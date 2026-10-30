@@ -8,8 +8,10 @@ A head-mounted **phone or GoPro** video goes in. Out come:
 * **activity insights**: posture per second (walking, standing, sitting, crouching, bending, arms raised), time split,
   breaks, and a short summary with schedule and posture suggestions
 
-**Example outputs** (the three OmniEgoDB demos, without the dataset's camera footage):
-[Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1).
+**Example outputs** (the three OmniEgoDB demos, without the dataset's camera footage): [`examples/`](examples)
+(`office`, `outdoor`, `robothome`, and `day`, a report over all three), also as zips in
+[Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1). Start with
+`examples/office/mesh_exo.mp4` and `examples/day/insights.md`.
 
 ```
 video → ingest → hawor → build_input → omniegocap → render → describe → insights
@@ -131,6 +133,8 @@ region looks: on the camera view whatever lies under a fixed point (carpet, desk
 * **Fingers** come from HaWoR where it detects a hand (24–46% of frames in the demos); gaps up to 0.5 s are
   interpolated, longer ones ease to the clip's average hand.
 * **Legs** are inferred from head and wrist motion, not seen. OmniEgoCap is offline (each frame sees ±2.1 s).
+* **Uneven ground** breaks OmniEgoCap's flat-floor assumption: outdoors, standing on lower ground reads as bent knees
+  (knees > 40° while the wearer stands straight in 8% of the outdoor frames; under 0.2% indoors).
 * **Feet sink into the floor** by 2–4 cm in OmniEgoCap's output (up to 20 cm outdoors, where the ground isn't flat).
   The video lifts the drawn body onto the floor; the exported motion keeps the predicted heights, because lifting it
   also moves the camera-pinned head (MPJPE 102.6 → 107.2 mm on the demos).

@@ -1,0 +1,87 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "text": "The camera wearer is adjusting their gloves."
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "text": "The camera wearer walks towards a door."
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "text": "The camera wearer walks around the office."
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "text": "The camera wearer walks into an office."
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 25.0,
+  "text": "The camera wearer picks up a plastic bag from a table."
+ },
+ {
+  "start_s": 25.0,
+  "end_s": 30.0,
+  "text": "The camera wearer is pouring a liquid into a cup."
+ },
+ {
+  "start_s": 30.0,
+  "end_s": 35.0,
+  "text": "The camera wearer turns on the water dispenser."
+ },
+ {
+  "start_s": 35.0,
+  "end_s": 40.0,
+  "text": "The camera wearer turns on the water dispenser."
+ },
+ {
+  "start_s": 40.0,
+  "end_s": 45.0,
+  "text": "The camera wearer is walking towards a table."
+ },
+ {
+  "start_s": 45.0,
+  "end_s": 50.0,
+  "text": "The camera wearer opens a door."
+ },
+ {
+  "start_s": 50.0,
+  "end_s": 55.0,
+  "text": "The camera wearer opens the refrigerator."
+ },
+ {
+  "start_s": 55.0,
+  "end_s": 60.0,
+  "text": "The camera wearer opens a refrigerator."
+ },
+ {
+  "start_s": 60.0,
+  "end_s": 65.0,
+  "text": "The camera wearer opens a cabinet."
+ },
+ {
+  "start_s": 65.0,
+  "end_s": 70.0,
+  "text": "The camera wearer opens a cabinet."
+ },
+ {
+  "start_s": 70.0,
+  "end_s": 75.0,
+  "text": "The camera wearer walks to the table."
+ },
+ {
+  "start_s": 75.0,
+  "end_s": 80.0,
+  "text": "The camera wearer walks to the table."
+ },
+ {
+  "start_s": 80.0,
+  "end_s": 83.5,
+  "text": "The camera wearer walks around the office."
+ }
+]

@@ -1,0 +1,216 @@
+1
+00:00:00,000 --> 00:00:05,000
+The camera wearer walks around a room.
+
+2
+00:00:05,000 --> 00:00:10,000
+The camera wearer is walking around a room.
+
+3
+00:00:10,000 --> 00:00:15,000
+The camera wearer sits on a chair.
+
+4
+00:00:15,000 --> 00:00:20,000
+The camera wearer is sitting on a chair in front of a washing machine.
+
+5
+00:00:20,000 --> 00:00:25,000
+The camera wearer is sitting on a chair in a room.
+
+6
+00:00:25,000 --> 00:00:30,000
+The camera wearer picks up a chair.
+
+7
+00:00:30,000 --> 00:00:35,000
+The camera wearer is watering the plants.
+
+8
+00:00:35,000 --> 00:00:40,000
+The camera wearer is pouring water from a pitcher into a container.
+
+9
+00:00:40,000 --> 00:00:45,000
+The camera wearer picks up a plant.
+
+10
+00:00:45,000 --> 00:00:50,000
+The camera wearer is watering a plant.
+
+11
+00:00:50,000 --> 00:00:55,000
+The camera wearer is watering a plant.
+
+12
+00:00:55,000 --> 00:01:00,000
+The camera wearer is adjusting a plant on a table.
+
+13
+00:01:00,000 --> 00:01:05,000
+The camera wearer is holding a yellow bottle of cleaning solution.
+
+14
+00:01:05,000 --> 00:01:10,000
+The camera wearer places a bottle of dish soap on a table.
+
+15
+00:01:10,000 --> 00:01:15,000
+The camera wearer picks up an apple from the floor.
+
+16
+00:01:15,000 --> 00:01:20,000
+The camera wearer is picking up a yellow object from a shelf.
+
+17
+00:01:20,000 --> 00:01:25,000
+The camera wearer picks up a bottle of water.
+
+18
+00:01:25,000 --> 00:01:30,000
+The camera wearer is holding a water bottle.
+
+19
+00:01:30,000 --> 00:01:35,000
+The camera wearer is opening a bottle of water.
+
+20
+00:01:35,000 --> 00:01:40,000
+The camera wearer picks up a water bottle.
+
+21
+00:01:40,000 --> 00:01:45,000
+The camera wearer places a bottle on a table.
+
+22
+00:01:45,000 --> 00:01:50,000
+The camera wearer picks up a chair.
+
+23
+00:01:50,000 --> 00:01:55,000
+The camera wearer is walking through a room with chairs and a table.
+
+24
+00:01:55,000 --> 00:02:00,000
+The camera wearer walks around a room.
+
+25
+00:02:00,000 --> 00:02:05,000
+The camera wearer is sitting on a couch.
+
+26
+00:02:05,000 --> 00:02:10,000
+The camera wearer is sitting on a couch and adjusting their knee pads.
+
+27
+00:02:10,000 --> 00:02:15,000
+The camera wearer is sitting on a couch.
+
+28
+00:02:15,000 --> 00:02:20,000
+The camera wearer is sitting on a couch and adjusting a pillow.
+
+29
+00:02:20,000 --> 00:02:25,000
+The camera wearer is sitting on a couch.
+
+30
+00:02:25,000 --> 00:02:30,000
+The camera wearer is sitting on a couch and holding a pillow.
+
+31
+00:02:30,000 --> 00:02:35,000
+The camera wearer is sitting on a couch and adjusting a pillow.
+
+32
+00:02:35,000 --> 00:02:40,000
+The camera wearer walks around a room.
+
+33
+00:02:40,000 --> 00:02:45,000
+The camera wearer walks around a cluttered room.
+
+34
+00:02:45,000 --> 00:02:50,000
+The camera wearer picks up a pot.
+
+35
+00:02:50,000 --> 00:02:55,000
+The camera wearer places a pan on the stove.
+
+36
+00:02:55,000 --> 00:03:00,000
+The camera wearer turns on the stove.
+
+37
+00:03:00,000 --> 00:03:05,000
+The camera wearer turns on the stove.
+
+38
+00:03:05,000 --> 00:03:10,000
+The camera wearer turns on the stove.
+
+39
+00:03:10,000 --> 00:03:15,000
+The camera wearer is cooking on the stove.
+
+40
+00:03:15,000 --> 00:03:20,000
+The person is cooking on the stove.
+
+41
+00:03:20,000 --> 00:03:25,000
+The camera wearer is cooking on the stove.
+
+42
+00:03:25,000 --> 00:03:30,000
+The camera wearer opens a cabinet.
+
+43
+00:03:30,000 --> 00:03:35,000
+The camera wearer is adjusting a wooden board.
+
+44
+00:03:35,000 --> 00:03:40,000
+The camera wearer is adjusting their wrist guards.
+
+45
+00:03:40,000 --> 00:03:45,000
+The camera wearer picks up a white tray from the floor.
+
+46
+00:03:45,000 --> 00:03:50,000
+The camera wearer is holding a white plastic container and placing it on a wooden shelf.
+
+47
+00:03:50,000 --> 00:03:55,000
+The camera wearer turns on the water cooler.
+
+48
+00:03:55,000 --> 00:04:00,000
+The camera wearer walks to a table.
+
+49
+00:04:00,000 --> 00:04:05,000
+The camera wearer picks up a bottle from the table.
+
+50
+00:04:05,000 --> 00:04:10,000
+The camera wearer is opening a bottle of water.
+
+51
+00:04:10,000 --> 00:04:15,000
+The camera wearer walks toward the wall.
+
+52
+00:04:15,000 --> 00:04:20,000
+The camera wearer walks around a lab.
+
+53
+00:04:20,000 --> 00:04:25,000
+The camera wearer walks towards a table.
+
+54
+00:04:25,000 --> 00:04:30,000
+The camera wearer walks around a cluttered room.
+

@@ -1,0 +1,53 @@
+{
+  "clips": {
+    "outdoor": {
+      "duration_min": 1.75,
+      "minutes": {
+        "walking": 0.95,
+        "standing": 0.6,
+        "sitting": 0.12,
+        "crouching": 0.08,
+        "bending": 0.0,
+        "arms raised": 0.0
+      },
+      "share": {
+        "walking": 0.543,
+        "standing": 0.343,
+        "sitting": 0.067,
+        "crouching": 0.048,
+        "bending": 0.0,
+        "arms raised": 0.0
+      },
+      "sit_stand_transitions": 3,
+      "longest_sitting_min": 0.17,
+      "walking_distance_m": 66.6,
+      "bent_over_min": 0.0
+    }
+  },
+  "total": {
+    "duration_min": 1.75,
+    "minutes": {
+      "walking": 0.95,
+      "standing": 0.6,
+      "sitting": 0.12,
+      "crouching": 0.08,
+      "bending": 0.0,
+      "arms raised": 0.0
+    },
+    "share": {
+      "walking": 0.543,
+      "standing": 0.343,
+      "sitting": 0.067,
+      "crouching": 0.048,
+      "bending": 0.0,
+      "arms raised": 0.0
+    },
+    "sit_stand_transitions": 3,
+    "longest_sitting_min": 0.17,
+    "walking_distance_m": 66.6,
+    "bent_over_min": 0.0
+  },
+  "summary": "The person began with 0.95 minutes of walking, followed by 0.6 minutes of standing, and 0.12 minutes of sitting. They spent 0.17 minutes in a sitting posture, with a total of three instances of sitting or crouching. The majority of their time was spent walking (66.6 meters), with brief periods of standing and crouching. They moved a chair, walked to a table, and accessed a vending machine, with a significant portion of their time spent on a wooden deck.\n\nTo improve posture and schedule, the person should: 1) increase movement during breaks to reduce sitting time, especially during the 0.17-minute sitting period; 2) incorporate 10\u201315 minutes of stretching or light activity every hour to counteract prolonged sitting; 3) limit standing time to 10\u201315 minutes per hour and use a standing desk or take short standing breaks to improve posture. These adjustments would help reduce strain and support long-term health.",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "runtime_s": 10.9
+}

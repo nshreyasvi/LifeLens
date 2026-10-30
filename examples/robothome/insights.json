@@ -1,0 +1,53 @@
+{
+  "clips": {
+    "robothome": {
+      "duration_min": 4.5,
+      "minutes": {
+        "walking": 0.3,
+        "standing": 3.37,
+        "sitting": 0.43,
+        "crouching": 0.28,
+        "bending": 0.12,
+        "arms raised": 0.0
+      },
+      "share": {
+        "walking": 0.067,
+        "standing": 0.748,
+        "sitting": 0.096,
+        "crouching": 0.063,
+        "bending": 0.026,
+        "arms raised": 0.0
+      },
+      "sit_stand_transitions": 2,
+      "longest_sitting_min": 0.53,
+      "walking_distance_m": 49.8,
+      "bent_over_min": 0.12
+    }
+  },
+  "total": {
+    "duration_min": 4.5,
+    "minutes": {
+      "walking": 0.3,
+      "standing": 3.37,
+      "sitting": 0.43,
+      "crouching": 0.28,
+      "bending": 0.12,
+      "arms raised": 0.0
+    },
+    "share": {
+      "walking": 0.067,
+      "standing": 0.748,
+      "sitting": 0.096,
+      "crouching": 0.063,
+      "bending": 0.026,
+      "arms raised": 0.0
+    },
+    "sit_stand_transitions": 2,
+    "longest_sitting_min": 0.53,
+    "walking_distance_m": 49.8,
+    "bent_over_min": 0.12
+  },
+  "summary": "The person began by standing (0:00\u20130:13), then sat (0:13\u20130:24), followed by standing again (0:24\u20131:31) while performing various tasks like watering plants, pouring water, and adjusting a plant. They bent over (1:31\u20131:34), then stood (1:34\u20131:54), walked (1:54\u20132:00), crouched (2:00\u20132:05), and sat (2:05\u20132:19) while adjusting pillows and knee pads. After sitting (2:19\u20132:32), they walked (2:32\u20132:39), then stood (2:39\u20133:39) while cooking, adjusting wrist guards, and handling a tray. They bent (3:39\u20133:43) and stood (3:43\u20134:16) while placing a container on a shelf and opening a water bottle. Finally, they walked (4:16\u20134:19) and stood (4:19\u20134:25) near a table.\n\nTo improve posture and schedule, the person should: (1) take a 1-minute break every 30 minutes to stand and stretch, especially during prolonged sitting (e.g., 0:43\u20130:53); (2) increase walking time by incorporating 10\u201315 minutes of movement per day, such as walking 49.8 meters during the walk; (3) reduce sitting time by using a standing desk or taking short standing breaks, especially during tasks like cooking or adjusting items, to improve posture and reduce strain.",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "runtime_s": 14.6
+}

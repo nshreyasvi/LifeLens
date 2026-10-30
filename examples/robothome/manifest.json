@@ -1,0 +1,63 @@
+{
+  "frames": 8100,
+  "fps": 30,
+  "duration_s": 270.0,
+  "streams": {
+    "ego_video": "input.mp4",
+    "mesh_video": "mesh_exo.mp4",
+    "side_by_side": "side_by_side.mp4",
+    "pose_graph": "pose_graph.mp4",
+    "narration": "narration.srt",
+    "dam_ego": "dam_ego.srt",
+    "dam_pose": "dam_pose.srt",
+    "dam_both": "dam_both.srt"
+  },
+  "motion": {
+    "smplh": "smplh.npz",
+    "smplh_canonical": "smplh_canonical.npz",
+    "omniegocap_input": "omniegocap_input.npz",
+    "pose_timeseries": "pose_timeseries.csv",
+    "kinematics": "kinematics"
+  },
+  "calibration": null,
+  "omniegocap": {
+    "runtime_s": 758.698935508728,
+    "load_s": 3.666726589202881,
+    "peak_gpu_mb": 7175.8271484375,
+    "optimization": false
+  },
+  "stage_wall_s": {
+    "ingest": 142.78,
+    "hawor": 2977.41,
+    "omniegocap": 772.36,
+    "render": 285.25,
+    "describe": 56.18,
+    "describe_anything": 6869.73,
+    "insights": 18.63
+  },
+  "realtime_factor": 41.19,
+  "narration": {
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "window_s": 5.0,
+    "fps": 2.0,
+    "windows": 54,
+    "load_s": 3.9,
+    "run_s": 47.2,
+    "peak_gpu_mb": 4209
+  },
+  "describe_anything": {
+    "model": "nvidia/DAM-3B-Video",
+    "window_s": 5.0,
+    "point": [
+      0.5,
+      0.6
+    ],
+    "windows": {
+      "ego": 54,
+      "pose": 54,
+      "both": 54
+    },
+    "sam2_s": 278.3,
+    "dam_s": 6588.7
+  }
+}

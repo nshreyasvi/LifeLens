@@ -1,0 +1,53 @@
+{
+  "clips": {
+    "office": {
+      "duration_min": 1.38,
+      "minutes": {
+        "walking": 0.45,
+        "standing": 0.87,
+        "sitting": 0.05,
+        "crouching": 0.0,
+        "bending": 0.0,
+        "arms raised": 0.02
+      },
+      "share": {
+        "walking": 0.325,
+        "standing": 0.627,
+        "sitting": 0.036,
+        "crouching": 0.0,
+        "bending": 0.0,
+        "arms raised": 0.012
+      },
+      "sit_stand_transitions": 1,
+      "longest_sitting_min": 0.05,
+      "walking_distance_m": 32.3,
+      "bent_over_min": 0.0
+    }
+  },
+  "total": {
+    "duration_min": 1.38,
+    "minutes": {
+      "walking": 0.45,
+      "standing": 0.87,
+      "sitting": 0.05,
+      "crouching": 0.0,
+      "bending": 0.0,
+      "arms raised": 0.02
+    },
+    "share": {
+      "walking": 0.325,
+      "standing": 0.627,
+      "sitting": 0.036,
+      "crouching": 0.0,
+      "bending": 0.0,
+      "arms raised": 0.012
+    },
+    "sit_stand_transitions": 1,
+    "longest_sitting_min": 0.05,
+    "walking_distance_m": 32.3,
+    "bent_over_min": 0.0
+  },
+  "summary": "The person began the day by standing (0:00\u20130:04), then walked (0:04\u20130:18) to a door and around the office. They sat briefly (0:21\u20130:23) to pick up a plastic bag, then stood again (0:23\u20130:44) while pouring liquid and walking toward a table. They stood (1:11\u20131:17) while opening a refrigerator and cabinet, then walked (1:17\u20131:22) to the table and stood (1:22\u20131:23) before raising their arms. The person spent 0.05 min sitting, 0.45 min walking, and 0.87 min standing, with minimal movement in other postures.\n\nTo improve posture and efficiency, the person should: 1) take a 1-minute break every 30 minutes to stand and stretch, reducing prolonged sitting; 2) increase walking time by incorporating 10 minutes of daily walking, especially during breaks; 3) limit arm-raising to 10 seconds or less, as it contributes to poor posture. These changes will reduce strain, improve circulation, and support long-term health.",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "runtime_s": 13.8
+}

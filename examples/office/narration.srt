@@ -1,0 +1,68 @@
+1
+00:00:00,000 --> 00:00:05,000
+The camera wearer is adjusting their gloves.
+
+2
+00:00:05,000 --> 00:00:10,000
+The camera wearer walks towards a door.
+
+3
+00:00:10,000 --> 00:00:15,000
+The camera wearer walks around the office.
+
+4
+00:00:15,000 --> 00:00:20,000
+The camera wearer walks into an office.
+
+5
+00:00:20,000 --> 00:00:25,000
+The camera wearer picks up a plastic bag from a table.
+
+6
+00:00:25,000 --> 00:00:30,000
+The camera wearer is pouring a liquid into a cup.
+
+7
+00:00:30,000 --> 00:00:35,000
+The camera wearer turns on the water dispenser.
+
+8
+00:00:35,000 --> 00:00:40,000
+The camera wearer turns on the water dispenser.
+
+9
+00:00:40,000 --> 00:00:45,000
+The camera wearer is walking towards a table.
+
+10
+00:00:45,000 --> 00:00:50,000
+The camera wearer opens a door.
+
+11
+00:00:50,000 --> 00:00:55,000
+The camera wearer opens the refrigerator.
+
+12
+00:00:55,000 --> 00:01:00,000
+The camera wearer opens a refrigerator.
+
+13
+00:01:00,000 --> 00:01:05,000
+The camera wearer opens a cabinet.
+
+14
+00:01:05,000 --> 00:01:10,000
+The camera wearer opens a cabinet.
+
+15
+00:01:10,000 --> 00:01:15,000
+The camera wearer walks to the table.
+
+16
+00:01:15,000 --> 00:01:20,000
+The camera wearer walks to the table.
+
+17
+00:01:20,000 --> 00:01:23,500
+The camera wearer walks around the office.
+

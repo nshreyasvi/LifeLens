@@ -1,0 +1,99 @@
+{
+  "clips": {
+    "office": {
+      "duration_min": 1.38,
+      "minutes": {
+        "walking": 0.45,
+        "standing": 0.87,
+        "sitting": 0.05,
+        "crouching": 0.0,
+        "bending": 0.0,
+        "arms raised": 0.02
+      },
+      "share": {
+        "walking": 0.325,
+        "standing": 0.627,
+        "sitting": 0.036,
+        "crouching": 0.0,
+        "bending": 0.0,
+        "arms raised": 0.012
+      },
+      "sit_stand_transitions": 1,
+      "longest_sitting_min": 0.05,
+      "walking_distance_m": 32.3,
+      "bent_over_min": 0.0
+    },
+    "outdoor": {
+      "duration_min": 1.75,
+      "minutes": {
+        "walking": 0.95,
+        "standing": 0.6,
+        "sitting": 0.12,
+        "crouching": 0.08,
+        "bending": 0.0,
+        "arms raised": 0.0
+      },
+      "share": {
+        "walking": 0.543,
+        "standing": 0.343,
+        "sitting": 0.067,
+        "crouching": 0.048,
+        "bending": 0.0,
+        "arms raised": 0.0
+      },
+      "sit_stand_transitions": 3,
+      "longest_sitting_min": 0.17,
+      "walking_distance_m": 66.6,
+      "bent_over_min": 0.0
+    },
+    "robothome": {
+      "duration_min": 4.5,
+      "minutes": {
+        "walking": 0.3,
+        "standing": 3.37,
+        "sitting": 0.43,
+        "crouching": 0.28,
+        "bending": 0.12,
+        "arms raised": 0.0
+      },
+      "share": {
+        "walking": 0.067,
+        "standing": 0.748,
+        "sitting": 0.096,
+        "crouching": 0.063,
+        "bending": 0.026,
+        "arms raised": 0.0
+      },
+      "sit_stand_transitions": 2,
+      "longest_sitting_min": 0.53,
+      "walking_distance_m": 49.8,
+      "bent_over_min": 0.12
+    }
+  },
+  "total": {
+    "duration_min": 7.63,
+    "minutes": {
+      "walking": 1.7,
+      "standing": 4.83,
+      "sitting": 0.6,
+      "crouching": 0.37,
+      "bending": 0.12,
+      "arms raised": 0.02
+    },
+    "share": {
+      "walking": 0.223,
+      "standing": 0.633,
+      "sitting": 0.079,
+      "crouching": 0.048,
+      "bending": 0.015,
+      "arms raised": 0.002
+    },
+    "sit_stand_transitions": 6,
+    "longest_sitting_min": 0.53,
+    "walking_distance_m": 148.7,
+    "bent_over_min": 0.12
+  },
+  "summary": "The person began the day with a brief standing period at the office, followed by walking around the workspace, then sitting briefly to pick up a plastic bag. They spent a significant amount of time standing (4.83 min) and walking (1.7 min), with minimal movement in sitting (0.6 min) and crouching (0.37 min). The majority of their time was spent in standing and walking, with a few moments of bending and arms raised. They also spent 148.7 meters walking during the day, indicating a high level of physical activity.\n\nTo improve posture and schedule, the person should: 1) take a 5-minute break every 90 minutes to stand and stretch, reducing prolonged sitting; 2) increase walking time by incorporating 10-minute walks during breaks or after tasks; 3) limit sitting to 15 minutes at a time and use a standing desk or chair to reduce sedentary time. These changes will help improve posture, reduce strain, and support better overall health.",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "runtime_s": 11.4
+}

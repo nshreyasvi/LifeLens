@@ -1,0 +1,107 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "text": "The camera wearer is walking on a wooden deck."
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "text": "The camera wearer is walking on a wooden floor."
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "text": "The camera wearer is sitting on a chair and stretching their hands."
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "text": "The camera wearer is moving a chair."
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 25.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 25.0,
+  "end_s": 30.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 30.0,
+  "end_s": 35.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 35.0,
+  "end_s": 40.0,
+  "text": "The camera wearer walks to a table."
+ },
+ {
+  "start_s": 40.0,
+  "end_s": 45.0,
+  "text": "The camera wearer walks to a vending machine."
+ },
+ {
+  "start_s": 45.0,
+  "end_s": 50.0,
+  "text": "The camera wearer opens a vending machine."
+ },
+ {
+  "start_s": 50.0,
+  "end_s": 55.0,
+  "text": "The camera wearer is walking on a wooden deck."
+ },
+ {
+  "start_s": 55.0,
+  "end_s": 60.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 60.0,
+  "end_s": 65.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 65.0,
+  "end_s": 70.0,
+  "text": "The camera wearer walks on a wooden deck."
+ },
+ {
+  "start_s": 70.0,
+  "end_s": 75.0,
+  "text": "The camera wearer walks into a room."
+ },
+ {
+  "start_s": 75.0,
+  "end_s": 80.0,
+  "text": "The camera wearer walks to a vending machine."
+ },
+ {
+  "start_s": 80.0,
+  "end_s": 85.0,
+  "text": "The camera wearer opens the vending machine."
+ },
+ {
+  "start_s": 85.0,
+  "end_s": 90.0,
+  "text": "The camera wearer opens a door."
+ },
+ {
+  "start_s": 90.0,
+  "end_s": 95.0,
+  "text": "The camera wearer opens a door."
+ },
+ {
+  "start_s": 95.0,
+  "end_s": 100.0,
+  "text": "The camera wearer walks towards a glass door."
+ },
+ {
+  "start_s": 100.0,
+  "end_s": 105.0,
+  "text": "The camera wearer walks on a wooden deck."
+ }
+]
