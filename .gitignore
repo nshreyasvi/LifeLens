@@ -1,0 +1,15 @@
+# cloned upstream code, model weights and licensed body models (SMPL-H, MANO): see README "Setup"
+third_party/
+# OmniEgoDB is gated and non-commercial: download it yourself (README "Demos")
+omniegodb/
+omniegodb_readme.txt
+# videos and run outputs
+*.mp4
+*.MP4
+*.mov
+runs/
+# generated
+__pycache__/
+bench/_fake_smplh/
+*.npz
+*.npy

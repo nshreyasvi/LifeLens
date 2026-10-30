@@ -1,0 +1,70 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch": "2.7.1+cu126",
+  "rows": [
+    {
+      "frames": 300,
+      "video_s": 10.0,
+      "optimization": false,
+      "runtime_s": 3.33,
+      "realtime_factor": 0.333,
+      "peak_gpu_mb": 496
+    },
+    {
+      "frames": 300,
+      "video_s": 10.0,
+      "optimization": true,
+      "runtime_s": 9.87,
+      "realtime_factor": 0.987,
+      "peak_gpu_mb": 521
+    },
+    {
+      "frames": 900,
+      "video_s": 30.0,
+      "optimization": false,
+      "runtime_s": 2.9,
+      "realtime_factor": 0.097,
+      "peak_gpu_mb": 608
+    },
+    {
+      "frames": 900,
+      "video_s": 30.0,
+      "optimization": true,
+      "runtime_s": 9.41,
+      "realtime_factor": 0.314,
+      "peak_gpu_mb": 632
+    },
+    {
+      "frames": 1800,
+      "video_s": 60.0,
+      "optimization": false,
+      "runtime_s": 4.95,
+      "realtime_factor": 0.082,
+      "peak_gpu_mb": 897
+    },
+    {
+      "frames": 1800,
+      "video_s": 60.0,
+      "optimization": true,
+      "runtime_s": 10.93,
+      "realtime_factor": 0.182,
+      "peak_gpu_mb": 979
+    },
+    {
+      "frames": 3600,
+      "video_s": 120.0,
+      "optimization": false,
+      "runtime_s": 18.2,
+      "realtime_factor": 0.152,
+      "peak_gpu_mb": 1896
+    },
+    {
+      "frames": 3600,
+      "video_s": 120.0,
+      "optimization": true,
+      "runtime_s": 25.61,
+      "realtime_factor": 0.213,
+      "peak_gpu_mb": 2178
+    }
+  ]
+}
