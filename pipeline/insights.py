@@ -9,7 +9,8 @@ Each second gets one label from the body pose (pose_timeseries.csv, kinematics/j
 wearer's own leg length:
     walking      pelvis moving faster than 0.5 m/s
     sitting      pelvis below 75% of its standing height, knees bent less than 110 deg
-    crouching    pelvis below 75% of its standing height, knees bent more than 110 deg
+    crouching    pelvis below 75% of its standing height, knees bent more than 110 deg, for less than 8 s
+                 (longer low bouts are sitting: OmniEgoCap often tucks a seated wearer's legs past 110 deg)
     bending      standing, trunk leaning more than 35 deg
     arms raised  standing, a wrist above the shoulders
     standing     anything else
@@ -23,6 +24,7 @@ import argparse
 import json
 import os
 import time
+from itertools import groupby
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -31,6 +33,8 @@ FPS = 30
 LABELS = ('walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised')
 COLORS = ((44, 160, 44), (180, 180, 180), (31, 119, 180), (148, 103, 189), (214, 39, 40), (255, 127, 14))
 SMOOTH_S = 5        # a label must hold for most of a 5 s window: drops 1-2 s flicker
+SIT_S = 8           # a low bout this long is sitting. On the demos all 22 s labelled crouching were sitting (20) or
+                    # bending (2) in the motion capture; any limit from 5 to 10 s fixes the 20
 PROMPT = ('You are a health coach. Below is a log of one person\'s day, measured from a head-mounted camera: how long '
           'they spent in each body posture and what they were doing. In under 150 words, write two short paragraphs. '
           'First: what they did, in time order. Second: three concrete suggestions to improve their schedule, breaks '
@@ -59,8 +63,17 @@ def label_seconds(run: str) -> list:
             labels.append('arms raised')
         else:
             labels.append('standing')
+    labels = long_low_is_sitting(labels)
     h = SMOOTH_S // 2
     return [max(LABELS, key=labels[max(0, i - h):i + h + 1].count) for i in range(len(labels))]
+
+
+def long_low_is_sitting(labels: list) -> list:
+    out = []
+    for low, run in groupby(labels, key=lambda x: x in ('sitting', 'crouching')):
+        run = list(run)
+        out += ['sitting'] * len(run) if low and len(run) >= SIT_S else run
+    return out
 
 
 def narration_at(run: str, seconds: int) -> list:
@@ -122,7 +135,7 @@ def summarize(log: str, model_id: str) -> str:
     prompt = processor.apply_chat_template([{'role': 'user', 'content': [{'type': 'text', 'text': PROMPT.format(log=log)}]}],
                                            add_generation_prompt=True)
     inputs = processor(text=[prompt], return_tensors='pt').to(model.device)
-    ids = model.generate(**inputs, max_new_tokens=400, do_sample=False)
+    ids = model.generate(**inputs, max_new_tokens=400, do_sample=False, repetition_penalty=1.1)   # greedy 2B loops without it
     return processor.batch_decode(ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True)[0].strip()
 
 
@@ -159,7 +172,8 @@ def main(a):
             while e < len(c['labels']) and c['labels'][e] == c['labels'][s]:
                 e += 1
             said = ' '.join(dict.fromkeys(t for t in c['text'][s:e] if t))
-            lines.append(f"  {s // 60}:{s % 60:02d}-{e // 60}:{e % 60:02d} {c['labels'][s]}. {said}".rstrip())
+            # durations, not clock times: the 2B model copied clock times into the wrong bouts
+            lines.append(f"  {c['labels'][s]} {e - s} s. {said}".rstrip())
             s = e
     log = '\n'.join(lines[:150])     # shortcut: a 2B model reads ~150 lines well; summarize per clip for longer days
     summary = summarize(log, a.model) if a.model else ''

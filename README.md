@@ -17,10 +17,11 @@ dataset's footage can't be redistributed.*
 | **Descriptions** | every 5 s: Qwen3-VL-2B narrates the activity; optionally Describe Anything describes a region |
 | **Activity insights** | posture per second, time split, breaks, a short summary with suggestions (below) |
 
-![Posture per second over the three demo clips: mostly standing (gray) and walking (green), with sitting, crouching, bending and arms-raised bouts](examples/day/activity.png)
+![Posture per second over the three demo clips: mostly standing (gray) and walking (green), with sitting, bending and arms-raised bouts](examples/day/activity.png)
 
 *Posture per second over the three demos ([`examples/day/insights.md`](examples/day/insights.md)), from fixed
-thresholds on the reconstructed body. Outdoors, "crouching" is mostly wrong: see [Limits](#limits).*
+thresholds on the reconstructed body. It matches the posture in the motion capture in 96% of 5 s windows (measured
+on these same clips, which the sitting rule was tuned on).*
 
 **Try it without installing:** [`examples/`](examples) holds the outputs of the three demos (`office`, `outdoor`,
 `robothome`, and `day`, a report over all three), also as zips in
@@ -154,7 +155,7 @@ then checked against the posture the motion capture shows in that window: `pytho
 
 | | Qwen narration | DAM, camera view | DAM, 3D body | DAM, both | our posture labels | always "standing" |
 |---|---|---|---|---|---|---|
-| names the right posture (the first one it names) | 33% | 18% | 74% | 45% | **89%** | 63% |
+| names the right posture (the first one it names) | 33% | 18% | 74% | 45% | **96%** | 63% |
 | names any posture | 48% | 39% | 100% | 84% | 100% | 100% |
 | names an activity (open, pour, pick up…) | 57% | 33% | 51% | 29% | – | – |
 | describes looks (colour, material, shape) | 18% | 99% | 62% | 97% | – | – |
@@ -172,7 +173,7 @@ What they say about the same moment (first words):
 * **Qwen** is the only one that says what the wearer *does*, and it is 40× faster. It names a posture in half the
   windows and gets a third of those wrong ("walks around a room" while standing).
 * **DAM on the 3D body** puts the body's posture into words. It cannot know more than the body it looks at, and is
-  less right (74%) than the labels computed from that same body (89%), and less consistent: run again, it names
+  less right (74%) than the labels computed from that same body (96%), and less consistent: run again, it names
   other postures in 41% of the windows.
 * **DAM on the camera view** describes how whatever lies under a fixed point in the image looks (a desk, a mat, the
   wearer's sleeve). It says next to nothing about the wearer's posture.
@@ -200,8 +201,10 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
   also moves the camera-pinned head (MPJPE 102.6 → 107.2 mm on the demos).
 * **Floor fit** (own videos) needs floor in view; `calibration.json` warns when the camera ends up < 1.2 or > 2.0 m
   above it.
-* **Insights** labels come from fixed thresholds on the body pose (see `pipeline/insights.py`); the summary is a 2B
-  model's reading of them, not advice.
+* **Insights** labels come from fixed thresholds on the body pose (see `pipeline/insights.py`). The reconstructed
+  knees bend too far when the wearer sits, so a low posture held 8 s or longer counts as sitting, never crouching; a
+  long real crouch will read as sitting. The summary is a 2B model's reading of the labels, not advice, and it mixes
+  up numbers (the demo day report gives the day's 149 m walked as one walk).
 
 ## Licenses
 

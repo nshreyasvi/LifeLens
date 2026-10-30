@@ -5,16 +5,16 @@
       "minutes": {
         "walking": 0.95,
         "standing": 0.6,
-        "sitting": 0.12,
-        "crouching": 0.08,
+        "sitting": 0.17,
+        "crouching": 0.03,
         "bending": 0.0,
         "arms raised": 0.0
       },
       "share": {
         "walking": 0.543,
         "standing": 0.343,
-        "sitting": 0.067,
-        "crouching": 0.048,
+        "sitting": 0.095,
+        "crouching": 0.019,
         "bending": 0.0,
         "arms raised": 0.0
       },
@@ -29,16 +29,16 @@
     "minutes": {
       "walking": 0.95,
       "standing": 0.6,
-      "sitting": 0.12,
-      "crouching": 0.08,
+      "sitting": 0.17,
+      "crouching": 0.03,
       "bending": 0.0,
       "arms raised": 0.0
     },
     "share": {
       "walking": 0.543,
       "standing": 0.343,
-      "sitting": 0.067,
-      "crouching": 0.048,
+      "sitting": 0.095,
+      "crouching": 0.019,
       "bending": 0.0,
       "arms raised": 0.0
     },
@@ -47,7 +47,7 @@
     "walking_distance_m": 66.6,
     "bent_over_min": 0.0
   },
-  "summary": "The person began with 0.95 minutes of walking, followed by 0.6 minutes of standing, and 0.12 minutes of sitting. They spent 0.17 minutes in a sitting posture, with a total of three instances of sitting or crouching. The majority of their time was spent walking (66.6 meters), with brief periods of standing and crouching. They moved a chair, walked to a table, and accessed a vending machine, with a significant portion of their time spent on a wooden deck.\n\nTo improve posture and schedule, the person should: 1) increase movement during breaks to reduce sitting time, especially during the 0.17-minute sitting period; 2) incorporate 10\u201315 minutes of stretching or light activity every hour to counteract prolonged sitting; 3) limit standing time to 10\u201315 minutes per hour and use a standing desk or take short standing breaks to improve posture. These adjustments would help reduce strain and support long-term health.",
+  "summary": "The individual began with a brief walk (0.95 min), followed by standing (0.6 min) and then sitting for 0.17 min\u2014totaling 1.75 minutes of seated activity. They moved through various tasks including walking on a wooden deck, interacting with a vending machine, and adjusting furniture. Their movements included frequent transitions between standing, walking, and sitting, with prolonged periods of sitting at a desk-like position.\n\nTo improve this routine, consider increasing movement throughout the day\u2014aim for at least 10\u201315 minutes of active engagement per session. Reduce sedentary time by taking regular breaks every 45 minutes; during these, stand up and stretch for 30 seconds. Additionally, ensure proper posture when sitting\u2014avoid slouching by using ergonomic chairs and maintaining a neutral spine. These adjustments will support better circulation, reduce strain, and enhance overall well-being.",
   "model": "Qwen/Qwen3-VL-2B-Instruct",
-  "runtime_s": 10.9
+  "runtime_s": 11.7
 }
