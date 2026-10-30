@@ -22,7 +22,7 @@ video ─ ingest ─ hawor ─────────────────�
 | `hawor` | hawor | HaWoR: camera-frame wrists and finger poses; its masked DROID-SLAM camera path with Metric3D scale and the scene points. SLAM runs on 30 s pieces (it holds at most 512 keyframes), joined on 3 s overlaps |
 | `build_input` | omniegocap | OmniEgoCap's `trajectory` adapter needs a z-up world and the floor height and leaves both to the user: both come from the floor plane fitted in HaWoR's SLAM points. Head mount from the first 3 s |
 | `omniegocap` | omniegocap | OmniEgoCap sequence diffusion → SMPL-H body (22 joints); fingers from HaWoR where a hand was seen; motion exported as `.npy` / `.csv` |
-| `render` | mhr | pyrender third-person follow camera; scrolling 10 s pose graph under the ego and mesh videos; manifest |
+| `render` | mhr | pyrender third-person follow camera; close-ups of both hands (fingers are a few pixels at full-body scale); scrolling 10 s pose graph under the ego and mesh videos; manifest |
 | `describe` | vlm | [Qwen3-VL-2B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct): what the wearer is doing, one sentence per 5 s |
 | `describe_anything` | dam | `--dam` only. [DAM-3B-Video](https://github.com/NVlabs/describe-anything) per 5 s, on three inputs: **ego** (SAM 2.1 tracks the object below the image center), **pose** (the rendered body) and **both** side by side |
 
@@ -107,7 +107,8 @@ bash demos.sh          # runs/outdoor, runs/office, runs/robothome; the focal le
 | `input.mp4` | ego video, 30 fps CFR |
 | `mesh_exo.mp4` | body mesh, third-person follow camera; frame *i* = `input.mp4` frame *i* |
 | `pose_graph.mp4` | scrolling pose graph |
-| `side_by_side.mp4` | ego \| mesh, pose graph underneath |
+| `hands.mp4` | close-ups of the left \| right hand, seen from outside the body |
+| `side_by_side.mp4` | ego \| mesh with the hand close-ups in its corner, pose graph underneath |
 | `kinematics/joints_world.csv`, `.npy` | (L, 22, 3) joint positions in meters, z up, floor at z = 0; CSV columns `pelvis_x … right_wrist_z` |
 | `kinematics/joint_rotations.csv`, `.npy` | (L, 52, 3) SMPL-H axis-angle rotations, parent-relative: root, 21 body joints, 30 finger joints |
 | `kinematics/root_trans.npy`, `betas.npy` | root translation (L, 3), body shape (16) |
@@ -144,8 +145,23 @@ Pose accuracy against OmniEgoDB's Xsens ground truth, with OmniEgoCap's own eval
 
 ```bash
 mkdir -p preds/gopro && cp runs/outdoor/smplh.npz preds/gopro/S04_outdoor_1.npz   # same for office, robothome
-python third_party/OmniEgoCap/scripts/eval.py omniegodb --root omniegodb --track gopro --pred_dir preds/gopro --per_capture
+python third_party/OmniEgoCap/scripts/eval.py omniegodb --root omniegodb --track gopro --pred_dir preds/gopro \
+    --per_capture --device cpu
 ```
+
+Measured on the three demos (`--input_npz`, no optimization), 13,737 frames:
+
+| Sequence | MPJPE (mm) | Jerk (km/s³) | Hand PE (mm) |
+|---|---|---|---|
+| S03_office_1 | 94.2 | 0.07 | 160.4 |
+| S03_robothome_1 | 105.8 | 0.07 | 135.9 |
+| S04_outdoor_1 | 102.8 | 0.08 | 115.4 |
+| **all three** | **103.0** | **0.075** | **135.7** |
+| paper, GoPro track (20 sequences) | 111.7 | 0.073 | 166.2 |
+
+The pipeline reproduces the paper's numbers on these three; they are a subset of the 20, so this checks the
+pipeline rather than ranking it. HaWoR's finger poses articulate the hands in 40–46% of the outdoor frames (median
+finger-joint bend ~30°).
 
 ## Speed (RTX 4060 Laptop 8 GB, i9-13900H, WSL2)
 
@@ -161,9 +177,44 @@ Own-video mode, 60 s of the OmniEgoDB outdoor GoPro clip:
 | describe (13 sentences) | 25 s |
 | **total** | **≈ 37 min per minute of video**, peak GPU memory 7.9 GB |
 
-HaWoR is almost all of it; with `--input_npz` there is no SLAM. OmniEgoCap alone (`bench_latency.py`, model time):
-3.3 s for 10 s, 5.0 s for 60 s, 18.2 s for 120 s of video. Qwen3-VL-2B needs ~4 GB and DAM-3B ~7 GB of VRAM: they run
-after SLAM, never alongside it, and DAM runs SAM 2 for all windows before loading itself.
+`--input_npz` mode (the demos: HaWoR for the fingers only, no SLAM), seconds per stage:
+
+| Demo | Length | ingest | hawor | omniegocap | render | describe | total | per video second |
+|---|---|---|---|---|---|---|---|---|
+| office | 83 s | 50 | 693 | 21 | 117 | 20 | 901 | 10.9 |
+| outdoor | 105 s | 87 | 1093 | 29 | 149 | 27 | 1385 | 13.2 |
+| robothome | 270 s | 143 | 2977 | 713 | 378 | 56 | 4267 | 15.8 |
+
+(render includes the hand close-ups, ~35% of its time)
+
+Describe Anything (`--dam`) comes on top: 2603 s for office's 3 × 17 windows (~49 s per description, 160 tokens),
+6870 s for robothome's 3 × 54 windows (~42 s, 80 tokens) and 1668 s for outdoor's 3 × 21 windows (~26 s, 80 tokens,
+nothing else on the GPU). Halving the tokens barely helped: DAM's 16 image views per window on a GPU at its 8 GB limit
+dominate.
+
+HaWoR's hand model is most of it, ~11 s per video second. OmniEgoCap is fast up to ~2 min (`bench_latency.py`, model
+time: 3.3 s for 10 s, 5.0 s for 60 s, 18.2 s for 120 s of video) but its attention cost grows faster than the length:
+713 s for the 270 s robothome clip, where it also fills the 8 GB GPU. Split longer recordings into ≤2 min pieces.
+Qwen3-VL-2B needs ~4 GB and DAM-3B ~7 GB of VRAM: they run after SLAM, never alongside it, and DAM runs SAM 2 for all
+windows before loading itself.
+
+## Qwen narration vs Describe Anything
+
+Same 5 s windows of the office demo:
+
+| Time | Qwen3-VL-2B narration | DAM on the ego region | DAM on the rendered pose | DAM on both |
+|---|---|---|---|---|
+| 10 s | walks around the office | a flat surface, likely a carpet | a humanoid figure begins to walk forward, right arm swinging | a white humanoid figure in a walking motion |
+| 30 s | turns on the water dispenser | a light-colored wooden desk | stands upright, slight forward lean, arms forward, hands clasped | a sleek, modern microwave |
+| 50 s | opens the refrigerator | a pair of light-colored sneakers | stands upright, head slightly tilted downward | a person in a light shirt, walking |
+
+* **Qwen narration** says what the wearer does, in one short sentence, 14 s for the whole clip.
+* **DAM** describes how a region looks, not what happens: on the ego video that is whatever lies under the point
+  (carpet, desk, shoes). On the rendered pose it does put the posture into words (walking, arm swing, arms forward),
+  the one new signal. On both, the joint mask spans two panels and its focus jumps between body and objects.
+* On this GPU DAM took ~150 s per 5 s window for its three inputs (160 tokens), the narration under 1 s. Use the
+  narration for activity, and DAM on the pose (`--sources pose` in `describe_anything.py`) if posture in words is
+  wanted.
 
 ## Known limits
 

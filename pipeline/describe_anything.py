@@ -32,6 +32,7 @@ SAM2_CFG = 'configs/sam2.1/sam2.1_hiera_s.yaml'
 QUERY = ('Video: ' + '<image>' * 8 + '\nGiven the video in the form of a sequence of frames above, describe the object '
          'in the masked region in the video in detail.')
 TRACK_FPS, WIDTH = 10, 960      # SAM 2 tracks at 10 fps on 960 px frames: plenty for a 5 s window
+MAX_TOKENS = 80                 # DAM writes ~1 token / 0.3 s on an 8 GB GPU: 80 tokens = 2-3 sentences
 
 
 def windows(path: str, seconds: float) -> list:
@@ -67,6 +68,13 @@ def track(predictor, frames: list, point: tuple) -> list:
 def body_mask(rgb: np.ndarray) -> np.ndarray:
     """The rendered body: render.py draws it bluish on a gray floor and a white background."""
     return rgb[..., 2].astype(int) - rgb[..., 0] > 25
+
+
+def fill_empty(masks: list) -> list:
+    """DAM crops around the region in every frame: an empty mask (object lost, body out of view) takes the nearest
+    non-empty mask of the window."""
+    full = [k for k, m in enumerate(masks) if m.any()]
+    return [m if m.any() else masks[min(full, key=lambda k: abs(k - i))] for i, m in enumerate(masks)]
 
 
 def side_by_side(ego: np.ndarray, mesh: np.ndarray) -> np.ndarray:
@@ -111,8 +119,8 @@ def main(a):
             if not any(m.any() for m in masks):     # nothing under the point, or no body in view
                 continue
             text = dam.get_description([Image.fromarray(f) for f in frames],
-                                       [Image.fromarray(m.astype(np.uint8) * 255) for m in masks], QUERY,
-                                       temperature=0.2, top_p=0.5, num_beams=1, max_new_tokens=160).strip()
+                                       [Image.fromarray(m.astype(np.uint8) * 255) for m in fill_empty(masks)], QUERY,
+                                       temperature=0.2, top_p=0.5, num_beams=1, max_new_tokens=MAX_TOKENS).strip()
             out.append({'start_s': round(start, 2), 'end_s': round(start + length, 2), 'text': text})
             print(f'{source:4s} {start:6.1f} s  {text[:140]}', flush=True)
         json.dump(out, open(f'{a.run}/dam_{source}.json', 'w'), indent=1)

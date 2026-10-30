@@ -63,7 +63,8 @@ setup_mhr() {
 setup_hawor() {
   clone HaWoR https://github.com/ThunderVVV/HaWoR.git 66c7d4108d58a716deccd192cb7645170cdc7bd7
   # HaWoR allocates all hand masks of a video as float64: 52 GB for 105 s of 1080p. Booleans give the same result.
-  sed -i 's/    model_masks = np.zeros((len(imgfiles), H, W))$/    model_masks = np.zeros((len(imgfiles), H, W), dtype=bool)/' \
+  sed -i -e 's/    model_masks = np.zeros((len(imgfiles), H, W))$/    model_masks = np.zeros((len(imgfiles), H, W), dtype=bool)/' \
+    -e 's/^    model_masks = model_masks > 0 # bool$/    model_masks = model_masks if model_masks.dtype == bool else model_masks > 0/' \
     "$TP/HaWoR/scripts/scripts_test_video/hawor_video.py"
   mkenv hawor python=3.10 ffmpeg
   conda activate hawor
