@@ -3,23 +3,23 @@
     "robothome": {
       "duration_min": 4.5,
       "minutes": {
-        "walking": 0.3,
+        "walking": 0.28,
         "standing": 3.37,
-        "sitting": 0.43,
-        "crouching": 0.28,
+        "sitting": 0.73,
+        "crouching": 0.0,
         "bending": 0.12,
         "arms raised": 0.0
       },
       "share": {
-        "walking": 0.067,
+        "walking": 0.063,
         "standing": 0.748,
-        "sitting": 0.096,
-        "crouching": 0.063,
+        "sitting": 0.163,
+        "crouching": 0.0,
         "bending": 0.026,
         "arms raised": 0.0
       },
       "sit_stand_transitions": 2,
-      "longest_sitting_min": 0.53,
+      "longest_sitting_min": 0.55,
       "walking_distance_m": 49.8,
       "bent_over_min": 0.12
     }
@@ -27,27 +27,27 @@
   "total": {
     "duration_min": 4.5,
     "minutes": {
-      "walking": 0.3,
+      "walking": 0.28,
       "standing": 3.37,
-      "sitting": 0.43,
-      "crouching": 0.28,
+      "sitting": 0.73,
+      "crouching": 0.0,
       "bending": 0.12,
       "arms raised": 0.0
     },
     "share": {
-      "walking": 0.067,
+      "walking": 0.063,
       "standing": 0.748,
-      "sitting": 0.096,
-      "crouching": 0.063,
+      "sitting": 0.163,
+      "crouching": 0.0,
       "bending": 0.026,
       "arms raised": 0.0
     },
     "sit_stand_transitions": 2,
-    "longest_sitting_min": 0.53,
+    "longest_sitting_min": 0.55,
     "walking_distance_m": 49.8,
     "bent_over_min": 0.12
   },
-  "summary": "The person began by standing (0:00\u20130:13), then sat (0:13\u20130:24), followed by standing again (0:24\u20131:31) while performing various tasks like watering plants, pouring water, and adjusting a plant. They bent over (1:31\u20131:34), then stood (1:34\u20131:54), walked (1:54\u20132:00), crouched (2:00\u20132:05), and sat (2:05\u20132:19) while adjusting pillows and knee pads. After sitting (2:19\u20132:32), they walked (2:32\u20132:39), then stood (2:39\u20133:39) while cooking, adjusting wrist guards, and handling a tray. They bent (3:39\u20133:43) and stood (3:43\u20134:16) while placing a container on a shelf and opening a water bottle. Finally, they walked (4:16\u20134:19) and stood (4:19\u20134:25) near a table.\n\nTo improve posture and schedule, the person should: (1) take a 1-minute break every 30 minutes to stand and stretch, especially during prolonged sitting (e.g., 0:43\u20130:53); (2) increase walking time by incorporating 10\u201315 minutes of movement per day, such as walking 49.8 meters during the walk; (3) reduce sitting time by using a standing desk or taking short standing breaks, especially during tasks like cooking or adjusting items, to improve posture and reduce strain.",
+  "summary": "The individual began by walking around a room (49.8 m), then stood for 67 seconds while performing tasks like watering plants, pouring water, and handling items such as a water bottle and cleaning supplies. They also sat for 33 seconds on a couch, adjusted pillows, and held a pillow. Afterward, they stood again for 60 seconds while cooking on the stove, opened a cabinet, and adjusted wrist guards. During this period, they bent over briefly to pick up a tray and placed it on a shelf. Finally, they walked around a lab and stood near a table for several seconds before ending the session.\n\nTo improve their schedule, consider increasing movement throughout the day\u2014aim for at least 10 minutes of active engagement every hour. Breaks should include stretching or light activity; the current log shows only brief moments of standing and walking. For posture improvement, avoid prolonged sitting by taking regular breaks to stand and move. Additionally, ensure proper ergonomics during seated work by using a supportive chair and maintaining a neutral spine. These adjustments could reduce strain and support overall well-being.",
   "model": "Qwen/Qwen3-VL-2B-Instruct",
-  "runtime_s": 14.6
+  "runtime_s": 13.4
 }

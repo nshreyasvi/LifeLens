@@ -7,9 +7,9 @@
 | office | 0.5 min | 0.9 min | 0.1 min | 0.0 min | 0.0 min | 0.0 min | 1 | 0.1 min | 32 m |
 | **total** | 0.5 min | 0.9 min | 0.1 min | 0.0 min | 0.0 min | 0.0 min | 1 | 0.1 min | 32 m |
 
-The person began the day by standing (0:00–0:04), then walked (0:04–0:18) to a door and around the office. They sat briefly (0:21–0:23) to pick up a plastic bag, then stood again (0:23–0:44) while pouring liquid and walking toward a table. They stood (1:11–1:17) while opening a refrigerator and cabinet, then walked (1:17–1:22) to the table and stood (1:22–1:23) before raising their arms. The person spent 0.05 min sitting, 0.45 min walking, and 0.87 min standing, with minimal movement in other postures.
+The individual began by walking for 0.45 minutes while adjusting gloves, then stood for 4 seconds before beginning to walk again—this was followed by another 14-second walk as they moved through the office. They sat briefly for 3 seconds after entering the office, picked up a plastic bag, and continued walking toward a table. After this, they stood for 21 seconds while pouring liquid into a cup, turned on the water dispenser, and walked toward the table. They stood for another 22 seconds, opened a refrigerator, and later walked to the table again. Finally, they stood for 5 seconds and walked around the office before raising their arms for 1 second.
 
-To improve posture and efficiency, the person should: 1) take a 1-minute break every 30 minutes to stand and stretch, reducing prolonged sitting; 2) increase walking time by incorporating 10 minutes of daily walking, especially during breaks; 3) limit arm-raising to 10 seconds or less, as it contributes to poor posture. These changes will reduce strain, improve circulation, and support long-term health.
+To improve this schedule, consider increasing movement throughout the day—aim for at least 10–15 minutes of active rest every hour. Reduce prolonged sitting; the person spent only 0.05 minutes sitting, so suggest taking a 5-minute break every hour to stand, stretch, or walk. Additionally, encourage more frequent use of the water dispenser and avoid unnecessary bending (which occurred 0.0 minutes). By incorporating these changes, the individual can reduce strain and support better posture and overall well-being.
 
 <details><summary>Log given to the model</summary>
 
@@ -17,15 +17,15 @@ To improve posture and efficiency, the person should: 1) take a 1-minute break e
 Total 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min
 1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.
 Clip office:
-  0:00-0:04 standing. The camera wearer is adjusting their gloves.
-  0:04-0:18 walking. The camera wearer is adjusting their gloves. The camera wearer walks towards a door. The camera wearer walks around the office. The camera wearer walks into an office.
-  0:18-0:21 sitting. The camera wearer walks into an office. The camera wearer picks up a plastic bag from a table.
-  0:21-0:23 walking. The camera wearer picks up a plastic bag from a table.
-  0:23-0:44 standing. The camera wearer picks up a plastic bag from a table. The camera wearer is pouring a liquid into a cup. The camera wearer turns on the water dispenser. The camera wearer is walking towards a table.
-  0:44-0:49 walking. The camera wearer is walking towards a table. The camera wearer opens a door.
-  0:49-1:11 standing. The camera wearer opens a door. The camera wearer opens the refrigerator. The camera wearer opens a refrigerator. The camera wearer opens a cabinet. The camera wearer walks to the table.
-  1:11-1:17 walking. The camera wearer walks to the table.
-  1:17-1:22 standing. The camera wearer walks to the table. The camera wearer walks around the office.
-  1:22-1:23 arms raised. The camera wearer walks around the office.
+  standing 4 s. The camera wearer is adjusting their gloves.
+  walking 14 s. The camera wearer is adjusting their gloves. The camera wearer walks towards a door. The camera wearer walks around the office. The camera wearer walks into an office.
+  sitting 3 s. The camera wearer walks into an office. The camera wearer picks up a plastic bag from a table.
+  walking 2 s. The camera wearer picks up a plastic bag from a table.
+  standing 21 s. The camera wearer picks up a plastic bag from a table. The camera wearer is pouring a liquid into a cup. The camera wearer turns on the water dispenser. The camera wearer is walking towards a table.
+  walking 5 s. The camera wearer is walking towards a table. The camera wearer opens a door.
+  standing 22 s. The camera wearer opens a door. The camera wearer opens the refrigerator. The camera wearer opens a refrigerator. The camera wearer opens a cabinet. The camera wearer walks to the table.
+  walking 6 s. The camera wearer walks to the table.
+  standing 5 s. The camera wearer walks to the table. The camera wearer walks around the office.
+  arms raised 1 s. The camera wearer walks around the office.
 ```
 </details>

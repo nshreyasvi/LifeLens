@@ -134,6 +134,7 @@ def main(a):
     if os.path.exists(manifest):
         m = json.load(open(manifest))
         m['streams'].update({f'dam_{s}': f'dam_{s}.srt' for s in counts})
+        counts = {**m.get('describe_anything', {}).get('windows', {}), **counts}     # keep sources not re-run
         m['describe_anything'] = {'model': a.model, 'window_s': a.window, 'point': list(a.point), 'windows': counts,
                                   'sam2_s': round(sam_s, 1), 'dam_s': round(dam_s, 1)}
         json.dump(m, open(manifest, 'w'), indent=2)

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StageSense Director Preview</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#101116;color:#f3f4f7}body{max-width:900px;margin:32px auto;padding:0 18px}
+.stage{height:300px;border-radius:18px;display:grid;place-items:center;background:#3977ff;box-shadow:0 0 80px #3977ff66;transition:background .3s,filter .3s;filter:brightness(.15)}
+.stage.flash{animation:flash .2s ease-out}@keyframes flash{0%{box-shadow:0 0 180px 50px #fff}100%{box-shadow:0 0 80px #3977ff66}}
+.stage b{font-size:2rem;text-shadow:0 2px 8px #000}.grid{display:flex;gap:28px;flex-wrap:wrap;margin:18px 0}.value{font-size:1.5rem}.log{height:220px;overflow:auto;background:#1b1c24;border-radius:10px;padding:12px;white-space:pre-wrap;font:13px ui-monospace,monospace}
+#status{color:#9ba3b4}
+</style></head>
+<body><h1>StageSense Director</h1><p id="status">Connecting to ws://localhost:8765…</p>
+<div id="stage" class="stage"><b id="phase">Waiting for replay</b></div>
+<div class="grid"><div>Zone <div id="zone" class="value">—</div></div><div>Mood <div id="mood" class="value">—</div></div><div>BPM <div id="bpm" class="value">—</div></div><div>Intensity <div id="intensity" class="value">—</div></div><div>Scene <div id="scene" class="value">—</div></div><div>Stem <div id="stem" class="value">—</div></div><div>Shader <div id="shader" class="value">—</div></div></div>
+<h2>WHAT THE MODEL SEES</h2><div id="model-sees" class="log">Waiting for the first slow-loop summary.</div>
+<h2>WHAT IT DECIDED</h2><div id="model-decided" class="log">Holding the starting scene.</div>
+<h2>Director log</h2><div id="log" class="log"></div>
+<script>
+const statusEl=document.querySelector('#status'),stage=document.querySelector('#stage'),logs=document.querySelector('#log');
+function connect(){const ws=new WebSocket('ws://localhost:8765');ws.onopen=()=>statusEl.textContent='Connected';ws.onclose=()=>{statusEl.textContent='Disconnected; retrying…';setTimeout(connect,1000)};ws.onerror=()=>ws.close();ws.onmessage=e=>{const m=JSON.parse(e.data);stage.style.background=m.color;stage.style.filter=`brightness(${Math.max(0,m.intensity)})`;document.querySelector('#zone').textContent=m.zone;document.querySelector('#mood').textContent=m.mood;document.querySelector('#bpm').textContent=`${m.music_tempo} BPM`;document.querySelector('#intensity').textContent=Number(m.intensity).toFixed(2);document.querySelector('#scene').textContent=m.scene;document.querySelector('#stem').textContent=m.stem;document.querySelector('#shader').textContent=m.shader;document.querySelector('#phase').textContent=`${m.phase.toUpperCase()} · ${m.cue.toUpperCase()}`;document.querySelector('#model-sees').textContent=m.model_summary||'Waiting for the first slow-loop summary.';document.querySelector('#model-decided').textContent=m.model_decision||'Holding the starting scene.';if(m.cue==='flash'){stage.classList.remove('flash');void stage.offsetWidth;stage.classList.add('flash');setTimeout(()=>stage.classList.remove('flash'),220)}logs.textContent+=`${m.time} [${m.phase}] ${m.reason}\n`;logs.scrollTop=logs.scrollHeight;while(logs.childNodes.length>120)logs.removeChild(logs.firstChild)}}connect();
+</script></body></html>

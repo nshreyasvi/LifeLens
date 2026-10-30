@@ -28,16 +28,16 @@
       "minutes": {
         "walking": 0.95,
         "standing": 0.6,
-        "sitting": 0.12,
-        "crouching": 0.08,
+        "sitting": 0.17,
+        "crouching": 0.03,
         "bending": 0.0,
         "arms raised": 0.0
       },
       "share": {
         "walking": 0.543,
         "standing": 0.343,
-        "sitting": 0.067,
-        "crouching": 0.048,
+        "sitting": 0.095,
+        "crouching": 0.019,
         "bending": 0.0,
         "arms raised": 0.0
       },
@@ -49,23 +49,23 @@
     "robothome": {
       "duration_min": 4.5,
       "minutes": {
-        "walking": 0.3,
+        "walking": 0.28,
         "standing": 3.37,
-        "sitting": 0.43,
-        "crouching": 0.28,
+        "sitting": 0.73,
+        "crouching": 0.0,
         "bending": 0.12,
         "arms raised": 0.0
       },
       "share": {
-        "walking": 0.067,
+        "walking": 0.063,
         "standing": 0.748,
-        "sitting": 0.096,
-        "crouching": 0.063,
+        "sitting": 0.163,
+        "crouching": 0.0,
         "bending": 0.026,
         "arms raised": 0.0
       },
       "sit_stand_transitions": 2,
-      "longest_sitting_min": 0.53,
+      "longest_sitting_min": 0.55,
       "walking_distance_m": 49.8,
       "bent_over_min": 0.12
     }
@@ -73,27 +73,27 @@
   "total": {
     "duration_min": 7.63,
     "minutes": {
-      "walking": 1.7,
+      "walking": 1.68,
       "standing": 4.83,
-      "sitting": 0.6,
-      "crouching": 0.37,
+      "sitting": 0.95,
+      "crouching": 0.03,
       "bending": 0.12,
       "arms raised": 0.02
     },
     "share": {
-      "walking": 0.223,
+      "walking": 0.221,
       "standing": 0.633,
-      "sitting": 0.079,
-      "crouching": 0.048,
+      "sitting": 0.124,
+      "crouching": 0.004,
       "bending": 0.015,
       "arms raised": 0.002
     },
     "sit_stand_transitions": 6,
-    "longest_sitting_min": 0.53,
+    "longest_sitting_min": 0.55,
     "walking_distance_m": 148.7,
     "bent_over_min": 0.12
   },
-  "summary": "The person began the day with a brief standing period at the office, followed by walking around the workspace, then sitting briefly to pick up a plastic bag. They spent a significant amount of time standing (4.83 min) and walking (1.7 min), with minimal movement in sitting (0.6 min) and crouching (0.37 min). The majority of their time was spent in standing and walking, with a few moments of bending and arms raised. They also spent 148.7 meters walking during the day, indicating a high level of physical activity.\n\nTo improve posture and schedule, the person should: 1) take a 5-minute break every 90 minutes to stand and stretch, reducing prolonged sitting; 2) increase walking time by incorporating 10-minute walks during breaks or after tasks; 3) limit sitting to 15 minutes at a time and use a standing desk or chair to reduce sedentary time. These changes will help improve posture, reduce strain, and support better overall health.",
+  "summary": "The individual began by walking 148.7 meters while adjusting gloves, then stood for 4 seconds before walking again\u2014this pattern repeated across multiple tasks. They spent significant time seated (e.g., 33 seconds) during a home routine involving household chores like watering plants and cooking. Outdoor activity included brief standing and walking on a wooden deck, but most time was spent indoors, particularly when sitting or standing near furniture. Their movement patterns showed frequent transitions between standing, sitting, and walking, with minimal rest periods.\n\nTo improve this schedule, consider increasing active breaks: take 1\u20132 minutes every hour to stand and stretch, especially after prolonged sitting. Reduce sedentary time by incorporating more walking or light exercise during daily routines\u2014such as replacing static sitting with brief walks during meals or at work. Additionally, limit screen time and encourage posture awareness; aim to maintain good posture during all activities, including lifting objects or using tools, which can be improved by practicing proper ergonomics.",
   "model": "Qwen/Qwen3-VL-2B-Instruct",
-  "runtime_s": 11.4
+  "runtime_s": 15.4
 }

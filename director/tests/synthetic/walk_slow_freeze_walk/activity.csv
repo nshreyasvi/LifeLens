@@ -1,0 +1,5 @@
+second,clip,label,narration
+0,walk_slow_freeze_walk,walking,The performer walks across the stage.
+1,walk_slow_freeze_walk,standing,"The performer slows, freezes, then walks again."
+2,walk_slow_freeze_walk,standing,"The performer is still, then resumes walking."
+3,walk_slow_freeze_walk,walking,The performer walks away.
