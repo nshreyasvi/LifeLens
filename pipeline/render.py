@@ -1,5 +1,5 @@
 """
-Render the MHR mesh from a third-person camera that follows the wearer, pair it with the ego video, write the manifest.
+Render the body mesh from a third-person camera that follows the wearer, pair it with the ego video, write the manifest.
 
 python pipeline/render.py --run runs/x [--size 960 720] [--distance 3.5] [--azimuth 135] [--elevation 20]
 
@@ -25,7 +25,6 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 FPS = 30
 BODY_COLOR = (0.55, 0.65, 0.85, 1.0)
 GRAPH_H, GRAPH_S = 260, 10.0        # pose graph strip: height (px), seconds shown
-HAND = 240                          # hand close-up size (px): at full-body scale a hand is only a few pixels
 SIDES = ((0, 'l', (31, 119, 180)), (1, 'r', (255, 127, 14)))     # left blue, right orange
 # SMPL-H joints (AMASS layout): pelvis, neck; (left, right) hip, knee, ankle, shoulder, elbow, wrist
 PELVIS, NECK, HIP, KNEE, ANKLE, SHOULDER, ELBOW, WRIST = 0, 12, (1, 2), (4, 5), (7, 8), (16, 17), (18, 19), (20, 21)
@@ -118,40 +117,13 @@ def graph_frames(s: dict, width: int):
         yield np.asarray(img)
 
 
-def render_hands(run: str, verts: np.ndarray, faces: np.ndarray, joints: np.ndarray):
-    """hands.mp4: a HAND x HAND close-up of each hand (left | right), seen from outside the body so the torso does not
-    hide it. Its own scene and renderer: pyrender binds meshes to one OpenGL context."""
-    scene = pyrender.Scene(bg_color=(1.0, 1.0, 1.0, 1.0), ambient_light=(0.35, 0.35, 0.35))
-    camera = scene.add(pyrender.PerspectiveCamera(yfov=np.radians(40), aspectRatio=1.0))
-    light = scene.add(pyrender.DirectionalLight(intensity=3.0))
-    material = pyrender.MetallicRoughnessMaterial(baseColorFactor=BODY_COLOR, metallicFactor=0.0, roughnessFactor=0.7)
-    renderer = pyrender.OffscreenRenderer(HAND, HAND)
-    body = None
-    with imageio.get_writer(f'{run}/hands.mp4', fps=FPS, codec='libx264', quality=8, macro_block_size=1) as writer:
-        for i in range(len(verts)):
-            if body is not None:
-                scene.remove_node(body)
-            body = scene.add(pyrender.Mesh.from_trimesh(trimesh.Trimesh(verts[i], faces, process=False),
-                                                        material=material, smooth=True))
-            tiles = []
-            for k in (0, 1):
-                forearm = joints[i, WRIST[k]] - joints[i, ELBOW[k]]
-                palm = joints[i, WRIST[k]] + 0.08 * forearm / np.linalg.norm(forearm)
-                out = palm - joints[i, PELVIS]
-                out[2] = 0.0
-                out = out / (np.linalg.norm(out) + 1e-6) + [0.0, 0.0, 0.6]
-                pose = look_at(palm + 0.35 * out / np.linalg.norm(out), palm)
-                scene.set_pose(camera, pose)
-                scene.set_pose(light, pose)
-                tiles.append(renderer.render(scene)[0])
-            writer.append_data(np.hstack(tiles))
-    renderer.delete()
-
-
 def render(run: str, a) -> int:
     mesh_path = f'{run}/mhr.npz' if os.path.exists(f'{run}/mhr.npz') else f'{run}/smplh_canonical.npz'
     m = np.load(mesh_path)
     verts = np.einsum('lij,lvj->lvi', m['R'], m['verts'].astype(np.float32)) + m['t'][:, None]
+    # OmniEgoCap's feet sink 2-4 cm into the floor (up to 20 cm on uneven ground): lift the drawn body onto it. Video
+    # only: lifting the motion itself moves the camera-pinned head too (MPJPE 102.6 -> 107.2 mm on the demos)
+    verts[..., 2] += smooth(np.maximum(0.0, -verts[..., 2].min(1))[:, None], 5)
     faces = m['faces']
     center = smooth(verts.mean(axis=1), FPS)      # 1 s moving average: a steady camera
     az, el = np.radians(a.azimuth), np.radians(a.elevation)
@@ -177,7 +149,6 @@ def render(run: str, a) -> int:
             scene.set_pose(light, pose)
             writer.append_data(renderer.render(scene)[0])
     renderer.delete()
-    render_hands(run, verts, faces, np.load(f'{run}/smplh_canonical.npz')['joints'])
 
     # pose time series: CSV for analysis, and a scrolling graph strip under the two videos
     s = pose_series(np.load(f'{run}/smplh_canonical.npz')['joints'])
@@ -190,9 +161,9 @@ def render(run: str, a) -> int:
             writer.append_data(frame)
 
     subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-y', '-loglevel', 'error', '-i', f'{run}/input.mp4',
-                    '-i', f'{run}/mesh_exo.mp4', '-i', f'{run}/pose_graph.mp4', '-i', f'{run}/hands.mp4',
-                    '-filter_complex', f'[0:v]scale={in_w}:{a.size[1]}[a];[1:v][3:v]overlay=W-w-8:H-h-8[m];'
-                    '[a][m]hstack=inputs=2[top];[top][2:v]vstack=inputs=2',
+                    '-i', f'{run}/mesh_exo.mp4', '-i', f'{run}/pose_graph.mp4',
+                    '-filter_complex', f'[0:v]scale={in_w}:{a.size[1]}[a];[a][1:v]hstack=inputs=2[top];'
+                    '[top][2:v]vstack=inputs=2',
                     '-c:v', 'libx264', '-crf', '20', '-pix_fmt', 'yuv420p', '-shortest', f'{run}/side_by_side.mp4'],
                    check=True)
     return len(verts)
@@ -209,7 +180,7 @@ def manifest(run: str, frames: int, render_s: float) -> dict:
     # a re-render keeps what later stages (narration, DAM) added to an existing manifest
     out = json.load(open(f'{run}/manifest.json')) if os.path.exists(f'{run}/manifest.json') else {}
     streams = {'ego_video': 'input.mp4', 'mesh_video': 'mesh_exo.mp4', 'side_by_side': 'side_by_side.mp4',
-               'pose_graph': 'pose_graph.mp4', 'hands_closeup': 'hands.mp4'}
+               'pose_graph': 'pose_graph.mp4'}
     motion = {'smplh': 'smplh.npz', 'smplh_canonical': 'smplh_canonical.npz', 'omniegocap_input': 'omniegocap_input.npz',
               'camera_trajectory': 'trajectory_aligned.npz', 'pose_timeseries': 'pose_timeseries.csv',
               'kinematics': 'kinematics'}
@@ -217,7 +188,7 @@ def manifest(run: str, frames: int, render_s: float) -> dict:
         'frames': frames,
         'fps': FPS,
         'duration_s': round(frames / FPS, 2),
-        'streams': {**out.get('streams', {}), **streams},
+        'streams': {k: v for k, v in {**out.get('streams', {}), **streams}.items() if os.path.exists(f'{run}/{v}')},
         'motion': {k: v for k, v in motion.items() if os.path.exists(f'{run}/{v}')},
         'calibration': json.load(open(f'{run}/calibration.json')) if os.path.exists(f'{run}/calibration.json') else None,
         'omniegocap': {k: smplh_meta.get(k) for k in ('runtime_s', 'load_s', 'peak_gpu_mb', 'optimization')},

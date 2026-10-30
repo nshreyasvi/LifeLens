@@ -5,12 +5,14 @@ Pure-Python runner replacing pipeline/run.sh.
 
 Usage:
     python pipeline/run.py <video> [run_name] [--focal FOCAL] [--input_npz input.npz] [--device DEVICE] [--opt]
+                           [--describe qwen|dam|none ...]
 
 Only OmniEgoCap's own tools: HaWoR for wrists and its SLAM for the camera path (focal: --focal, else HaWoR's default),
 gravity and floor from the floor plane in that SLAM's points. No GeoCalib, no lens height to measure.
 """
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -34,6 +36,19 @@ def get_python(env: str) -> str:
     return sys.executable
 
 
+def iphone_focal(video: str, work_mp4: str):
+    """Focal length (px) of the working video from the 35 mm-equivalent focal length iPhones write into their videos,
+    or None. shortcut: ignores the few % of crop from video stabilization; pass --focal when it is known exactly."""
+    probe = lambda *a: json.loads(subprocess.run(['ffprobe', '-v', 'error', *a, '-of', 'json'], capture_output=True,
+                                                 text=True, check=True).stdout)
+    tags = probe('-show_entries', 'format_tags', video).get('format', {}).get('tags', {})
+    f35 = tags.get('com.apple.quicktime.camera.focal_length.35mm_equivalent')
+    if not f35:
+        return None
+    s = probe('-select_streams', 'v:0', '-show_entries', 'stream=width,height', work_mp4)['streams'][0]
+    return float(f35) / 36 * max(s['width'], s['height'])     # 35 mm film: 36 mm across the frame's long side
+
+
 def run_stage(name: str, out_file: str, cmd: list, run_dir: str):
     target = os.path.join(run_dir, out_file)
     if os.path.exists(target):
@@ -55,11 +70,15 @@ def main():
                         help="Focal length (px) of the 30 fps, <=1920 px wide working video; else HaWoR's default.")
     parser.add_argument("--device", default=None, help="Device name (e.g. gopro).")
     parser.add_argument("--opt", action="store_true", help="Enable OmniEgoCap wrist guidance optimization.")
+    parser.add_argument("--smooth", type=float, default=2.0,
+                        help="Body smoothing sigma in frames; 0 keeps OmniEgoCap's raw output (paper-comparable).")
     parser.add_argument("--input_npz", default=None,
                         help="Ready OmniEgoCap input, e.g. OmniEgoDB's input.npz: no SLAM and no build_input (HaWoR "
                              "still runs for the finger poses), and the video is cut to its frames (raw_time_s).")
-    parser.add_argument("--dam", action="store_true",
-                        help="Also describe the region below the image center with NVIDIA's Describe Anything Model.")
+    parser.add_argument("--describe", nargs="+", default=["qwen"], choices=["qwen", "dam", "none"],
+                        help="Video description model(s): qwen = Qwen3-VL-2B narration of the activity (~1 s per 5 s "
+                             "window); dam = NVIDIA Describe Anything on the ego video, the body and both (~30 s per "
+                             "window, non-commercial weights); none = skip.")
     args = parser.parse_args()
 
     video_path = os.path.abspath(args.video)
@@ -95,6 +114,10 @@ def main():
         print("== ingest: skip (input.mp4 exists)")
 
     # 2. HaWoR: wrists and finger poses, plus the SLAM camera path unless the input comes ready
+    if not args.focal:
+        args.focal = iphone_focal(video_path, input_mp4)
+        print(f"== focal: {args.focal:.1f} px from the iPhone's lens metadata" if args.focal else
+              "== focal: unknown, HaWoR assumes 600 px. Pass --focal (README, 'Your own video') or SLAM may fail")
     hawor_cmd = [py_hawor, os.path.join(PIPELINE, 'hawor_export.py'), '--video', input_mp4, '--out_dir', run_dir]
     if args.focal:
         hawor_cmd.extend(['--focal', str(args.focal)])
@@ -112,7 +135,7 @@ def main():
         run_stage('build_input', 'omniegocap_input.npz', build_cmd, run_dir)
 
     # 4. OmniEgoCap (SMPL-H generation with articulated hands)
-    ego_cmd = [py_omniego, os.path.join(PIPELINE, 'run_omniegocap.py'), '--run', run_dir]
+    ego_cmd = [py_omniego, os.path.join(PIPELINE, 'run_omniegocap.py'), '--run', run_dir, '--smooth', str(args.smooth)]
     if args.opt:
         ego_cmd.append('--optimization')
     run_stage('omniegocap', 'smplh_canonical.npz', ego_cmd, run_dir)
@@ -122,13 +145,18 @@ def main():
     run_stage('render', 'side_by_side.mp4', render_cmd, run_dir)
 
     # 6. Narration by a small local video LLM (after render: it can't share the 8 GB GPU with SLAM)
-    run_stage('describe', 'narration.json', [get_python('vlm'), os.path.join(PIPELINE, 'describe.py'), '--run', run_dir],
-              run_dir)
+    if 'qwen' in args.describe:
+        run_stage('describe', 'narration.json',
+                  [get_python('vlm'), os.path.join(PIPELINE, 'describe.py'), '--run', run_dir], run_dir)
 
-    # 7. Region descriptions by Describe Anything (opt-in: non-commercial weights, ~7 GB of VRAM)
-    if args.dam:
+    # 7. Region descriptions by Describe Anything (non-commercial weights, ~7 GB of VRAM)
+    if 'dam' in args.describe:
         run_stage('describe_anything', 'dam_both.json',
                   [get_python('dam'), os.path.join(PIPELINE, 'describe_anything.py'), '--run', run_dir], run_dir)
+
+    # 8. Activity insights: posture per second, time split, breaks, and a summary with suggestions
+    run_stage('insights', 'insights.json',
+              [get_python('vlm'), os.path.join(PIPELINE, 'insights.py'), run_dir], run_dir)
 
     print(f"Done: {run_dir}")
 

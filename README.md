@@ -1,238 +1,146 @@
-# LifeLens: ego video → 3D body motion, pose graph and scene descriptions
+# LifeLens
 
-A head-mounted **phone or GoPro** video goes in. Out come the wearer's full-body 3D motion (SMPL-H, fingers included),
-a third-person mesh video with a live pose graph, a one-sentence narration every 5 s (Qwen3-VL-2B), detailed region
-descriptions (NVIDIA Describe Anything) and the motion as plain `.npy` / `.csv` tables. Everything shares one 30 fps
-frame clock and lands in one folder, `runs/<name>/`.
+A head-mounted **phone or GoPro** video goes in. Out come:
 
-Built on [OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) (full-body motion from head + wrist poses) and
-[HaWoR](https://github.com/ThunderVVV/HaWoR) (hands and camera from the video), the hand estimator OmniEgoCap's GoPro
-inputs used.
+* the wearer's **full-body 3D motion** (SMPL-H, fingers included) as `.npy` / `.csv`
+* a **side-by-side video**: camera | 3D body, with a live pose graph underneath
+* a **narration** of what the wearer does every 5 s (Qwen3-VL-2B) and, optionally, region descriptions (Describe Anything)
+* **activity insights**: posture per second (walking, standing, sitting, crouching, bending, arms raised), time split,
+  breaks, and a short summary with schedule and posture suggestions
+
+**Example outputs** (the three OmniEgoDB demos, without the dataset's camera footage):
+[Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1).
 
 ```
-video ─ ingest ─ hawor ─────────────────── build_input ─── omniegocap ─── render ──────────── describe ─── describe_anything
-        30 fps   HaWoR hands (wrists +     floor plane in   diffusion:     mesh_exo.mp4       Qwen3-VL-2B   DAM-3B-Video
-        ≤1920px  fingers) + masked         the SLAM points  head+wrists    pose_graph.mp4     narration     on ego / pose /
-                 DROID-SLAM + Metric3D     → z up, floor    → SMPL-H       side_by_side.mp4                 both (optional)
+video → ingest → hawor → build_input → omniegocap → render → describe → insights
+        30 fps   hands +  floor plane   head + wrists  3D body   Qwen /    posture timeline,
+                 SLAM     → z up        → SMPL-H       + graph   DAM       LLM summary
 ```
 
-| Stage | Env | What it does |
-|---|---|---|
-| `ingest` | omniegocap | ffmpeg to 30 fps CFR (OmniEgoCap's rate), at most 1920 px wide |
-| `hawor` | hawor | HaWoR: camera-frame wrists and finger poses; its masked DROID-SLAM camera path with Metric3D scale and the scene points. SLAM runs on 30 s pieces (it holds at most 512 keyframes), joined on 3 s overlaps |
-| `build_input` | omniegocap | OmniEgoCap's `trajectory` adapter needs a z-up world and the floor height and leaves both to the user: both come from the floor plane fitted in HaWoR's SLAM points. Head mount from the first 3 s |
-| `omniegocap` | omniegocap | OmniEgoCap sequence diffusion → SMPL-H body (22 joints); fingers from HaWoR where a hand was seen; motion exported as `.npy` / `.csv` |
-| `render` | mhr | pyrender third-person follow camera; close-ups of both hands (fingers are a few pixels at full-body scale); scrolling 10 s pose graph under the ego and mesh videos; manifest |
-| `describe` | vlm | [Qwen3-VL-2B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct): what the wearer is doing, one sentence per 5 s |
-| `describe_anything` | dam | `--dam` only. [DAM-3B-Video](https://github.com/NVlabs/describe-anything) per 5 s, on three inputs: **ego** (SAM 2.1 tracks the object below the image center), **pose** (the rendered body) and **both** side by side |
+[HaWoR](https://github.com/ThunderVVV/HaWoR) finds the hands and the camera path in the video,
+[OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) turns head + wrist motion into a full body.
 
-Two ways in:
-
-* **Your own video**: everything is estimated from the video (`hawor` with SLAM, then `build_input`).
-* **A ready OmniEgoCap input** (`--input_npz`), e.g. an [OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB)
-  sequence's `input.npz`: the authors' own camera path and wrists, as in the paper. HaWoR then runs without SLAM, only
-  for the finger poses, and the video is cut to the input's frames (`raw_time_s`).
-
-## Setup (WSL2 Ubuntu or Linux, NVIDIA GPU, CUDA 12.6)
+## 1. Set up (Linux or WSL2, NVIDIA GPU with 8 GB, CUDA 12.6)
 
 ```bash
-cd /mnt/d/Projects/metahack_project
-bash setup.sh          # envs omniegocap, hawor, mhr, vlm: clones pinned upstream commits, builds, downloads weights
-bash setup.sh dam      # optional: Describe Anything + SAM 2.1 (NVIDIA Noncommercial License)
+bash setup.sh          # conda envs omniegocap, hawor, mhr, vlm: pinned upstream commits, weights, HaWoR patch
+bash setup.sh dam      # optional: Describe Anything + SAM 2.1 (NVIDIA non-commercial license)
 ```
 
-Five conda envs because the upstream projects pin conflicting Python and library versions. Each step of `setup.sh`
-was run on the machine below; the script as a whole was not re-run from scratch.
+Then add the licensed body models (free registration at https://mano.is.tue.mpg.de):
 
-Licensed body models, free registration at https://mano.is.tue.mpg.de:
-
-| File | Put it at |
+| Download | Put it at |
 |---|---|
 | SMPL-H "Extended SMPL+H model" `smplh.tar.xz` | `tar -xJf smplh.tar.xz -O neutral/model.npz > third_party/OmniEgoCap/data/smplh/SMPLH_NEUTRAL.npz` |
-| MANO "Models & Code" `mano_v1_2.zip` → `models/MANO_RIGHT.pkl` | `third_party/HaWoR/_DATA/data/mano/` |
-| same zip → `models/MANO_LEFT.pkl` | `third_party/HaWoR/_DATA/data_left/mano_left/` |
+| MANO `mano_v1_2.zip`: `models/MANO_RIGHT.pkl` | `third_party/HaWoR/_DATA/data/mano/` |
+| MANO `mano_v1_2.zip`: `models/MANO_LEFT.pkl` | `third_party/HaWoR/_DATA/data_left/mano_left/` |
 
-`setup.sh` also patches one line of HaWoR: it allocates every hand mask of a video as float64 (52 GB for 105 s of
-1080p); booleans give the same masks in 6.5 GB.
+Check the install: `conda activate omniegocap && python bench/smoke_test.py` (a synthetic walk through every stage).
 
-## Recording your own video
-
-The method needs a camera that is rigid with the head: it reconstructs the body from **head motion + wrists seen in
-the camera**. Chest or handheld footage won't work.
-
-* **Phone**: head mount in landscape, main 1× lens, stabilization off, 30 or 60 fps. **GoPro**: Linear lens,
-  HyperSmooth and Horizon Leveling off.
-* Tilt the camera down 20–30° so your hands are in view most of the time, and keep some floor in view (the floor fit
-  needs it).
-* For the first 3 seconds stand upright, look straight ahead and keep still (this gives the head mount).
-* **Pass the focal length** with `--focal`, in pixels of the 1920-px-wide working video: `focal = 960 / tan(hfov / 2)`
-  for a lens with horizontal field of view `hfov`. Without it HaWoR assumes 600 px (a ~116° lens), and a wrong focal
-  length is what breaks SLAM (see Known limits).
-
-## Run
+## 2. Run
 
 ```bash
-python pipeline/run.py walk01.mp4 walk01 --focal 1500                       # your own video
-python pipeline/run.py S04_outdoor_1.MP4 outdoor --focal 929.5 --device gopro \
-    --input_npz omniegodb/gopro/S04_outdoor_1/input.npz --dam               # a ready OmniEgoCap input, with DAM
+conda activate omniegocap
+python pipeline/run.py my_walk.mov my_walk                    # → runs/my_walk/
 ```
 
 | Flag | Meaning |
 |---|---|
-| `--focal` | focal length (px) of the 1920-px-wide working video; default HaWoR's 600 |
-| `--input_npz` | ready OmniEgoCap input: no SLAM, no `build_input`; HaWoR only for the fingers |
-| `--dam` | also run Describe Anything on ego, pose and both |
-| `--opt` | OmniEgoCap's wrist guidance optimization, off by default: on the paper's GoPro track (Table 3) it left body error unchanged (111.7 → 112.2 mm) and raised jerk 71% |
-| `--device gopro` | draws the GoPro in OmniEgoCap's viewer |
+| `--focal F` | focal length in pixels of the ≤1920 px working video. iPhone videos: read from the file automatically |
+| `--describe qwen dam` | description model(s): `qwen` (default, activity narration, ~1 s per 5 s), `dam` (Describe Anything on the camera view, the body and both, ~30 s per 5 s), `none` |
+| `--smooth S` | body smoothing in frames (default 2); `0` = OmniEgoCap's raw output, as in the paper |
+| `--input_npz F` | a ready OmniEgoCap input (e.g. OmniEgoDB's `input.npz`): no SLAM, HaWoR only for the fingers |
+| `--opt` | OmniEgoCap's wrist optimization: same body error, 71% more jerk, 2–3× slower (paper, Table 3) |
 
-Every stage is skipped when its output already exists: delete a file to redo that stage.
+Each stage is skipped when its output exists; delete the file to redo it. A day of clips gets one report:
+`python pipeline/insights.py runs/morning runs/lunch runs/afternoon --out runs/day`.
 
-### Demos (OmniEgoDB office, robot home, outdoor)
+## 3. Record your own video
 
-Download the three GoPro sequences' videos and inputs (log in to Hugging Face and accept the dataset terms first),
-put the videos in the project folder as `S03_office_1.MP4`, `S03_robothome_1.MP4`, `S04_outdoor_1.MP4`, then:
+* The camera must be **rigid with the head** (head strap or cap mount); chest or handheld footage won't work.
+* Landscape, 1× or 0.5× lens, 30 or 60 fps. GoPro: Linear lens, HyperSmooth and Horizon Leveling off.
+* Tilt it 20–30° down so the hands are in view, and keep some floor in view.
+* Stand still and look ahead for the first 3 s.
+* **Focal length** matters most: a wrong one makes SLAM fail and the body drift. iPhone files carry it. For other
+  cameras pass `--focal 960/tan(hfov/2)` for a lens with horizontal field of view `hfov` (1920 px working width).
+* Keep clips under 2 min (OmniEgoCap slows down sharply beyond that); record several for a day.
+
+## 4. Replicate the demos and the accuracy numbers
+
+The demos are OmniEgoDB clips from a head-mounted GoPro HERO10 Black (3840×2160, ~92° horizontal view, nearly no
+distortion; the pipeline works on 1920×1080 at 30 fps). Accept the
+[OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB) terms on Hugging Face, put the three videos in this
+folder as `S03_office_1.MP4`, `S03_robothome_1.MP4`, `S04_outdoor_1.MP4`, then:
 
 ```bash
 for s in S03_office_1 S03_robothome_1 S04_outdoor_1; do
   hf download cscandkswon/OmniEgoDB --repo-type dataset --local-dir omniegodb \
     --include "gopro/$s/input.npz" "gopro/$s/camera.json" "gopro/$s/gt.npz"
 done
-bash demos.sh          # runs/outdoor, runs/office, runs/robothome; the focal length comes from camera.json
-```
-
-## Output: `runs/<name>/`
-
-| File | Content |
-|---|---|
-| `input.mp4` | ego video, 30 fps CFR |
-| `mesh_exo.mp4` | body mesh, third-person follow camera; frame *i* = `input.mp4` frame *i* |
-| `pose_graph.mp4` | scrolling pose graph |
-| `hands.mp4` | close-ups of the left \| right hand, seen from outside the body |
-| `side_by_side.mp4` | ego \| mesh with the hand close-ups in its corner, pose graph underneath |
-| `kinematics/joints_world.csv`, `.npy` | (L, 22, 3) joint positions in meters, z up, floor at z = 0; CSV columns `pelvis_x … right_wrist_z` |
-| `kinematics/joint_rotations.csv`, `.npy` | (L, 52, 3) SMPL-H axis-angle rotations, parent-relative: root, 21 body joints, 30 finger joints |
-| `kinematics/root_trans.npy`, `betas.npy` | root translation (L, 3), body shape (16) |
-| `kinematics/head_world.npy`, `wrist_world.npy`, `wrist_visible.npy` | model input: head (L, 4, 4), wrists (L, 2, 4, 4), which wrists were seen (L, 2) |
-| `kinematics/time_s.npy`, `frame_valid.npy` | frame times, frames OmniEgoCap considers valid |
-| `pose_timeseries.csv` | knee, hip, elbow flexion (L/R), trunk lean (deg), pelvis height (m), walking speed (m/s) per frame |
-| `narration.json`, `narration.srt` | Qwen3-VL-2B: one sentence per 5 s (load the `.srt` as subtitles) |
-| `dam_ego/pose/both.json`, `.srt` | DAM region descriptions per 5 s (`--dam`) |
-| `calibration.json` | floor fit, camera height above it, mount tilt, path length (own-video mode): **check these first** |
-| `manifest.json` | file index, per-stage wall time, real-time factor, narration and DAM timing |
-| `smplh.npz`, `omniegocap_input.npz` | OmniEgoCap's own formats, kept as `.npz` for its viewer and evaluator |
-
-Angles in the graph are unsigned (0 = straight / upright): a leg behind the body also reads as flexion.
-
-Interactive 3D check (input poses, prediction, scene points, video in sync):
-
-```bash
-conda activate omniegocap
-python third_party/OmniEgoCap/scripts/visualize.py --input runs/outdoor/omniegocap_input.npz \
-    --pred runs/outdoor/smplh.npz --video runs/outdoor/input.mp4      # open http://localhost:8080
-```
-
-## Checks
-
-```bash
-conda activate omniegocap
-python bench/smoke_test.py       # synthetic walk through build_input → describe: floor fit next to a wall and a
-                                 # table, camera height and mount tilt recovered exactly, every output written
-python bench/bench_latency.py    # OmniEgoCap model time per clip length
-conda activate hawor && python bench/test_slam_align.py   # joining of the SLAM pieces
-```
-
-Pose accuracy against OmniEgoDB's Xsens ground truth, with OmniEgoCap's own evaluator (the paper's Table 3):
-
-```bash
-mkdir -p preds/gopro && cp runs/outdoor/smplh.npz preds/gopro/S04_outdoor_1.npz   # same for office, robothome
+bash demos.sh            # runs/office, runs/outdoor, runs/robothome: ~2 h, +3 h for DAM (drop `dam` in demos.sh)
+mkdir -p preds/gopro && for p in office:S03_office_1 outdoor:S04_outdoor_1 robothome:S03_robothome_1; do
+  cp runs/${p%%:*}/smplh.npz preds/gopro/${p#*:}.npz; done
 python third_party/OmniEgoCap/scripts/eval.py omniegodb --root omniegodb --track gopro --pred_dir preds/gopro \
     --per_capture --device cpu
 ```
 
-Measured on the three demos (`--input_npz`, no optimization), 13,737 frames:
+To see a release demo with its footage without recomputing HaWoR: unzip it into `runs/<name>/` and run the matching
+`demos.sh` line. Only OmniEgoCap and the render run again (minutes).
 
-| Sequence | MPJPE (mm) | Jerk (km/s³) | Hand PE (mm) |
-|---|---|---|---|
-| S03_office_1 | 94.2 | 0.07 | 160.4 |
-| S03_robothome_1 | 105.8 | 0.07 | 135.9 |
-| S04_outdoor_1 | 102.8 | 0.08 | 115.4 |
-| **all three** | **103.0** | **0.075** | **135.7** |
-| paper, GoPro track (20 sequences) | 111.7 | 0.073 | 166.2 |
+## Outputs: `runs/<name>/`
 
-The pipeline reproduces the paper's numbers on these three; they are a subset of the 20, so this checks the
-pipeline rather than ranking it. HaWoR's finger poses articulate the hands in 40–46% of the outdoor frames (median
-finger-joint bend ~30°).
-
-## Speed (RTX 4060 Laptop 8 GB, i9-13900H, WSL2)
-
-Own-video mode, 60 s of the OmniEgoDB outdoor GoPro clip:
-
-| Stage | Time |
+| File | Content |
 |---|---|
-| ingest (4K HEVC → 1080p) | 39 s |
-| hawor: hand poses + 3 SLAM pieces | 2076 s (35 min) |
-| build_input | 7 s |
-| omniegocap | 20 s |
-| render + pose graph | 70 s |
-| describe (13 sentences) | 25 s |
-| **total** | **≈ 37 min per minute of video**, peak GPU memory 7.9 GB |
+| `side_by_side.mp4` | camera \| 3D body, pose graph underneath (knee, hip, elbow flexion, trunk lean, speed) |
+| `mesh_exo.mp4`, `pose_graph.mp4` | the body and the graph alone; frame *i* = `input.mp4` frame *i*, 30 fps |
+| `kinematics/joints_world.csv` / `.npy` | (L, 22, 3) joint positions, meters, z up, floor at z = 0 |
+| `kinematics/joint_rotations.csv` / `.npy` | (L, 52, 3) SMPL-H axis-angle: root, 21 body joints, 30 finger joints |
+| `kinematics/root_trans.npy`, `betas.npy`, `time_s.npy` | root translation, body shape, frame times |
+| `pose_timeseries.csv` | the graph's angles (deg), pelvis height (m), walking speed (m/s) per frame |
+| `narration.json` / `.srt` | Qwen: one sentence per 5 s (load the `.srt` as subtitles) |
+| `dam_ego/pose/both.json` / `.srt` | Describe Anything per 5 s (`--describe dam`) |
+| `insights.md`, `insights.json`, `activity.csv`, `activity.png` | posture per second with narration, time split, summary |
+| `smplh.npz` | AMASS SMPL-H layout (with fingers), for Blender / AMASS tools and OmniEgoCap's viewer and evaluator |
+| `calibration.json` | own-video mode: floor fit and camera height. **Check it first** when the body looks wrong |
+| `manifest.json` | file index and per-stage timings |
 
-`--input_npz` mode (the demos: HaWoR for the fingers only, no SLAM), seconds per stage:
+## Results (RTX 4060 Laptop 8 GB)
 
-| Demo | Length | ingest | hawor | omniegocap | render | describe | total | per video second |
-|---|---|---|---|---|---|---|---|---|
-| office | 83 s | 50 | 693 | 21 | 117 | 20 | 901 | 10.9 |
-| outdoor | 105 s | 87 | 1093 | 29 | 149 | 27 | 1385 | 13.2 |
-| robothome | 270 s | 143 | 2977 | 713 | 378 | 56 | 4267 | 15.8 |
+Pose error against OmniEgoDB's Xsens motion capture, OmniEgoCap's evaluator, 13,737 frames:
 
-(render includes the hand close-ups, ~35% of its time)
+| | office | robothome | outdoor | all three | paper (20 seq.) |
+|---|---|---|---|---|---|
+| MPJPE (mm), smoothed (default) | 93.9 | 105.6 | 101.7 | **102.6** | 111.7 |
+| MPJPE (mm), raw (`--smooth 0`) | 94.2 | 105.8 | 102.8 | 103.0 | |
+| Hand error (mm), smoothed / raw | 159 / 160 | 135 / 136 | 110 / 115 | **134.0** / 135.7 | 166.2 |
+| Jerk (km/s³), smoothed / raw | 0.02 / 0.07 | 0.01 / 0.07 | 0.03 / 0.08 | **0.016** / 0.075 | 0.073 |
 
-Describe Anything (`--dam`) comes on top: 2603 s for office's 3 × 17 windows (~49 s per description, 160 tokens),
-6870 s for robothome's 3 × 54 windows (~42 s, 80 tokens) and 1668 s for outdoor's 3 × 21 windows (~26 s, 80 tokens,
-nothing else on the GPU). Halving the tokens barely helped: DAM's 16 image views per window on a GPU at its 8 GB limit
-dominate.
+Three of the paper's 20 sequences: this checks the pipeline, it does not rank it. Smoothing removes OmniEgoCap's
+frame-to-frame shake without costing accuracy.
 
-HaWoR's hand model is most of it, ~11 s per video second. OmniEgoCap is fast up to ~2 min (`bench_latency.py`, model
-time: 3.3 s for 10 s, 5.0 s for 60 s, 18.2 s for 120 s of video) but its attention cost grows faster than the length:
-713 s for the 270 s robothome clip, where it also fills the 8 GB GPU. Split longer recordings into ≤2 min pieces.
-Qwen3-VL-2B needs ~4 GB and DAM-3B ~7 GB of VRAM: they run after SLAM, never alongside it, and DAM runs SAM 2 for all
-windows before loading itself.
+Speed, in processing seconds per video second: **11–16** with `--input_npz` (HaWoR's hand model is ~75% of it),
+**~37** for own videos (SLAM on top). OmniEgoCap needs 26 s for 83 s of video but over 700 s for 270 s. Qwen narration
+adds ~0.2, Describe Anything 16–31.
 
-## Qwen narration vs Describe Anything
+**Qwen or Describe Anything?** Qwen says what the wearer does ("opens the refrigerator"). DAM describes how a masked
+region looks: on the camera view whatever lies under a fixed point (carpet, desk), on the rendered body the posture
+("walks forward, right arm swinging"). Use Qwen for activity, DAM on the body only for posture in words.
 
-Same 5 s windows of the office demo:
+## Limits
 
-| Time | Qwen3-VL-2B narration | DAM on the ego region | DAM on the rendered pose | DAM on both |
-|---|---|---|---|---|
-| 10 s | walks around the office | a flat surface, likely a carpet | a humanoid figure begins to walk forward, right arm swinging | a white humanoid figure in a walking motion |
-| 30 s | turns on the water dispenser | a light-colored wooden desk | stands upright, slight forward lean, arms forward, hands clasped | a sleek, modern microwave |
-| 50 s | opens the refrigerator | a pair of light-colored sneakers | stands upright, head slightly tilted downward | a person in a light shirt, walking |
+* **Fingers** come from HaWoR where it detects a hand (24–46% of frames in the demos); gaps up to 0.5 s are
+  interpolated, longer ones ease to the clip's average hand.
+* **Legs** are inferred from head and wrist motion, not seen. OmniEgoCap is offline (each frame sees ±2.1 s).
+* **Feet sink into the floor** by 2–4 cm in OmniEgoCap's output (up to 20 cm outdoors, where the ground isn't flat).
+  The video lifts the drawn body onto the floor; the exported motion keeps the predicted heights, because lifting it
+  also moves the camera-pinned head (MPJPE 102.6 → 107.2 mm on the demos).
+* **Floor fit** (own videos) needs floor in view; `calibration.json` warns when the camera ends up < 1.2 or > 2.0 m
+  above it.
+* **Insights** labels come from fixed thresholds on the body pose (see `pipeline/insights.py`); the summary is a 2B
+  model's reading of them, not advice.
 
-* **Qwen narration** says what the wearer does, in one short sentence, 14 s for the whole clip.
-* **DAM** describes how a region looks, not what happens: on the ego video that is whatever lies under the point
-  (carpet, desk, shoes). On the rendered pose it does put the posture into words (walking, arm swing, arms forward),
-  the one new signal. On both, the joint mask spans two panels and its focus jumps between body and objects.
-* On this GPU DAM took ~150 s per 5 s window for its three inputs (160 tokens), the narration under 1 s. Use the
-  narration for activity, and DAM on the pose (`--sources pose` in `describe_anything.py`) if posture in words is
-  wanted.
+## Licenses
 
-## Known limits
-
-* **Focal length decides whether SLAM works.** With HaWoR's 600 px default on the OmniEgoDB outdoor clip (true focal
-  930 px) SLAM read 30 s of walking as 1.7 m and the camera as tilted up 55°; the body then drifted and flipped.
-  OmniEgoCap only turns the head path into a body: a wrong path gives a wrong body.
-* **The floor fit needs floor.** It takes the plane with the most SLAM points that the camera sits 0.9–2.2 m above;
-  `calibration.json` warns when the camera ends up outside 1.2–2.0 m above it.
-* **Fingers** come from HaWoR only where a hand was detected, and stay flat elsewhere.
-* **Offline.** OmniEgoCap is a non-causal sequence model (every frame sees ±2.1 s).
-* **Accuracy.** The paper reports 111.7 mm mean joint error on its GoPro track. Legs and feet are inferred, not seen.
-* **Licenses.** OmniEgoCap's checkpoint is CC BY-NC 4.0; SMPL-H, MANO, OmniEgoDB and DAM's weights are non-commercial.
-  Fine for a hackathon demo, not for a product. None of them are in this repository.
-
-## Next ideas
-
-* **Music**: [ReccoBeats](https://reccobeats.com/docs/apis/get-recommendation)' recommendation endpoint takes seed
-  tracks plus target `tempo`, `energy`, `valence`, `danceability`. Step cadence from `pose_timeseries.csv` gives the
-  tempo, movement speed the energy, the narration the context.
-* **Phone tracking**: ARKit / ARCore record metric, gravity-aligned camera poses with the video; importing them would
-  replace SLAM, Metric3D and the floor fit.
+No license is set for this code yet. Not included and non-commercial: OmniEgoCap's checkpoint (CC BY-NC 4.0), SMPL-H and MANO,
+OmniEgoDB (CC BY-NC, gated), Describe Anything's weights. Fine for research and demos, not for a product. The release
+demos are derived from OmniEgoDB and inherit CC BY-NC.

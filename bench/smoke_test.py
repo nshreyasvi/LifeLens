@@ -87,6 +87,8 @@ def main():
     assert len(k) == N and np.load(f'{RUN}/kinematics/joint_rotations.npy').shape == (N, 52, 3), k.dtype.names[:4]
     s = np.genfromtxt(f'{RUN}/pose_timeseries.csv', delimiter=',', names=True)
     assert len(s) == N and np.isfinite(s['knee_l']).all(), s.dtype.names
+    ins = json.load(open(f'{RUN}/insights.json'))['total']       # 3 s standing, then 7 s walking at 1.2 m/s
+    assert ins['share']['walking'] > 0.5 and abs(ins['walking_distance_m'] - 1.2 * (N / FPS - 3)) < 2, ins
     print(f'SMOKE TEST PASSED ({"real" if real else "stand-in"} SMPL-H)')
 
 

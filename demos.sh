@@ -7,7 +7,7 @@ for pair in outdoor:S04_outdoor_1 office:S03_office_1 robothome:S03_robothome_1;
   name=${pair%%:*}; seq=${pair#*:}
   focal=$(python -c "import json; c = json.load(open('omniegodb/gopro/$seq/camera.json')); print(c['fx'] * 1920 / c['width'])")
   mkdir -p runs/$name
-  python pipeline/run.py $seq.MP4 $name --input_npz omniegodb/gopro/$seq/input.npz --focal $focal --device gopro --dam \
+  python pipeline/run.py $seq.MP4 $name --input_npz omniegodb/gopro/$seq/input.npz --focal $focal --device gopro --describe qwen dam \
     > runs/$name/run.log 2>&1
   echo "== $name: exit $?"
   cat runs/$name/timings.tsv
