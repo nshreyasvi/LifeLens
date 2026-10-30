@@ -109,7 +109,8 @@ To see a release demo with its footage without recomputing HaWoR: unzip it into 
 
 ## Results (RTX 4060 Laptop 8 GB)
 
-Pose error against OmniEgoDB's Xsens motion capture, OmniEgoCap's evaluator, 13,737 frames:
+Pose error against OmniEgoDB's Xsens motion capture, OmniEgoCap's evaluator, 13,737 frames, in `--input_npz` mode
+(the authors' camera path and wrists; own-video mode, with our SLAM, is not measured):
 
 | | office | robothome | outdoor | all three | paper (20 seq.) |
 |---|---|---|---|---|---|
