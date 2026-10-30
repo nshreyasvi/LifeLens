@@ -1,0 +1,16 @@
+{
+  "_comment": "SAMPLE DATA — fictional messages for testing LifeLens Live Panel. Not real user or device data.",
+  "sample": true,
+  "messages": [
+    { "id": 1,  "time": "19:00:05", "energy": "low",    "action": "dim",          "music_tempo": 72 },
+    { "id": 2,  "time": "19:00:12", "energy": "low",    "action": "change_color", "music_tempo": 78 },
+    { "id": 3,  "time": "19:00:20", "energy": "medium", "action": "flash_light",  "music_tempo": 96 },
+    { "id": 4,  "time": "19:00:31", "energy": "medium", "action": "change_color", "music_tempo": 104 },
+    { "id": 5,  "time": "19:00:39", "energy": "high",   "action": "flash_light",  "music_tempo": 128 },
+    { "id": 6,  "time": "19:00:46", "energy": "high",   "action": "change_color", "music_tempo": 140 },
+    { "id": 7,  "time": "19:00:58", "energy": "high",   "action": "flash_light",  "music_tempo": 152 },
+    { "id": 8,  "time": "19:01:07", "energy": "medium", "action": "dim",          "music_tempo": 118 },
+    { "id": 9,  "time": "19:01:15", "energy": "low",    "action": "change_color", "music_tempo": 90 },
+    { "id": 10, "time": "19:01:24", "energy": "low",    "action": "dim",          "music_tempo": 68 }
+  ]
+}
