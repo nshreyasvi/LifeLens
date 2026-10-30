@@ -48,7 +48,7 @@ python pipeline/run.py my_walk.mov my_walk                    # → runs/my_walk
 
 | Flag | Meaning |
 |---|---|
-| `--focal F` | focal length in pixels of the ≤1920 px working video. iPhone videos: read from the file automatically |
+| `--focal F` | focal length in pixels of the ≤1920 px working video. If omitted, read from an iPhone video's lens metadata (tested on synthetic files only so far) |
 | `--describe qwen dam` | description model(s): `qwen` (default, activity narration, ~1 s per 5 s), `dam` (Describe Anything on the camera view, the body and both, ~30 s per 5 s), `none` |
 | `--smooth S` | body smoothing in frames (default 2); `0` = OmniEgoCap's raw output, as in the paper |
 | `--input_npz F` | a ready OmniEgoCap input (e.g. OmniEgoDB's `input.npz`): no SLAM, HaWoR only for the fingers |
@@ -63,7 +63,8 @@ Each stage is skipped when its output exists; delete the file to redo it. A day 
 * Landscape, 1× or 0.5× lens, 30 or 60 fps. GoPro: Linear lens, HyperSmooth and Horizon Leveling off.
 * Tilt it 20–30° down so the hands are in view, and keep some floor in view.
 * Stand still and look ahead for the first 3 s.
-* **Focal length** matters most: a wrong one makes SLAM fail and the body drift. iPhone files carry it. For other
+* **Focal length** matters most: a wrong one makes SLAM fail and the body drift. Recent iPhones store it in the video,
+  and the pipeline reads it (check the `== focal:` line it prints). For other
   cameras pass `--focal 960/tan(hfov/2)` for a lens with horizontal field of view `hfov` (1920 px working width).
 * Keep clips under 2 min (OmniEgoCap slows down sharply beyond that); record several for a day.
 
