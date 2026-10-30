@@ -1,3 +1,4 @@
+// LifeLens front-end: Activity and Stage views with demo mode
 'use strict';
 
 (() => {
