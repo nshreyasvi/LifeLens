@@ -30,7 +30,7 @@ on these same clips, which the sitting rule was tuned on).*
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TD
   V[/Head-mounted video/] --> H[HaWoR<br/>hands, fingers,<br/>camera path]
   H --> F[Floor fit<br/>gravity up,<br/>camera height]
   F --> O[OmniEgoCap<br/>head + wrists<br/>→ full body]
