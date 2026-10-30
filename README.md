@@ -1,26 +1,47 @@
 # LifeLens
 
-A head-mounted **phone or GoPro** video goes in. Out come:
+A head-mounted **phone or GoPro** video goes in. The wearer's whole body comes out in 3D, although the camera never
+sees it, together with what they do and how they move over the day.
 
-* the wearer's **full-body 3D motion** (SMPL-H, fingers included) as `.npy` / `.csv`
-* a **side-by-side video**: camera | 3D body, with a live pose graph underneath
-* a **narration** of what the wearer does every 5 s (Qwen3-VL-2B) and, optionally, region descriptions (Describe Anything)
-* **activity insights**: posture per second (walking, standing, sitting, crouching, bending, arms raised), time split,
-  breaks, and a short summary with schedule and posture suggestions
+![The 3D body sits down on a chair (not drawn) and stands up again; the pose graph underneath scrolls with it](docs/robothome_sit.gif)
 
-**Example outputs** (the three OmniEgoDB demos, without the dataset's camera footage): [`examples/`](examples)
-(`office`, `outdoor`, `robothome`, and `day`, a report over all three), also as zips in
-[Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1). Start with
-`examples/office/mesh_exo.mp4` and `examples/day/insights.md`.
+*The `robothome` demo, 11–26 s: the wearer sits down on a chair and gets up. Body reconstructed from the head camera
+alone. Graph underneath, left to right: knee, hip and elbow flexion (left / right), trunk lean, walking speed.
+Full videos: [`examples/*/mesh_exo.mp4`](examples). The camera half of the side-by-side video is left out: the
+dataset's footage can't be redistributed.*
 
+| Output | What it is |
+|---|---|
+| **3D motion** | SMPL-H body with fingers, 30 fps, as `.npy` / `.csv` / AMASS `.npz` |
+| **Side-by-side video** | camera \| 3D body, live pose graph underneath |
+| **Descriptions** | every 5 s: Qwen3-VL-2B narrates the activity; optionally Describe Anything describes a region |
+| **Activity insights** | posture per second, time split, breaks, a short summary with suggestions (below) |
+
+![Posture per second over the three demo clips: mostly standing (gray) and walking (green), with sitting, crouching, bending and arms-raised bouts](examples/day/activity.png)
+
+*Posture per second over the three demos ([`examples/day/insights.md`](examples/day/insights.md)), from fixed
+thresholds on the reconstructed body. Outdoors, "crouching" is mostly wrong: see [Limits](#limits).*
+
+**Try it without installing:** [`examples/`](examples) holds the outputs of the three demos (`office`, `outdoor`,
+`robothome`, and `day`, a report over all three), also as zips in
+[Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1).
+
+## How it works
+
+```mermaid
+flowchart LR
+  V[/Head-mounted video/] --> H[HaWoR<br/>hands, fingers,<br/>camera path]
+  H --> F[Floor fit<br/>gravity up,<br/>camera height]
+  F --> O[OmniEgoCap<br/>head + wrists<br/>→ full body]
+  O --> R[Render<br/>3D body,<br/>pose graph]
+  V --> Q[Qwen3-VL<br/>narration]
+  V & R --> D[Describe Anything<br/>camera view / body]
+  O & Q --> I[Insights<br/>posture timeline,<br/>summary]
 ```
-video → ingest → hawor → build_input → omniegocap → render → describe → insights
-        30 fps   hands +  floor plane   head + wrists  3D body   Qwen /    posture timeline,
-                 SLAM     → z up        → SMPL-H       + graph   DAM       LLM summary
-```
 
-[HaWoR](https://github.com/ThunderVVV/HaWoR) finds the hands and the camera path in the video,
-[OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) turns head + wrist motion into a full body.
+[HaWoR](https://github.com/ThunderVVV/HaWoR) finds the hands and the camera's path in the video. Only the head (the
+camera) and the wrists are tracked. [OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) infers a full body
+that fits them. The legs are therefore a plausible guess, not an observation.
 
 ## 1. Set up (Linux or WSL2, NVIDIA GPU with 8 GB, CUDA 12.6)
 
