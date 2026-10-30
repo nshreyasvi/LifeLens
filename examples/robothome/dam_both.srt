@@ -1,10 +1,10 @@
 1
 00:00:00,000 --> 00:00:05,000
-A slender, white, humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and elongated, with a subtle curvature at the top, suggesting a head. The figure's arms hang naturally by its sides, with one arm slightly bent at the elbow, as if poised for a gentle gesture.
+A slender, white, humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and featureless, with a subtle sheen that suggests a smooth surface. The figure maintains a consistent posture, with arms slightly bent at the elbows, hands positioned close to the body, as if in a relaxed
 
 2
 00:00:05,000 --> 00:00:10,000
-A slender, white, humanoid figure stands upright with a poised and balanced posture, suggesting a sense of alertness and readiness. Its elongated limbs are positioned in a way that conveys a sense of stillness and composure. The figure's head is slightly tilted, giving it an inquisitive or contemplative
+A slender, white humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and featureless, with no discernible facial features or clothing, giving it an ethereal quality. The figure maintains a consistent posture, with arms slightly bent at the elbows, suggesting a relaxed stance.
 
 3
 00:00:10,000 --> 00:00:15,000
@@ -12,11 +12,11 @@ A person is seated, wearing a black jacket with a distinctive white patch on the
 
 4
 00:00:15,000 --> 00:00:20,000
-A person is seated on the floor, facing away from the viewer. They are positioned in a relaxed posture, with their legs bent and feet flat on the ground. The individual is wearing a white, form-fitting outfit that accentuates their slender form. Their arms are bent at the elbows, resting on their knees, suggesting
+A person is seated on the floor, facing away from the viewer. They are positioned in a relaxed posture, with their legs bent and feet flat on the ground. The individual is wearing a light-colored, form-fitting outfit that contours to their body, accentuating their slender form. Their arms are bent at the elbows
 
 5
 00:00:20,000 --> 00:00:25,000
-A person is seated on the floor, wearing a black outfit with orange accents on the wrists and ankles. The individual is positioned with legs bent and feet flat on the ground, suggesting a relaxed or contemplative posture. As the sequence progresses, the person begins to shift their weight slightly, indicating a subtle movement or adjustment in their
+A person is seated on the floor, wearing a black outfit with orange accents on the wrists and ankles. The individual is positioned with legs bent and feet flat on the ground, suggesting a relaxed or contemplative posture. As the sequence progresses, the person remains mostly stationary, with subtle shifts in weight that indicate a slight adjust
 
 6
 00:00:25,000 --> 00:00:30,000
@@ -24,23 +24,23 @@ A slender, white, humanoid figure stands upright, exuding a sense of stillness a
 
 7
 00:00:30,000 --> 00:00:35,000
-A sleek, modern dishwasher with a stainless steel finish is prominently featured, showcasing its smooth, reflective surface. The dishwasher's door is open, revealing a glimpse of its interior, which is equipped with a circular, metallic rack designed to hold dishes securely. The door's
+A sleek, modern dishwasher with a stainless steel finish is prominently featured, showcasing its contemporary design. The front panel is smooth and reflective, with a subtle curve that adds to its aesthetic appeal. The control panel is visible on the right side, featuring a series of buttons and a digital display, indicating its advanced functionality. As
 
 8
 00:00:35,000 --> 00:00:40,000
-A person is depicted in a dynamic sequence, initially seen from behind, wearing a black outfit with a distinctive white patch on the back. The individual is captured in a moment of motion, with their right arm extended forward, suggesting a gesture or action. The left arm is bent at the elbow, with the hand positioned near the waist, possibly indicating a balance or support
+A person, dressed in a black outfit with a distinctive white patch on the back, is captured in a dynamic sequence of movement. The individual appears to be engaged in a physical activity, possibly a dance or exercise routine, as suggested by the fluidity and rhythm of their actions. Their arms are bent at the elbows, with one hand positioned near the waist and the
 
 9
 00:00:40,000 --> 00:00:45,000
-A humanoid figure, depicted in a smooth, white form, begins its sequence with a slight forward lean, suggesting a poised stance. As the sequence progresses, the figure subtly shifts its weight, causing a gentle sway in its posture. The arms are initially relaxed, with one arm slightly bent at the elbow, hinting at a casual,
+A humanoid figure, depicted in a smooth, white form, begins its sequence with a slight forward lean, suggesting a sense of motion or anticipation. As it progresses, the figure's posture shifts subtly, with the arms moving in a gentle arc, as if preparing to engage in an activity or gesture. The figure's head is slightly tilt
 
 10
 00:00:45,000 --> 00:00:50,000
-A slender, white humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and featureless, with a subtle sheen that suggests a smooth surface. The figure's arms are slightly bent at the elbows, with one arm extending forward, as if reaching out or gesturing. The legs are straight and parallel
+A slender, white humanoid figure stands upright, its form defined by smooth, elongated limbs and a minimalist design. The figure maintains a steady posture, with arms slightly bent at the elbows, suggesting a poised stance. Its head is slightly tilted forward, giving it an attentive appearance. As the sequence progresses,
 
 11
 00:00:50,000 --> 00:00:55,000
-A sleek, modern sink with a smooth, metallic finish is prominently featured, its surface reflecting light subtly. The sink is equipped with a central faucet, which is slightly raised and has a circular design, adding a touch of elegance to its appearance. Adjacent to the faucet, a small, round drain is visible, seam
+A sleek, modern sink with a smooth, metallic finish is prominently featured, its surface reflecting light subtly. The sink is equipped with a centrally positioned, cylindrical faucet that extends downward, suggesting a minimalist design. Adjacent to the faucet, a small, circular drain is visible, adding to the functional
 
 12
 00:00:55,000 --> 00:01:00,000
@@ -48,11 +48,11 @@ A sleek, metallic silver robotic arm is prominently featured, showcasing its smo
 
 13
 00:01:00,000 --> 00:01:05,000
-A slender, white humanoid figure stands upright, exuding a sense of calm and poise. Its smooth, featureless surface suggests a digital or animated form, with no distinct facial features or clothing. The figure maintains a steady posture, with its arms slightly bent at the elbows, one arm extended outward as if gesturing or reaching for
+A slender, white humanoid figure stands upright, exuding a sense of poised elegance. Its form is smooth and featureless, with a subtle sheen that suggests a metallic or plastic material. The figure's arms are slightly bent at the elbows, with one arm extended outward, as if reaching or gesturing towards something un
 
 14
 00:01:05,000 --> 00:01:10,000
-A slender, white, humanoid figure stands upright with a poised demeanor, its form defined by smooth, elongated limbs and a minimalist design. The figure's head is slightly tilted, suggesting a sense of curiosity or attentiveness. Its arms are positioned close to its body, with one arm slightly bent at the elbow,
+A slender, white humanoid figure stands upright, exuding a sense of poised elegance. Its form is smooth and featureless, with a subtle sheen that suggests a metallic or plastic material. The figure's arms are slightly bent at the elbows, with one arm extended outward, as if reaching or gesturing towards something un
 
 15
 00:01:10,000 --> 00:01:15,000
@@ -60,15 +60,15 @@ A person is lying down, wearing a black jacket with a distinctive white patch on
 
 16
 00:01:15,000 --> 00:01:20,000
-A person is seated, wearing a black jacket with a distinctive orange stripe on the sleeve, which adds a touch of color to the otherwise monochromatic attire. The individual is positioned with their legs extended forward, suggesting a relaxed posture. Their arms are bent at the elbows, resting comfortably on their knees, indicating a
+A person is lying down, wearing a black jacket with a distinctive orange stripe on the cuff of their right sleeve. The individual is positioned with their legs extended forward, and their feet are visible, clad in dark shoes. The person appears relaxed, with their arms resting comfortably by their sides. Throughout the sequence, the person remains mostly
 
 17
 00:01:20,000 --> 00:01:25,000
-A person is lying on their back, wearing a black jacket and blue jeans, with their legs extended upwards. The individual is wearing black wristbands and has a white wristband on their left wrist. Their arms are bent at the elbows, with one hand holding a bottle of water. The person appears to be in a relaxed position,
+A person is lying on their back, wearing a black jacket and blue jeans, with their legs extended upwards. The individual is wearing black wristbands and has a small rectangular patch on their left thigh. Their arms are bent at the elbows, with one hand holding a bottle of water. The person appears to be in a relaxed, re
 
 18
 00:01:25,000 --> 00:01:30,000
-An individual is seated, wearing a black jacket with a distinctive patch on the upper arm and light-colored sleeves. The person is positioned with their legs bent at the knees, suggesting a relaxed or seated posture. Their arms are extended forward, with one hand holding a small object, possibly a bottle, while the other hand is slightly raised
+An individual is seated, wearing a black jacket with a distinctive patch on the upper arm and light gray sleeves. The person is positioned with their legs bent at the knees, suggesting a relaxed or seated posture. Their arms are extended forward, with one hand resting on their knee, while the other hand is slightly raised, possibly gesturing or
 
 19
 00:01:30,000 --> 00:01:35,000
@@ -84,7 +84,7 @@ A person is lying down, wearing a black jacket with a distinctive patch on the u
 
 22
 00:01:45,000 --> 00:01:50,000
-A slender, white, humanoid figure is depicted in a sequence of fluid movements. Initially, it stands upright with a slight forward lean, suggesting a poised stance. As the sequence progresses, the figure begins to shift its weight, subtly bending its knees and leaning forward, as if preparing to take a step. The arms are position
+A slender, white, humanoid figure is depicted in a sequence of movements that suggest a walking motion. The figure appears to be a digital or animated representation, characterized by its smooth, featureless surface and uniform color. It begins in a standing position, with its arms slightly bent at the elbows, and its legs positioned in a walking stance. As the sequence
 
 23
 00:01:50,000 --> 00:01:55,000
@@ -92,7 +92,7 @@ A person is depicted in a dynamic sequence, initially appearing to be in a relax
 
 24
 00:01:55,000 --> 00:02:00,000
-A humanoid figure, depicted in a smooth, white form, begins its journey with a poised stance, standing upright with a slight forward lean, suggesting a sense of readiness or anticipation. As the sequence progresses, the figure gracefully transitions into a dynamic pose, bending forward with a fluid motion that conveys a sense of movement and energy.
+A humanoid figure, depicted in a smooth, white form, begins its journey with a poised stance, standing upright with a slight forward lean, suggesting a sense of alertness or curiosity. As the sequence progresses, the figure gracefully transitions into a dynamic pose, bending forward with a fluid motion that conveys a sense of balance and agility.
 
 25
 00:02:00,000 --> 00:02:05,000
@@ -104,11 +104,11 @@ A pair of blue jeans, characterized by their classic denim texture and slightly 
 
 27
 00:02:10,000 --> 00:02:15,000
-A slender, white, humanoid figure is depicted in a seated position, with its legs bent and arms resting on its knees. The figure appears to be in a state of contemplation or rest, with its head slightly tilted downward. Its smooth, featureless surface suggests a digital or animated form, lacking detailed facial features or clothing.
+A small, white, humanoid figure is depicted in a seated position, with its legs bent and arms resting on its knees. The figure appears to be in a relaxed posture, with a slight forward lean, suggesting a contemplative or introspective state. Its head is slightly tilted downward, and the facial features are minimalistic, emphasizing
 
 28
 00:02:15,000 --> 00:02:20,000
-A pair of black trousers, characterized by their smooth fabric and structured form, is prominently featured. The trousers exhibit a sleek, tailored appearance with a slight sheen that catches the light, highlighting the contours of the material. The waistband is fitted, with a subtle seam running vertically down the center, adding to
+A pair of black trousers, characterized by their smooth fabric and structured form, is prominently featured. The trousers exhibit a sleek, tailored appearance with a slight sheen that catches the light, highlighting the contours of the material. The waistband is neatly fitted, with a subtle seam running vertically down the center,
 
 29
 00:02:20,000 --> 00:02:25,000
@@ -116,35 +116,35 @@ A person is seated in a relaxed, cross-legged position, with their legs extended
 
 30
 00:02:25,000 --> 00:02:30,000
-A person is seated in a relaxed, cross-legged position, with their legs extended forward and arms resting on their knees. The individual appears to be wearing a light-colored outfit, with their head slightly tilted back, suggesting a state of ease or contemplation. Throughout the sequence, the person remains mostly stationary, with subtle sh
+A person is seated on the floor, legs extended forward with knees bent, creating a relaxed posture. The individual is wearing a white outfit, which contrasts with the checkered floor beneath them. Their arms are positioned behind their back, resting on the knees, suggesting a state of rest or contemplation. The person's head is slightly tilt
 
 31
 00:02:30,000 --> 00:02:35,000
-A large, plush cushion with a smooth, light-colored surface is prominently featured. Initially, it appears to be resting on a flat surface, its soft texture and slightly rounded edges suggesting comfort and softness. As the sequence progresses, the cushion seems to shift slightly, as if being gently adjusted or moved. Its form remains consistent,
+A large, plush cushion with a smooth, light-colored surface is prominently featured. Initially, it appears to be resting on a flat surface, its soft texture and slightly rounded edges suggesting comfort and softness. As the sequence progresses, the cushion begins to shift, its form subtly altering as if being gently manipulated or adjusted
 
 32
 00:02:35,000 --> 00:02:40,000
-A person, depicted in a simplified, stylized form, is seen walking steadily across the scene. The figure is composed of a smooth, uniform surface, giving it a sleek and modern appearance. Its arms swing naturally at its sides, maintaining a relaxed posture. The legs move in a rhythmic, coordinated manner, suggesting a casual stroll. The
+A humanoid figure, depicted in a smooth, white form, moves steadily across the scene. Its slender, elongated form is consistent throughout, with a defined head, torso, and limbs that suggest a minimalist, abstract representation. The figure maintains a forward-facing posture, with arms slightly bent at the elbows, giving it a po
 
 33
 00:02:40,000 --> 00:02:45,000
-A slender, humanoid figure stands upright, exuding a sense of calm and poise. Its form is smooth and featureless, with a uniform, light-colored surface that suggests a digital or animated representation. The figure's posture is relaxed, with one arm slightly bent at the elbow, hand resting gently on its hip, while the
+A slender, upright figure stands with a poised and relaxed posture, its form defined by smooth, uninterrupted lines that suggest a sense of balance and grace. The figure's head is slightly tilted upward, as if gazing at something above, conveying a sense of curiosity or contemplation. Its arms hang naturally by its sides, with
 
 34
 00:02:45,000 --> 00:02:50,000
-A slender, white, humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and featureless, with a subtle sheen that suggests a smooth surface. The figure maintains a consistent posture, with its arms relaxed at its sides, and its legs slightly apart, giving it a balanced stance. As
+A slender, white humanoid figure stands upright, exuding a sense of stillness and poise. Its form is smooth and featureless, with a subtle sheen that suggests a metallic or plastic material. The figure's arms hang naturally by its sides, and its legs are positioned in a relaxed stance, with one foot slightly forward
 
 35
 00:02:50,000 --> 00:02:55,000
-A humanoid figure, depicted in a smooth, white form, stands upright with a poised and balanced posture. Its slender legs are slightly apart, suggesting a relaxed yet attentive stance. The figure's arms hang naturally by its sides, with subtle movements indicating a gentle sway or shift in weight. The head is slightly tilted
+A humanoid figure, depicted in a smooth, white form, stands upright with a poised and balanced posture. Its arms are relaxed at its sides, and it appears to be in a state of stillness, exuding a sense of calm and composure. The figure's head is slightly tilted forward, suggesting a contemplative or observ
 
 36
 00:02:55,000 --> 00:03:00,000
-An individual is seen from a first-person perspective, wearing a black jacket and light gray pants. The person is equipped with black gloves featuring orange accents, suggesting a focus on safety or protection. Their arms are extended forward, with the hands positioned as if reaching or manipulating an unseen object. The posture is slightly hunched, indicating engagement in
+An individual is depicted in a dynamic sequence, wearing a black jacket and light gray pants. The person is equipped with black gloves featuring orange accents, suggesting a focus on safety or protection. Their arms are raised above their head, with one hand slightly bent at the elbow, as if reaching or gesturing towards something above. The other arm is extended downward,
 
 37
 00:03:00,000 --> 00:03:05,000
-A person is seated, wearing a black jacket and light-colored pants, with their legs crossed and arms resting on their knees. The individual appears relaxed, with their hands positioned near their chest. The person's posture is upright, and they maintain a steady position throughout the sequence. Their head is slightly tilted forward, suggesting
+A person is seated, wearing a black jacket and light-colored pants, with their legs crossed and arms resting on their knees. The individual appears relaxed, with their hands positioned near their face, suggesting a contemplative or resting posture. The person's head is slightly tilted, and their gaze is directed forward, indicating att
 
 38
 00:03:05,000 --> 00:03:10,000
@@ -168,7 +168,7 @@ A humanoid figure, depicted in a smooth, white form, stands upright with a poise
 
 43
 00:03:30,000 --> 00:03:35,000
-A person is lying down, wearing a black jacket with a distinctive orange stripe on the sleeve. The individual is positioned with their legs extended forward, suggesting a relaxed or reclined posture. The person's arms are bent at the elbows, with one hand resting on the ground, while the other hand is slightly raised, possibly indicating a
+A person is lying down, wearing a black jacket with a distinctive orange stripe on the sleeve, which is visible in the sequence. The individual is positioned with their legs extended forward, suggesting a relaxed or reclined posture. The person's arms are bent at the elbows, with one hand resting on the ground, while the other hand
 
 44
 00:03:35,000 --> 00:03:40,000
@@ -180,19 +180,19 @@ A person is depicted in a dynamic sequence, initially lying on their back with t
 
 46
 00:03:45,000 --> 00:03:50,000
-A person is lying down, wearing a black outfit with a distinctive orange patch on the knee. The individual is positioned with their legs extended forward, suggesting a relaxed or reclined posture. The black fabric of the clothing appears smooth and slightly reflective, indicating a material that is both comfortable and durable. The person's arms are bent at the el
+A person is depicted in a dynamic sequence, initially appearing to be in a relaxed, reclined position. The individual is dressed in a black outfit, with a distinctive patch on the upper thigh, adding a touch of detail to their attire. As the sequence progresses, the person begins to shift their posture, transitioning from a lying position to a more u
 
 47
 00:03:50,000 --> 00:03:55,000
-A person is lying down, wearing a black jacket with a visible patch on the upper arm. The individual is positioned with their legs bent and feet resting on the ground, suggesting a relaxed or reclined posture. The person's head is slightly tilted back, and their arms are bent at the elbows, resting on the ground. The jack
+A person is lying down, wearing a black jacket with a visible patch on the upper arm. The individual is positioned with their legs bent and feet resting on the ground, suggesting a relaxed or reclined posture. The person's head is slightly tilted, and their arms are bent at the elbows, resting on the ground. The jacket
 
 48
 00:03:55,000 --> 00:04:00,000
-A person is depicted in a sequence of movements, initially appearing to be seated with their legs crossed. The individual is wearing a black jacket with a visible patch on the upper arm, suggesting a casual or sporty style. As the sequence progresses, the person begins to rise, shifting their weight forward, indicating a transition from a seated to a standing position. The
+A person is depicted in a sequence of movements, initially appearing to be seated with their legs crossed. The individual is wearing a black jacket with a distinctive patch on the upper arm, and their posture suggests a relaxed, casual demeanor. As the sequence progresses, the person begins to shift their weight, subtly adjusting their position. The movement is
 
 49
 00:04:00,000 --> 00:04:05,000
-A person is lying down, wearing a black jacket with a visible orange patch on the sleeve. The individual appears relaxed, with their legs bent and feet resting on the ground. Their arms are positioned behind their head, suggesting a state of rest or contemplation. The person's posture remains mostly unchanged throughout the sequence, indicating a calm and composed de
+A person is lying down, wearing a black jacket with a distinctive orange stripe on the sleeve. The individual is positioned with their legs bent at the knees, and their feet are resting on the ground. The person appears relaxed, with their arms resting comfortably by their sides. Throughout the sequence, the person remains mostly still, suggesting a state
 
 50
 00:04:05,000 --> 00:04:10,000
@@ -200,17 +200,17 @@ A black jacket, characterized by its smooth, slightly glossy fabric, is prominen
 
 51
 00:04:10,000 --> 00:04:15,000
-A person is depicted in a sequence of movements, initially appearing to be in a relaxed, seated position. The individual is wearing a black jacket with a distinctive orange patch on the sleeve, which adds a touch of color to the otherwise monochromatic attire. As the sequence progresses, the person begins to shift their posture, transitioning from a
+A person is depicted in a sequence of movements, initially appearing to be in a relaxed, seated position. The individual is wearing a black jacket with a distinctive white patch on the upper arm, and a pair of orange gloves. As the sequence progresses, the person begins to shift their posture, transitioning from a seated position to standing upright.
 
 52
 00:04:15,000 --> 00:04:20,000
-A slender, humanoid figure with a smooth, featureless surface and a uniform, light blue color begins its journey standing upright. Its posture is upright and alert, with a slight forward lean suggesting readiness or anticipation. As the sequence progresses, the figure begins to walk forward with a steady, rhythmic gait. Its arms swing naturally at its
+A slender, humanoid figure with a smooth, featureless surface and a uniform, light blue color is depicted in a sequence of fluid movements. Initially, the figure stands upright, exuding a sense of stillness and poise. As the sequence progresses, the figure begins to shift its weight, subtly turning its body to the side, suggesting a gentle
 
 53
 00:04:20,000 --> 00:04:25,000
-A sleek, white, humanoid figure stands upright with a poised and balanced posture. Its elongated limbs are slender and well-defined, suggesting a sense of grace and agility. The figure's head is slightly tilted, giving it an inquisitive or contemplative expression. As the sequence progresses, the figure maintains
+A sleek, white, humanoid figure stands upright with a smooth, elongated form, exuding a sense of modernity and minimalism. Its surface is unadorned, emphasizing its streamlined silhouette. The figure maintains a steady posture, with arms relaxed at its sides, suggesting a calm and composed demeanor. As the
 
 54
 00:04:25,000 --> 00:04:30,000
-A person is walking steadily across the scene, their body slightly angled as they move forward. The individual is wearing a pair of light-colored shoes, which contrast with the darker clothing they are dressed in. Their arms swing naturally at their sides, maintaining a relaxed posture. The person's head is slightly tilted, suggesting attentiveness or
+A person is depicted in a sequence of movements, initially standing upright with a relaxed posture. The individual is dressed in a light-colored outfit, with a pair of shoes visible, suggesting a casual setting. As the sequence progresses, the person begins to shift their weight, subtly adjusting their stance. The arms remain close to the body,
 
