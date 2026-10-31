@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+venv/
+venv314/
+.venv/
+runs/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.key
+*.pem
+secrets*
