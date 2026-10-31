@@ -1,0 +1,15 @@
+[
+  {"t0": 0,   "t1": 5,   "label": "standing",   "note": "waiting at start, hand check"},
+  {"t0": 5,   "t1": 42,  "label": "walking",    "note": "corridor"},
+  {"t0": 45,  "t1": 49,  "label": "standing",   "note": "at doors"},
+  {"t0": 49,  "t1": 81,  "label": "walking",    "note": "corridor, passes umbrella"},
+  {"t0": 88,  "t1": 103, "label": "sitting",    "note": "lounge table, hands on table"},
+  {"t0": 106, "t1": 117, "label": "hands_task", "note": "bends, picks up blue object, wipes black board"},
+  {"t0": 118, "t1": 176, "label": "walking",    "note": "corridor, round a table"},
+  {"t0": 177, "t1": 200, "label": "gesturing",  "note": "standing at posters, arm/hand gestures"},
+  {"t0": 200, "t1": 205, "label": "walking"},
+  {"t0": 205, "t1": 211, "label": "arms_raised","note": "wrists together, arms up"},
+  {"t0": 211, "t1": 219, "label": "walking"},
+  {"t0": 219, "t1": 224, "label": "standing",   "note": "facing operator"},
+  {"t0": 224, "t1": 231, "label": "hands_task", "note": "using laptop held by operator"}
+]

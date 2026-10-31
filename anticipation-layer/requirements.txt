@@ -1,0 +1,8 @@
+# torch is installed separately to match the GPU driver, e.g. (driver 462 -> CUDA 11.8):
+#   pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cu118
+transformers>=4.53
+av>=12
+numpy>=1.26
+matplotlib>=3.8
+websockets>=12
+pytest>=8
