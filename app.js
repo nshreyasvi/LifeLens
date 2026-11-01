@@ -31,6 +31,27 @@
 
   const LIGHT_NAMES = ['Living room', 'Kitchen', 'Desk', 'Hallway', 'Bedroom', 'Porch'];
 
+  // Fictional sample songs, grouped by tempo. No outside service is called.
+  const SONGS = {
+    calm: [
+      { name: 'Paper Lanterns', artist: 'The Quiet Hours', tempo: 72 },
+      { name: 'Slow Tide', artist: 'Mira Vale', tempo: 84 },
+      { name: 'Evening Static', artist: 'Low Orchard', tempo: 94 },
+    ],
+    medium: [
+      { name: 'City in Bloom', artist: 'Juniper Lane', tempo: 108 },
+      { name: 'Golden Hour Drive', artist: 'The Overpass', tempo: 122 },
+      { name: 'Neon Postcards', artist: 'Kite & Compass', tempo: 136 },
+    ],
+    fast: [
+      { name: 'Voltage Run', artist: 'Signal Fire', tempo: 148 },
+      { name: 'Heartbeat Circuit', artist: 'Nova Arcade', tempo: 160 },
+      { name: 'Midnight Sprint', artist: 'Polar Echo', tempo: 174 },
+    ],
+  };
+
+  const SONG_MOODS = { calm: 'Calm', medium: 'Medium', fast: 'Fast' };
+
   const $ = (id) => document.getElementById(id);
   const els = {
     error: $('error'),
@@ -64,6 +85,9 @@
     tempoValue: $('tempo-value'),
     tempoLabel: $('tempo-label'),
     tempoMeter: $('tempo-meter'),
+    songsMood: $('songs-mood'),
+    songList: $('song-list'),
+    songsNote: $('songs-note'),
   };
 
   // phase: 'idle' → 'activity' → 'stage' → 'done'
@@ -77,6 +101,7 @@
     colorIndex: 0,
     tempo: null,
     tempoFrame: null,
+    songMood: null,
   };
 
   // ---------- Helpers ----------
@@ -101,6 +126,13 @@
     if (bpm < 120) return 'Moderate groove';
     if (bpm < 150) return 'Upbeat';
     return 'Fast and energetic';
+  }
+
+  // Below 100 BPM: calm. 100–140: medium. Above 140: fast.
+  function songMood(bpm) {
+    if (bpm < 100) return 'calm';
+    if (bpm <= 140) return 'medium';
+    return 'fast';
   }
 
   // ---------- Tabs ----------
@@ -251,6 +283,36 @@
     const pct = Math.min(Math.max((bpm - TEMPO_MIN) / (TEMPO_MAX - TEMPO_MIN), 0), 1);
     els.tempoMeter.style.width = `${pct * 100}%`;
     els.beat.style.setProperty('--beat', `${(60 / bpm).toFixed(3)}s`);
+    renderSongs(bpm);
+  }
+
+  function renderSongs(bpm) {
+    const mood = songMood(bpm);
+    if (mood === state.songMood) return;
+    state.songMood = mood;
+
+    els.songsMood.textContent = `${SONG_MOODS[mood]} songs`;
+    els.songsMood.dataset.mood = mood;
+    els.songsNote.hidden = true;
+    els.songList.innerHTML = '';
+    for (const song of SONGS[mood]) {
+      const li = document.createElement('li');
+      li.className = 'song';
+      const info = document.createElement('div');
+      info.className = 'song-info';
+      const name = document.createElement('span');
+      name.className = 'song-name';
+      name.textContent = song.name;
+      const artist = document.createElement('span');
+      artist.className = 'song-artist';
+      artist.textContent = song.artist;
+      const tempo = document.createElement('span');
+      tempo.className = 'song-tempo';
+      tempo.textContent = `${song.tempo} BPM`;
+      info.append(name, artist);
+      li.append(info, tempo);
+      els.songList.appendChild(li);
+    }
   }
 
   // ---------- Reset ----------
@@ -277,6 +339,12 @@
     els.tempoLabel.textContent = 'Starts in the Stage phase';
     els.tempoMeter.style.width = '0';
     els.beat.style.removeProperty('--beat');
+
+    state.songMood = null;
+    els.songsMood.textContent = 'Waiting';
+    delete els.songsMood.dataset.mood;
+    els.songList.innerHTML = '';
+    els.songsNote.hidden = false;
   }
 
   // ---------- Progress & controls ----------
