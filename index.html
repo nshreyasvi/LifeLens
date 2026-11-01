@@ -13,7 +13,7 @@
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"></span>
       <h1>LifeLens Live Panel</h1>
-      <span class="badge">Sample data</span>
+      <span class="badge" id="conn-status" role="status">Demo</span>
     </div>
     <div class="buttons">
       <button class="btn btn-primary" id="play-btn" type="button">
@@ -126,8 +126,8 @@
     </section>
   </main>
 
-  <footer class="foot">LifeLens · showing fictional sample data from <code>sample-data.json</code>.</footer>
+  <footer class="foot">LifeLens · <span id="foot-demo">showing fictional sample data from <code>sample-data.json</code>.</span><span id="foot-live" hidden>showing live messages from the director.</span></footer>
 
-  <script src="app.js?v=4" defer></script>
+  <script src="app.js?v=8" defer></script>
 </body>
 </html>

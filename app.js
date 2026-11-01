@@ -4,6 +4,9 @@
 (() => {
   const DATA_URL = 'sample-data.json';
   const STEP_MS = 2000;
+  const LIVE_URL = 'ws://127.0.0.1:8765';
+  const LIVE_RETRY_MS = 5000;
+  const LIVE_MAX_MESSAGES = 100; // oldest timeline items are dropped past this
   const TEMPO_MIN = 60;
   const TEMPO_MAX = 180;
 
@@ -11,6 +14,7 @@
   const ENERGY_LEVEL = { low: 0.4, medium: 0.7, high: 1 };
   const ENERGY_ORDER = ['low', 'medium', 'high'];
   const DIM_FACTOR = 0.4;
+  const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
   // "change_color" moves to the next color in this list.
   const PALETTE = [
@@ -20,6 +24,9 @@
     { name: 'Amber', hex: '#F59E0B' },
     { name: 'Rose', hex: '#F43F5E' },
   ];
+
+  const ACCENT = PALETTE[0]; // same value as --accent in styles.css
+  const VERY_LIGHT_LUMINANCE = 0.85;
 
   const ACTION_LABELS = {
     flash_light: 'Flash light',
@@ -88,11 +95,17 @@
     songsMood: $('songs-mood'),
     songList: $('song-list'),
     songsNote: $('songs-note'),
+    connStatus: $('conn-status'),
+    footDemo: $('foot-demo'),
+    footLive: $('foot-live'),
   };
 
-  // phase: 'idle' → 'activity' → 'stage' → 'done'
+  // phase: 'idle' → 'activity' → 'stage' → 'done'; 'live' while the director is connected
   const state = {
     messages: [],
+    sampleMessages: [],
+    loadError: null,
+    liveCount: 0,
     phase: 'idle',
     index: -1,
     playing: false,
@@ -112,6 +125,16 @@
   function hexToRgba(hex, alpha) {
     const n = parseInt(hex.slice(1), 16);
     return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+  }
+
+  // WCAG relative luminance: 0 is black, 1 is white.
+  function luminance(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const [r, g, b] = [n >> 16, n >> 8, n].map((v) => {
+      const c = (v & 255) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
   function isValidMessage(m) {
@@ -171,24 +194,28 @@
 
   function buildTimeline() {
     els.timeline.innerHTML = '';
-    for (const msg of state.messages) {
-      const li = document.createElement('li');
-      li.className = 'tl-item is-pending';
-      li.innerHTML = `
-        <span class="tl-dot" aria-hidden="true"></span>
-        <div>
-          <div class="tl-row">
-            <span class="tl-action">${ACTION_LABELS[msg.action]}</span>
-            <time>${msg.time ?? ''}</time>
-          </div>
-          <div class="tl-meta">
-            <span class="energy energy-${msg.energy}">${capitalize(msg.energy)} energy</span>
-            <span>${msg.music_tempo} BPM</span>
-          </div>
-        </div>`;
-      els.timeline.appendChild(li);
-    }
+    for (const msg of state.messages) els.timeline.appendChild(createTimelineItem(msg));
     els.timeline.scrollTop = 0;
+  }
+
+  function createTimelineItem(msg) {
+    const li = document.createElement('li');
+    li.className = 'tl-item is-pending';
+    li.innerHTML = `
+      <span class="tl-dot" aria-hidden="true"></span>
+      <div>
+        <div class="tl-row">
+          <span class="tl-action">${ACTION_LABELS[msg.action]}</span>
+          <time></time>
+        </div>
+        <div class="tl-meta">
+          <span class="energy energy-${msg.energy}">${capitalize(msg.energy)} energy</span>
+          <span>${msg.music_tempo} BPM</span>
+        </div>
+      </div>`;
+    // Set as text: isValidMessage does not check "time", and live data is not trusted.
+    li.querySelector('time').textContent = msg.time ?? '';
+    return li;
   }
 
   // Items before `current` are done, `current` is highlighted, the rest are pending.
@@ -207,7 +234,7 @@
 
   // Keep the current item centered inside the list without scrolling the page.
   function scrollTimelineToCurrent() {
-    if (els.activityView.hidden || state.phase !== 'activity') return;
+    if (els.activityView.hidden || (state.phase !== 'activity' && state.phase !== 'live')) return;
     const current = els.timeline.children[state.index];
     if (!current) return;
     const top = current.offsetTop - els.timeline.clientHeight / 2 + current.offsetHeight / 2;
@@ -227,15 +254,29 @@
   }
 
   function renderLights(msg) {
-    let level = ENERGY_LEVEL[msg.energy];
-    if (msg.action === 'dim') level *= DIM_FACTOR;
-    if (msg.action === 'change_color') state.colorIndex = (state.colorIndex + 1) % PALETTE.length;
-    const color = PALETTE[state.colorIndex];
+    // Director messages carry "intensity" and "color". Sample data doesn't, and neither value
+    // is checked by isValidMessage, so anything missing or malformed falls back to the old rules.
+    const hasIntensity = Number.isFinite(msg.intensity) && msg.intensity >= 0 && msg.intensity <= 1;
+    const hasColor = typeof msg.color === 'string' && HEX_COLOR.test(msg.color);
+
+    let level = hasIntensity ? msg.intensity : ENERGY_LEVEL[msg.energy];
+    if (!hasIntensity && msg.action === 'dim') level *= DIM_FACTOR;
+    if (!hasColor && msg.action === 'change_color') state.colorIndex = (state.colorIndex + 1) % PALETTE.length;
+    let color = PALETTE[state.colorIndex];
+    if (hasColor) {
+      // A very light bulb would vanish against the white cards, so use the accent instead.
+      color = luminance(msg.color) >= VERY_LIGHT_LUMINANCE
+        ? ACCENT
+        : { name: msg.color.toUpperCase(), hex: msg.color };
+    }
+
+    // Any level above 0 keeps a visible minimum. Only director intensity can be exactly 0: a blackout.
+    const opacity = level === 0 ? 0 : 0.25 + 0.75 * level;
 
     els.bulbs.querySelectorAll('.bulb').forEach((bulb, i) => {
       bulb.style.transitionDelay = `${i * 70}ms`;
       bulb.style.backgroundColor = color.hex;
-      bulb.style.opacity = (0.25 + 0.75 * level).toFixed(2);
+      bulb.style.opacity = opacity.toFixed(2);
       bulb.style.boxShadow =
         `0 0 ${Math.round(16 + 48 * level)}px ${Math.round(2 + 10 * level)}px ${hexToRgba(color.hex, 0.6 * level)}`;
     });
@@ -354,7 +395,10 @@
     let label;
     let fill;
 
-    if (state.phase === 'idle') {
+    if (state.phase === 'live') {
+      label = state.liveCount ? `Live · Message ${state.liveCount}` : 'Live · Waiting for the director';
+      fill = 1;
+    } else if (state.phase === 'idle') {
       label = `${total} messages ready`;
       fill = 0;
     } else if (state.phase === 'done') {
@@ -377,24 +421,27 @@
   function renderControls() {
     const running = isRunning();
     const paused = running && !state.playing;
+    const live = state.phase === 'live';
 
-    els.playBtn.disabled = running;
+    els.playBtn.disabled = running || live;
+    els.pauseBtn.disabled = live;
+    els.restartBtn.disabled = live;
     els.playLabel.textContent = state.phase === 'done' ? 'Play again' : 'Play demo';
     els.pauseBtn.dataset.state = paused ? 'resume' : 'pause';
     els.pauseLabel.textContent = paused ? 'Resume' : 'Pause';
 
     for (const btn of els.tabBtns) {
-      btn.classList.toggle('is-live', state.playing && btn.dataset.tab === state.phase);
+      btn.classList.toggle('is-live', state.playing && (live || btn.dataset.tab === state.phase));
     }
 
-    const activityLive = state.phase === 'activity' && state.playing;
-    els.energyChip.textContent = state.phase === 'activity'
+    const activityLive = (state.phase === 'activity' || live) && state.playing;
+    els.energyChip.textContent = state.phase === 'activity' || live
       ? (state.playing ? 'Live' : 'Paused')
       : state.phase === 'idle' ? 'Waiting' : 'Complete';
     els.energyChip.classList.toggle('is-active', activityLive);
 
-    const stageLive = state.phase === 'stage' && state.playing;
-    els.musicState.textContent = state.phase === 'stage'
+    const stageLive = (state.phase === 'stage' || live) && state.playing;
+    els.musicState.textContent = state.phase === 'stage' || live
       ? (state.playing ? 'Playing' : 'Paused')
       : state.phase === 'done' ? 'Finished' : 'Waiting';
     els.musicState.classList.toggle('is-active', stageLive);
@@ -486,6 +533,97 @@
     renderProgress();
   }
 
+  // ---------- Live connection ----------
+
+  function showSource(live) {
+    els.connStatus.textContent = live ? 'Live' : 'Demo';
+    els.footDemo.hidden = live;
+    els.footLive.hidden = !live;
+  }
+
+  function enterLive() {
+    stopTimer();
+    state.pending = null;
+    state.messages = [];
+    state.liveCount = 0;
+    resetDisplay();
+    state.phase = 'live';
+    state.index = -1;
+    state.colorIndex = 0;
+    state.playing = true;
+    els.energyNote.textContent = 'Waiting for the director…';
+    els.tempoLabel.textContent = 'Waiting for the director…';
+    els.error.hidden = true;
+    showSource(true);
+    renderProgress();
+    renderControls();
+  }
+
+  function enterDemo() {
+    state.messages = state.sampleMessages;
+    resetDisplay();
+    state.phase = 'idle';
+    state.index = -1;
+    state.colorIndex = 0;
+    state.playing = false;
+    showSource(false);
+    renderProgress();
+    renderControls();
+    if (state.loadError) showError(state.loadError);
+  }
+
+  // Live data drives both views at once, since there is no fixed list to replay in two passes.
+  function applyLiveMessage(msg) {
+    renderEnergy(msg);
+    renderLights(msg);
+    renderMusic(msg);
+
+    state.messages.push(msg);
+    els.timeline.appendChild(createTimelineItem(msg));
+    if (state.messages.length > LIVE_MAX_MESSAGES) {
+      state.messages.shift();
+      els.timeline.firstElementChild.remove();
+    }
+    state.index = state.messages.length - 1;
+    state.liveCount += 1;
+    renderTimeline(state.index);
+    renderProgress();
+  }
+
+  function onLiveMessage(event) {
+    // The try also covers rendering: isValidMessage accepts some values the renderers can't
+    // handle, such as {"energy": ["low"]}.
+    try {
+      const msg = JSON.parse(event.data);
+      if (!isValidMessage(msg)) {
+        console.warn('Ignored invalid live message:', event.data);
+        return;
+      }
+      applyLiveMessage(msg);
+    } catch (err) {
+      console.warn('Ignored bad live message:', err.message);
+    }
+  }
+
+  function connectLive() {
+    let socket;
+    try {
+      socket = new WebSocket(LIVE_URL);
+    } catch (err) {
+      console.warn('Could not open the live connection:', err.message);
+      setTimeout(connectLive, LIVE_RETRY_MS);
+      return;
+    }
+    socket.addEventListener('open', enterLive);
+    socket.addEventListener('message', onLiveMessage);
+    // "close" also fires after a failed attempt. Only leaving live resets the screen, so
+    // failed retries don't interrupt a demo that is already playing.
+    socket.addEventListener('close', () => {
+      if (state.phase === 'live') enterDemo();
+      setTimeout(connectLive, LIVE_RETRY_MS);
+    });
+  }
+
   // ---------- Startup ----------
 
   function showError(err) {
@@ -515,19 +653,23 @@
       if (!res.ok) throw new Error(`The server responded with ${res.status}.`);
       const data = await res.json();
       const messages = Array.isArray(data.messages) ? data.messages : [];
-      state.messages = messages.filter(isValidMessage);
+      state.sampleMessages = messages.filter(isValidMessage);
+      state.messages = state.sampleMessages;
       if (state.messages.length < messages.length) {
         console.warn(`Skipped ${messages.length - state.messages.length} invalid message(s) in ${DATA_URL}.`);
       }
       if (!state.messages.length) throw new Error('It has no valid messages.');
     } catch (err) {
+      state.loadError = err;
       showError(err);
+      connectLive(); // the director can still drive the page without sample data
       return;
     }
 
     buildTimeline();
     renderProgress();
     renderControls();
+    connectLive();
   }
 
   init();
