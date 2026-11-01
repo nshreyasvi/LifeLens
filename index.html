@@ -4,16 +4,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0B0F19">
+  <meta name="theme-color" content="#FFFFFF">
   <title>LifeLens Live Panel</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"></span>
       <h1>LifeLens Live Panel</h1>
-      <span class="badge">Sample data</span>
+      <span class="badge" id="conn-status" role="status">Demo</span>
     </div>
     <div class="buttons">
       <button class="btn btn-primary" id="play-btn" type="button">
@@ -114,12 +114,20 @@
           <div class="meter" aria-hidden="true"><div class="meter-fill" id="tempo-meter"></div></div>
           <div class="meter-scale" aria-hidden="true"><span>60</span><span>120</span><span>180</span></div>
         </div>
+        <div class="songs">
+          <div class="songs-head">
+            <h3 id="songs-title">Songs</h3>
+            <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
+          </div>
+          <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
+          <p class="songs-note" id="songs-note">Songs appear in the Stage phase.</p>
+        </div>
       </section>
     </section>
   </main>
 
-  <footer class="foot">LifeLens · showing fictional sample data from <code>sample-data.json</code>.</footer>
+  <footer class="foot">LifeLens · <span id="foot-demo">showing fictional sample data from <code>sample-data.json</code>.</span><span id="foot-live" hidden>showing live messages from the director.</span></footer>
 
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=8" defer></script>
 </body>
 </html>
