@@ -216,6 +216,26 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 - Models: the director's slow loop uses Muse Spark (Meta Model API) and Llama 3.2 (Meta open weights). The front-end calls no models itself.
 - Planned: Node.js build (branch `feature/node-frontend`), buttons over the POV feed, ReccoBeats song recommendations, Spotify playback for Premium users.
 
+## Team checklist
+
+- [x] Front-end on `main` (PR #2, merged)
+- [x] Front-end README section (PR #3, waiting for review)
+- [ ] Front-end screenshots and a short screen recording
+- [ ] Node.js front-end (branch `feature/node-frontend`)
+- [ ] Buttons over the POV camera feed
+- [ ] Music recommendations (ReccoBeats)
+- [ ] Music playback (Spotify, Premium users)
+- [ ] Daily routine analytics view
+- [ ] 3-minute demo video
+- [ ] Final submission (Nov 4, 9 PM ET)
+
+## Footnotes
+
+1. Live mode needs the director running on `ws://127.0.0.1:8765`. Without it, the page shows sample data.
+2. Lights: any brightness above 0 shows at least 25%. Brightness 0 is fully off (blackout).
+3. The flash effect does not appear in `examples/office`, because the energy peak is not connected there.
+4. The director's slow loop uses Muse Spark and Llama. The front-end calls no models itself.
+
 ## Licenses
 
 No license is set for this code yet. Not included and non-commercial: OmniEgoCap's checkpoint (CC BY-NC 4.0), SMPL-H and MANO,
