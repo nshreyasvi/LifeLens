@@ -107,6 +107,7 @@
     loadError: null,
     liveCount: 0,
     phase: 'idle',
+    mode: 'activity', // which tab the demo plays: 'activity' or 'stage'
     index: -1,
     playing: false,
     timer: null,
@@ -490,8 +491,7 @@
     } else {
       label = `${PHASE_LABELS[state.phase]} · Message ${state.index + 1} of ${total}`;
       if (!state.playing) label += ' · Paused';
-      const offset = state.phase === 'stage' ? total : 0;
-      fill = (offset + state.index + 1) / (total * 2);
+      fill = (state.index + 1) / total;
     }
 
     els.progressLabel.textContent = label;
@@ -520,13 +520,13 @@
     const activityLive = (state.phase === 'activity' || live) && state.playing;
     els.energyChip.textContent = state.phase === 'activity' || live
       ? (state.playing ? 'Live' : 'Paused')
-      : state.phase === 'idle' ? 'Waiting' : 'Complete';
+      : state.phase === 'done' && state.mode === 'activity' ? 'Complete' : 'Waiting';
     els.energyChip.classList.toggle('is-active', activityLive);
 
     const stageLive = (state.phase === 'stage' || live) && state.playing;
     els.musicState.textContent = state.phase === 'stage' || live
       ? (state.playing ? 'Playing' : 'Paused')
-      : state.phase === 'done' ? 'Finished' : 'Waiting';
+      : state.phase === 'done' && state.mode === 'stage' ? 'Finished' : 'Waiting';
     els.musicState.classList.toggle('is-active', stageLive);
     els.musicPanel.classList.toggle('is-paused', !stageLive);
   }
@@ -563,17 +563,7 @@
   function tick() {
     step();
     if (state.index < state.messages.length - 1) schedule(tick);
-    else if (state.phase === 'activity') schedule(startStagePhase);
     else finish();
-  }
-
-  function startStagePhase() {
-    state.phase = 'stage';
-    state.index = -1;
-    renderTimeline(state.messages.length);
-    selectTab('stage');
-    renderControls();
-    tick();
   }
 
   function finish() {
@@ -589,11 +579,16 @@
     stopTimer();
     state.pending = null;
     resetDisplay();
-    state.phase = 'activity';
+    // Play the tab you are looking at: Activity plays the 10 activity messages,
+    // Stage plays the 10 stage messages. They no longer run one after the other.
+    const open = els.tabBtns.find((btn) => btn.getAttribute('aria-selected') === 'true');
+    state.mode = open && open.dataset.tab === 'stage' ? 'stage' : 'activity';
+    state.phase = state.mode;
     state.index = -1;
     state.colorIndex = 0;
     state.playing = true;
-    selectTab('activity');
+    if (state.mode === 'stage') renderTimeline(state.messages.length);
+    selectTab(state.mode);
     renderControls();
     tick();
   }
