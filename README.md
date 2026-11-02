@@ -208,13 +208,14 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 
 ## Front-end (Avi)
 
-- Latest commit: `0d2e433` "Add live director connection and director-driven lights" (merged into `main` as `48f55c4`).
-- Files: `index.html`, `styles.css`, `app.js`, `sample-data.json`.
-- Activity and Stage screens, light cues, a timeline, and a music box with sample songs.
+- Merged into `main`: PR #2 (live director connection and lights), PR #4 (music box), PR #5 (Node.js front-end).
+- Files: `index.html`, `src/main.js`, `src/styles.css`, `public/sample-data.json`. Run steps are in `NODE-FRONTEND.md`.
+- Activity and Stage screens, light cues, a timeline, and a music box.
+- Music box: picks songs from ReccoBeats (free, no key) that match the director's mood and tempo, with a Spotify player under each song. Falls back to sample songs if ReccoBeats is unreachable.
 - Connects to Dhruv's director at `ws://127.0.0.1:8765`. The badge shows **Live** when the director runs, and **Demo** with sample data otherwise.
-- Run it: `python3 -m http.server 8000` in the project folder, then open `localhost:8000`.
+- Run it: `npm install`, then `npm run dev`, then open `localhost:8000`. The original plain HTML version is in `legacy/` (run `python3 -m http.server 8000` inside that folder).
 - Models: the director's slow loop uses Muse Spark (Meta Model API) and Llama 3.2 (Meta open weights). The front-end calls no models itself.
-- Planned: Node.js build (branch `feature/node-frontend`), buttons over the POV feed, ReccoBeats song recommendations, Spotify playback for Premium users.
+- Planned: buttons over the POV feed, daily routine view.
 
 **Screenshots and demo video (Avi)**
 
@@ -223,15 +224,19 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 
 Short screen recording of the demo running on the Activity screen: [docs/avi-demo.mp4](docs/avi-demo.mp4)
 
+![Music box with Spotify player](docs/avi-music-player.png)
+
+Short screen recording of the music box: [docs/avi-music-demo.mp4](docs/avi-music-demo.mp4)
+
 ## Team checklist
 
 - [x] Front-end on `main` (PR #2, merged)
-- [x] Front-end README section (PR #3, waiting for review)
+- [x] Front-end README section (PR #3, merged)
 - [x] Front-end screenshots and a short screen recording
-- [ ] Node.js front-end (branch `feature/node-frontend`)
+- [x] Node.js front-end (PR #5, merged)
 - [ ] Buttons over the POV camera feed
-- [ ] Music recommendations (ReccoBeats)
-- [ ] Music playback (Spotify, Premium users)
+- [x] Music recommendations (ReccoBeats, PR #4, merged)
+- [x] Music playback (Spotify player in the page: 30-second preview without a Spotify login)
 - [ ] Daily routine analytics view
 - [ ] 3-minute demo video
 - [ ] Final submission (Nov 4, 9 PM ET)
@@ -242,6 +247,7 @@ Short screen recording of the demo running on the Activity screen: [docs/avi-dem
 2. Lights: any brightness above 0 shows at least 25%. Brightness 0 is fully off (blackout).
 3. The flash effect does not appear in `examples/office`, because the energy peak is not connected there.
 4. The director's slow loop uses Muse Spark and Llama. The front-end calls no models itself.
+5. The music box needs internet access to reach ReccoBeats and Spotify. Without it, it shows sample songs.
 
 ## Licenses
 
