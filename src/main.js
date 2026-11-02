@@ -38,7 +38,7 @@
 
   const LIGHT_NAMES = ['Living room', 'Kitchen', 'Desk', 'Hallway', 'Bedroom', 'Porch'];
 
-  // Fictional sample songs, grouped by tempo. No outside service is called.
+  // Fictional sample songs, grouped by tempo. Shown first and kept as the fallback.
   const SONGS = {
     calm: [
       { name: 'Paper Lanterns', artist: 'The Quiet Hours', tempo: 72 },
@@ -107,6 +107,7 @@
     loadError: null,
     liveCount: 0,
     phase: 'idle',
+    mode: 'activity', // which tab the demo plays: 'activity' or 'stage'
     index: -1,
     playing: false,
     timer: null,
@@ -327,16 +328,51 @@
     renderSongs(bpm);
   }
 
-  function renderSongs(bpm) {
-    const mood = songMood(bpm);
-    if (mood === state.songMood) return;
-    state.songMood = mood;
+  // ReccoBeats picks songs that match the energy and tempo. It is free and
+  // needs no key. If it fails or is slow, the fictional list above is shown.
+  const RECCO_URL = 'https://api.reccobeats.com/v1/track/recommendation';
+  const RECCO_SEED = '0VjIjW4GlUZAMYd2vXMi3b'; // Spotify track ID used as the starting song
+  const RECCO_TIMEOUT_MS = 4000;
+  const RECCO_ENERGY = { calm: 0.3, medium: 0.6, fast: 0.9 };
+  const reccoCache = {};
+  let songRequest = 0;
 
-    els.songsMood.textContent = `${SONG_MOODS[mood]} songs`;
-    els.songsMood.dataset.mood = mood;
-    els.songsNote.hidden = true;
+  async function fetchRecommendations(mood, bpm) {
+    const key = `${mood}`;
+    if (reccoCache[key]) return reccoCache[key];
+    const params = new URLSearchParams({
+      size: '5',
+      seeds: RECCO_SEED,
+      energy: String(RECCO_ENERGY[mood]),
+      tempo: String(Math.round(bpm)),
+    });
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), RECCO_TIMEOUT_MS);
+    try {
+      const res = await fetch(`${RECCO_URL}?${params}`, { signal: ctrl.signal });
+      if (!res.ok) throw new Error(`ReccoBeats ${res.status}`);
+      const data = await res.json();
+      const songs = (Array.isArray(data.content) ? data.content : [])
+        .map((t) => {
+          const match = typeof t.href === 'string' && t.href.match(/open\.spotify\.com\/track\/([A-Za-z0-9]{22})/);
+          return {
+            name: String(t.trackTitle || ''),
+            artist: Array.isArray(t.artists) ? t.artists.map((a) => a.name).join(', ') : '',
+            spotifyId: match ? match[1] : null,
+          };
+        })
+        .filter((t) => t.name && t.spotifyId);
+      if (!songs.length) throw new Error('No songs');
+      reccoCache[key] = songs;
+      return songs;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function drawSongs(songs) {
     els.songList.innerHTML = '';
-    for (const song of SONGS[mood]) {
+    for (const song of songs) {
       const li = document.createElement('li');
       li.className = 'song';
       const info = document.createElement('div');
@@ -347,13 +383,60 @@
       const artist = document.createElement('span');
       artist.className = 'song-artist';
       artist.textContent = song.artist;
-      const tempo = document.createElement('span');
-      tempo.className = 'song-tempo';
-      tempo.textContent = `${song.tempo} BPM`;
       info.append(name, artist);
-      li.append(info, tempo);
+      li.appendChild(info);
+
+      if (song.spotifyId) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'song-play';
+        btn.textContent = 'Play';
+        btn.setAttribute('aria-label', `Play ${song.name} on Spotify`);
+        btn.addEventListener('click', () => toggleEmbed(li, btn, song.spotifyId));
+        li.appendChild(btn);
+      } else {
+        const tempo = document.createElement('span');
+        tempo.className = 'song-tempo';
+        tempo.textContent = `${song.tempo} BPM`;
+        li.appendChild(tempo);
+      }
       els.songList.appendChild(li);
     }
+  }
+
+  function toggleEmbed(li, btn, id) {
+    const open = li.querySelector('.song-embed');
+    els.songList.querySelectorAll('.song-embed').forEach((e) => e.remove());
+    els.songList.querySelectorAll('.song-play').forEach((b) => { b.textContent = 'Play'; });
+    if (open) return;
+    const frame = document.createElement('iframe');
+    frame.className = 'song-embed';
+    frame.src = `https://open.spotify.com/embed/track/${id}`;
+    frame.height = '80';
+    frame.loading = 'lazy';
+    frame.allow = 'encrypted-media';
+    frame.title = 'Spotify player';
+    li.appendChild(frame);
+    btn.textContent = 'Close';
+  }
+
+  function renderSongs(bpm) {
+    const mood = songMood(bpm);
+    if (mood === state.songMood) return;
+    state.songMood = mood;
+
+    els.songsMood.textContent = `${SONG_MOODS[mood]} songs`;
+    els.songsMood.dataset.mood = mood;
+    els.songsNote.hidden = true;
+    drawSongs(SONGS[mood]);
+
+    const request = ++songRequest;
+    fetchRecommendations(mood, bpm)
+      .then((songs) => {
+        if (request !== songRequest || state.songMood !== mood) return;
+        drawSongs(songs);
+      })
+      .catch(() => { /* keep the fictional sample list */ });
   }
 
   // ---------- Reset ----------
@@ -382,6 +465,7 @@
     els.beat.style.removeProperty('--beat');
 
     state.songMood = null;
+    songRequest += 1;
     els.songsMood.textContent = 'Waiting';
     delete els.songsMood.dataset.mood;
     els.songList.innerHTML = '';
@@ -407,8 +491,7 @@
     } else {
       label = `${PHASE_LABELS[state.phase]} · Message ${state.index + 1} of ${total}`;
       if (!state.playing) label += ' · Paused';
-      const offset = state.phase === 'stage' ? total : 0;
-      fill = (offset + state.index + 1) / (total * 2);
+      fill = (state.index + 1) / total;
     }
 
     els.progressLabel.textContent = label;
@@ -437,13 +520,13 @@
     const activityLive = (state.phase === 'activity' || live) && state.playing;
     els.energyChip.textContent = state.phase === 'activity' || live
       ? (state.playing ? 'Live' : 'Paused')
-      : state.phase === 'idle' ? 'Waiting' : 'Complete';
+      : state.phase === 'done' && state.mode === 'activity' ? 'Complete' : 'Waiting';
     els.energyChip.classList.toggle('is-active', activityLive);
 
     const stageLive = (state.phase === 'stage' || live) && state.playing;
     els.musicState.textContent = state.phase === 'stage' || live
       ? (state.playing ? 'Playing' : 'Paused')
-      : state.phase === 'done' ? 'Finished' : 'Waiting';
+      : state.phase === 'done' && state.mode === 'stage' ? 'Finished' : 'Waiting';
     els.musicState.classList.toggle('is-active', stageLive);
     els.musicPanel.classList.toggle('is-paused', !stageLive);
   }
@@ -480,17 +563,7 @@
   function tick() {
     step();
     if (state.index < state.messages.length - 1) schedule(tick);
-    else if (state.phase === 'activity') schedule(startStagePhase);
     else finish();
-  }
-
-  function startStagePhase() {
-    state.phase = 'stage';
-    state.index = -1;
-    renderTimeline(state.messages.length);
-    selectTab('stage');
-    renderControls();
-    tick();
   }
 
   function finish() {
@@ -506,11 +579,16 @@
     stopTimer();
     state.pending = null;
     resetDisplay();
-    state.phase = 'activity';
+    // Play the tab you are looking at: Activity plays the 10 activity messages,
+    // Stage plays the 10 stage messages. They no longer run one after the other.
+    const open = els.tabBtns.find((btn) => btn.getAttribute('aria-selected') === 'true');
+    state.mode = open && open.dataset.tab === 'stage' ? 'stage' : 'activity';
+    state.phase = state.mode;
     state.index = -1;
     state.colorIndex = 0;
     state.playing = true;
-    selectTab('activity');
+    if (state.mode === 'stage') renderTimeline(state.messages.length);
+    selectTab(state.mode);
     renderControls();
     tick();
   }
