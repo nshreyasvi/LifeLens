@@ -216,11 +216,18 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 - Models: the director's slow loop uses Muse Spark (Meta Model API) and Llama 3.2 (Meta open weights). The front-end calls no models itself.
 - Planned: Node.js build (branch `feature/node-frontend`), buttons over the POV feed, ReccoBeats song recommendations, Spotify playback for Premium users.
 
+**Screenshots and demo video (Avi)**
+
+![Activity screen](docs/avi-activity.png)
+![Stage screen](docs/avi-stage.png)
+
+Short screen recording of the demo running on the Activity screen: [docs/avi-demo.mp4](docs/avi-demo.mp4)
+
 ## Team checklist
 
 - [x] Front-end on `main` (PR #2, merged)
 - [x] Front-end README section (PR #3, waiting for review)
-- [ ] Front-end screenshots and a short screen recording
+- [x] Front-end screenshots and a short screen recording
 - [ ] Node.js front-end (branch `feature/node-frontend`)
 - [ ] Buttons over the POV camera feed
 - [ ] Music recommendations (ReccoBeats)
