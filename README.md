@@ -206,6 +206,16 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
   long real crouch will read as sitting. The summary is a 2B model's reading of the labels, not advice, and it mixes
   up numbers (the demo day report gives the day's 149 m walked as one walk).
 
+## Front-end (Avi)
+
+- Latest commit: `0d2e433` "Add live director connection and director-driven lights" (merged into `main` as `48f55c4`).
+- Files: `index.html`, `styles.css`, `app.js`, `sample-data.json`.
+- Activity and Stage screens, light cues, a timeline, and a music box with sample songs.
+- Connects to Dhruv's director at `ws://127.0.0.1:8765`. The badge shows **Live** when the director runs, and **Demo** with sample data otherwise.
+- Run it: `python3 -m http.server 8000` in the project folder, then open `localhost:8000`.
+- Models: the director's slow loop uses Muse Spark (Meta Model API) and Llama 3.2 (Meta open weights). The front-end calls no models itself.
+- Planned: Node.js build (branch `feature/node-frontend`), buttons over the POV feed, ReccoBeats song recommendations, Spotify playback for Premium users.
+
 ## Licenses
 
 No license is set for this code yet. Not included and non-commercial: OmniEgoCap's checkpoint (CC BY-NC 4.0), SMPL-H and MANO,
