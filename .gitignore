@@ -13,3 +13,7 @@ __pycache__/
 bench/_fake_smplh/
 *.npz
 *.npy
+
+# node front-end
+node_modules/
+dist/

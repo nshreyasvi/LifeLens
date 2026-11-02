@@ -1,0 +1,15 @@
+{
+  "name": "lifelens-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "LifeLens Live Panel front-end (Vite). The original plain HTML version is in legacy/.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
