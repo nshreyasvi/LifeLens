@@ -35,7 +35,7 @@ The recorded full-clip run returned 16/16 valid answers (mean 8.56 s, max 16.08 
 director/venv/bin/python -m pytest director/tests -q
 ```
 
-The current suite output is `60 passed`. The synthetic CSV replay ends with a cancel; it is not evidence of a synthetic blackout. Add `--no-model` to exercise only the fast loop, or `--speed 2` to shorten replay time.
+The current suite output is `62 passed`. The synthetic CSV replay ends with a cancel; it is not evidence of a synthetic blackout. Add `--no-model` to exercise only the fast loop, or `--speed 2` to shorten replay time.
 
 ## Reactive flash check
 

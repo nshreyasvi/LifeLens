@@ -225,17 +225,20 @@ Short screen recording of the demo running on the Activity screen: [docs/avi-dem
 
 ## Director
 
-The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints_world.csv` from a processed LifeLens clip. Its fast loop sends flash, dim, and blackout cues; its slow loop uses Muse Spark or Ollama to set mood and tempo. It sends JSON over `ws://127.0.0.1:8765` to the front-end.
+The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints_world.csv` from a processed LifeLens clip. It sends JSON over `ws://127.0.0.1:8765` to the front-end.
+
+- Slow loop (Muse/Llama, every ~6 s) sets mood, tempo and the base light colour; the fast loop handles flashes, dims and blackouts on top.
 
 - Latest work: see the reactive-flash PR.
 - Run the director from the repository root:
 
   ```sh
-  MODEL_PROVIDER=muse director/venv/bin/python -m director.server examples/office --start 42 --duration 30 --describe qwen
+  MODEL_PROVIDER=muse director/venv/bin/python -m director.server examples/office --start 42 --describe qwen
   ```
 
+  This replays office from 42 s to the clip's end (83 s). The slow loop asks for a new mood every 6 s but waits for the previous reply; Muse replies took 9–22 s in two runs, so expect about 3 mood/tempo updates, the first 14–22 s in; the last can land after the final frame and arrives with the end message.
   Then run `npm run dev` and use Live mode in the front-end.
-  Offline: use `MODEL_PROVIDER=ollama`.
+  Offline: use `MODEL_PROVIDER=ollama` (replies take about 2 s).
 - Message format: JSON fields are `id`, `time`, `energy`, `action`, `music_tempo`, `phase`, `cue`, `intensity`, `color`, `zone`, `mood`, `source`, `reason`, `log`, `speed`, `posture_label`, `prediction_event`, `prediction_prob`, `scene`, `stem`, `shader`, `model_summary`, and `model_decision`. Example message:
 
   ```json
@@ -250,7 +253,9 @@ The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints
   - [x] Tempo from slow loop
   - [ ] Run on the real daily-routine recording
   - [ ] Swap the stand-in predictor for the real freeze model
-- Footnotes: flashes use pelvis walking speed and can miss upper-body movement; replay smoothing can make them appear about 0.25 s early. The freeze predictor is a stand-in, the camera is not live, and `music_map.py` is unused. See [director/README.md](director/README.md) for details.
+- Footnotes: flashes use pelvis walking speed and can miss upper-body movement; replay smoothing can make them appear about 0.25 s early. The freeze predictor is a stand-in and the camera is not live. Tempo stays inside the chosen mood's range from `music_map.py` and moves at most 10 BPM per update. See [director/README.md](director/README.md) for details.
+
+**Live run on `examples/office` (Muse, `--start 42`)**
 
 ![Director live on the Stage page](director/docs/director-live.png)
 

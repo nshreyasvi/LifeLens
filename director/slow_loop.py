@@ -13,6 +13,7 @@ from typing import Any, Callable
 from .descriptions import DamDescription, DamSelection, select_dam_description
 from .features import FrameFeatures
 from .model_client import call_model_raw, muse_call_count, muse_key_configured, _extract_json
+from .music_map import MOOD_MUSIC
 from .schemas import SlowSuggestion
 
 DEFAULT_STATE = SlowSuggestion(mood="curious", scene="wash", bpm=90, stem="ambient",
@@ -164,7 +165,9 @@ class SlowLoop:
             self.latest_decision = "The model response was invalid; the last good scene stays in place."
             await self.logs.put("slow: fallback · keeping the last good scene")
         else:
-            bpm = max(self.state.bpm - 10, min(self.state.bpm + 10, suggestion.bpm))
+            low, high = MOOD_MUSIC[suggestion.mood]["tempo_bpm"]
+            target = max(low, min(high, suggestion.bpm))
+            bpm = max(self.state.bpm - 10, min(self.state.bpm + 10, target))
             self.state = suggestion.model_copy(update={"bpm": bpm})
             self.latest_decision = self.state.reason
             self.update_times.append(time.perf_counter())

@@ -653,6 +653,55 @@ def test_bpm_moves_no_more_than_ten_per_slow_step():
     asyncio.run(run())
 
 
+def test_model_tempo_is_kept_inside_its_mood_range():
+    def suggest(summary, *, provider=None, retry_error=None):
+        return SlowSuggestion(mood="calm", scene="wash", bpm=120, stem="ambient",
+                              shader="soft_glow", color="#445566", reason="The stage settles.")
+
+    async def run():
+        loop = SlowLoop(model_fn=suggest)
+        await loop.update_once()
+        low, high = MOOD_MUSIC["calm"]["tempo_bpm"]
+        assert loop.state.mood == "calm"
+        assert low <= loop.state.bpm <= high
+        assert loop.state.bpm == 80
+
+    asyncio.run(run())
+
+
+def test_slow_reply_after_the_last_frame_reaches_the_end_message(monkeypatch):
+    import director.slow_loop as slow_loop_module
+    from director.server import replay
+
+    answer = SlowSuggestion(mood="calm", scene="silhouette", bpm=70, stem="drone",
+                            shader="none", color="#445566",
+                            reason="The stage settles after the walk.").model_dump_json()
+
+    def late_call(summary, *, provider=None, retry_error=None, max_muse_calls=30):
+        time.sleep(.6)
+        return answer
+
+    class Client:
+        def __init__(self):
+            self.received = []
+
+        async def send(self, payload):
+            self.received.append(json.loads(payload))
+
+    monkeypatch.setenv("MODEL_PROVIDER", "ollama")
+    monkeypatch.setattr(slow_loop_module, "call_model_raw", late_call)
+    client = Client()
+    clip = load_clip(TESTS / "synthetic" / "walk_slow_freeze_walk")
+    asyncio.run(replay(clip, speed=40, start=0, duration=None, no_model=False,
+                       clients={client}, describe="qwen"))
+    before_end = client.received[:-1]
+    end = client.received[-1]
+    assert all(message["mood"] == "curious" for message in before_end)
+    assert end["phase"] == "end"
+    assert (end["mood"], end["music_tempo"], end["scene"]) == ("calm", 80, "silhouette")
+    assert end["model_decision"] == "The stage settles after the walk."
+
+
 def test_slow_screen_update_includes_scene_stem_shader_and_throttles_color():
     loop = FastLoop(StubPredictor())
     suggestion = SlowSuggestion(mood="joyful", scene="spotlight", bpm=100, stem="pulse",
