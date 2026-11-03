@@ -25,8 +25,37 @@
     { name: 'Rose', hex: '#F43F5E' },
   ];
 
-  const ACCENT = PALETTE[0]; // same value as --accent in styles.css
   const VERY_LIGHT_LUMINANCE = 0.85;
+
+  // Friendly names for director colors: a color is shown as the closest name here
+  // (e.g. #FF6347 shows as "Coral"), so the panel never shows a raw code.
+  const COLOR_NAMES = [
+    { name: 'White', hex: '#FFFFFF' },
+    { name: 'Warm white', hex: '#FFF1D6' },
+    { name: 'Red', hex: '#E53935' },
+    { name: 'Coral', hex: '#FF6F59' },
+    { name: 'Orange', hex: '#FB8C00' },
+    { name: 'Amber', hex: '#F59E0B' },
+    { name: 'Yellow', hex: '#FDD835' },
+    { name: 'Lime', hex: '#9CCC65' },
+    { name: 'Green', hex: '#43A047' },
+    { name: 'Teal', hex: '#14B8A6' },
+    { name: 'Cyan', hex: '#00BCD4' },
+    { name: 'Sky blue', hex: '#4FC3F7' },
+    { name: 'Blue', hex: '#3977FF' },
+    { name: 'Indigo', hex: '#3F51B5' },
+    { name: 'Violet', hex: '#9A55E8' },
+    { name: 'Purple', hex: '#7B1FA2' },
+    { name: 'Pink', hex: '#F48FB1' },
+    { name: 'Rose', hex: '#F43F5E' },
+    { name: 'Brown', hex: '#8D6E63' },
+    { name: 'Gray', hex: '#9E9E9E' },
+    { name: 'Black', hex: '#1C1E21' },
+  ];
+
+  // Very light bulbs (like Dhruv's white flash) get a gray outline and glow so they stay visible on the white page.
+  const LIGHT_BULB_OUTLINE = 'inset 0 0 0 2px #BCC0C4';
+  const LIGHT_BULB_GLOW = '#8A8D91';
 
   const ACTION_LABELS = {
     flash_light: 'Flash light',
@@ -122,6 +151,11 @@
 
   const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const isRunning = () => state.phase === 'activity' || state.phase === 'stage';
+
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
 
   function hexToRgba(hex, alpha) {
     const n = parseInt(hex.slice(1), 16);
@@ -264,11 +298,10 @@
     if (!hasIntensity && msg.action === 'dim') level *= DIM_FACTOR;
     if (!hasColor && msg.action === 'change_color') state.colorIndex = (state.colorIndex + 1) % PALETTE.length;
     let color = PALETTE[state.colorIndex];
+    let veryLight = false;
     if (hasColor) {
-      // A very light bulb would vanish against the white cards, so use the accent instead.
-      color = luminance(msg.color) >= VERY_LIGHT_LUMINANCE
-        ? ACCENT
-        : { name: msg.color.toUpperCase(), hex: msg.color };
+      color = { name: colorName(msg.color), hex: msg.color };
+      veryLight = luminance(msg.color) >= VERY_LIGHT_LUMINANCE;
     }
 
     // Any level above 0 keeps a visible minimum. Only director intensity can be exactly 0: a blackout.
@@ -278,8 +311,8 @@
       bulb.style.transitionDelay = `${i * 70}ms`;
       bulb.style.backgroundColor = color.hex;
       bulb.style.opacity = opacity.toFixed(2);
-      bulb.style.boxShadow =
-        `0 0 ${Math.round(16 + 48 * level)}px ${Math.round(2 + 10 * level)}px ${hexToRgba(color.hex, 0.6 * level)}`;
+      const glow = `0 0 ${Math.round(16 + 48 * level)}px ${Math.round(2 + 10 * level)}px ${hexToRgba(veryLight ? LIGHT_BULB_GLOW : color.hex, 0.6 * level)}`;
+      bulb.style.boxShadow = veryLight ? `${LIGHT_BULB_OUTLINE}, ${glow}` : glow;
     });
 
     els.ambient.style.backgroundColor = color.hex;
@@ -297,7 +330,21 @@
     els.lightsEnergy.textContent = capitalize(msg.energy);
     els.lightsBrightness.textContent = `${Math.round(level * 100)}%`;
     els.lightsSwatch.style.backgroundColor = color.hex;
+    els.lightsSwatch.style.boxShadow = veryLight ? LIGHT_BULB_OUTLINE : '';
     els.lightsColor.textContent = color.name;
+  }
+
+  function colorName(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    let best = COLOR_NAMES[0];
+    let bestDist = Infinity;
+    for (const c of COLOR_NAMES) {
+      const [r2, g2, b2] = hexToRgb(c.hex);
+      // Weighted RGB distance: close enough to how people see color for a short label.
+      const d = 2 * (r - r2) ** 2 + 4 * (g - g2) ** 2 + 3 * (b - b2) ** 2;
+      if (d < bestDist) { bestDist = d; best = c; }
+    }
+    return best.name;
   }
 
   // ---------- Music (Stage) ----------
