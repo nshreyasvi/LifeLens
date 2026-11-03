@@ -12,6 +12,14 @@ BASE_FREEZE_THRESHOLD = 0.70
 MAX_FREEZE_THRESHOLD = 0.80
 THRESHOLD_RECOVERY_S = 10.0
 
+# Reactive flashes use absolute pelvis speed against only the preceding four seconds.
+FLASH_BASELINE_WINDOW_S = 4.0
+FLASH_SPEED_RISE_M_S = 0.3
+FLASH_MIN_SPEED_M_S = 0.5
+FLASH_REARM_SPEED_M_S = 0.25
+FLASH_REARM_S = 0.5
+FLASH_INTENSITY = 1.0
+
 
 @dataclass
 class PendingCheck:
@@ -39,6 +47,9 @@ class FastLoop:
         self.last_prediction: dict[str, Any] = {"event": "none", "prob": 0.0, "eta_ms": 0}
         self.flash_until_s: float | None = None
         self.last_flash_s = float("-inf")
+        self.last_blackout_return_s: float | None = None
+        self.flash_armed = True
+        self.low_speed_since_s: float | None = None
         self.speed_history: deque[tuple[float, float]] = deque()
         self.locked_until_moving = False
         self.blackout_active = False
@@ -52,13 +63,15 @@ class FastLoop:
                      reason: str, intensity: float | None = None, color: str | None = None) -> dict[str, Any]:
         self.msg_id += 1
         target = self.intensity if intensity is None else intensity
-        # Cap ordinary per-message changes; blackout is the explicit fire exception.
-        if cue != "blackout":
+        # Flash and blackout cues must remain visible through the screen step limiter.
+        if cue not in {"blackout", "flash"}:
             max_jump = 0.20 if phase == "prearm" else 0.04
             target = max(self.intensity - max_jump, min(self.intensity + max_jump, target))
-        self.intensity = max(0.0, min(1.0, target))
+        message_intensity = max(0.0, min(1.0, target))
+        if cue != "flash":
+            self.intensity = message_intensity
         return make_message(msg_id=self.msg_id, time_s=f.time_s, energy=f.energy, phase=phase,
-                            cue=cue, intensity=self.intensity, zone=f.zone, mood=self.mood,
+                            cue=cue, intensity=message_intensity, zone=f.zone, mood=self.mood,
                             bpm=self.bpm, source=source, reason=reason, color=color,
                             scene=self.scene, stem=self.stem, shader=self.shader)
 
@@ -86,8 +99,15 @@ class FastLoop:
             self.threshold = self.base_threshold
             self.last_cancel_s = None
         self.speed_history.append((t, features.speed_m_s))
-        while self.speed_history and self.speed_history[0][0] < t - 1.1:
+        while self.speed_history and self.speed_history[0][0] < t - FLASH_BASELINE_WINDOW_S:
             self.speed_history.popleft()
+        if features.speed_m_s <= FLASH_REARM_SPEED_M_S:
+            if self.low_speed_since_s is None:
+                self.low_speed_since_s = t
+            elif t - self.low_speed_since_s >= FLASH_REARM_S:
+                self.flash_armed = True
+        else:
+            self.low_speed_since_s = None
         logs: list[str] = []
         if self.locked_until_moving and features.speed_m_s > 0.15:
             self.locked_until_moving = False
@@ -120,6 +140,7 @@ class FastLoop:
         if self.blackout_active:
             if features.speed_m_s > 0.15:
                 self.blackout_active = False
+                self.last_blackout_return_s = t
                 msg = self._new_message(
                     features, phase="set", cue="dim", source="fast",
                     reason="The performer moved again; the stage light returns.",
@@ -137,7 +158,7 @@ class FastLoop:
             if t < self.flash_until_s:
                 return self._new_message(features, phase="set", cue="flash", source="fast",
                                          reason="Energy peaked; a brief stage flash is active.",
-                                         intensity=self.intensity, color="#FFFFFF"), logs
+                                         intensity=FLASH_INTENSITY, color="#FFFFFF"), logs
             self.flash_until_s = None
             restore_color = self.active_slow_color or ZONE_COLORS[features.zone]
             self.last_scene_change_s = t
@@ -155,20 +176,47 @@ class FastLoop:
 
         prediction = Prediction.model_validate(self.predictor.predict(features))
         self.last_prediction = prediction.model_dump()
-        if prediction.event == "energy_peak" and prediction.prob > self.threshold and t - self.last_flash_s >= 1.0:
+        if (prediction.event == "energy_peak" and prediction.prob > self.threshold
+                and t - self.last_flash_s >= 1.0
+                and (self.last_blackout_return_s is None
+                     or t - self.last_blackout_return_s >= 1.0)):
             self.last_flash_s = t
             self.flash_until_s = t + 0.2
             msg = self._new_message(features, phase="set", cue="flash", source="fast",
                                     reason="Energy peaked; a brief stage flash is active.",
-                                    intensity=self.intensity, color="#FFFFFF")
+                                    intensity=FLASH_INTENSITY, color="#FFFFFF")
             return msg, logs
-        if prediction.event == "freeze" and prediction.prob > self.threshold and not self.pending and not self.locked_until_moving:
+        if prediction.event == "freeze" and prediction.prob > self.threshold and not self.locked_until_moving:
             old = self.intensity
             reason = "A stop was detected; the lights pre-dim while I check for a freeze."
             msg = self._new_message(features, phase="prearm", cue="dim", source="fast",
                                     reason=reason, intensity=old * 0.8)
             self.pending = PendingCheck(deadline_s=t + 1.0, restore_intensity=old)
             logs.append("freeze detection: stop detected · pre-arm")
+            return msg, logs
+
+        prior_speeds = [speed for sample_t, speed in self.speed_history
+                        if 0 < t - sample_t <= FLASH_BASELINE_WINDOW_S]
+        running_speed_baseline = (
+            sum(prior_speeds) / len(prior_speeds) if prior_speeds else None
+        )
+        flash_allowed = (
+            (self.last_blackout_return_s is None
+             or t - self.last_blackout_return_s >= 1.0)
+            and t - self.last_flash_s >= 1.0
+            and self.flash_armed
+        )
+        if (flash_allowed and running_speed_baseline is not None
+                and features.speed_m_s >= FLASH_MIN_SPEED_M_S
+                and features.speed_m_s - running_speed_baseline >= FLASH_SPEED_RISE_M_S):
+            self.last_flash_s = t
+            self.flash_armed = False
+            self.flash_until_s = t + 0.2
+            msg = self._new_message(
+                features, phase="set", cue="flash", source="fast",
+                reason="Measured walking speed rose quickly; a brief reactive flash is active.",
+                intensity=FLASH_INTENSITY, color="#FFFFFF",
+            )
             return msg, logs
 
         zone_changed = self.last_zone is not None and features.zone != self.last_zone

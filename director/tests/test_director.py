@@ -429,6 +429,157 @@ def test_energy_peak_fires_a_visible_flash_cue():
     assert message["action"] == "flash_light"
 
 
+def test_measured_speed_jump_fires_a_reactive_flash_at_full_brightness():
+    loop = FastLoop(StubPredictor())
+    loop.step(frame(0.0, .1))
+    loop.step(frame(.2, .1))
+    message, _ = loop.step(frame(.4, .7))
+    assert message["phase"] == "set"
+    assert message["cue"] == "flash"
+    assert message["action"] == "flash_light"
+    assert message["intensity"] == 1.0
+    assert loop.intensity < message["intensity"]
+
+
+def test_gradual_speed_rise_does_not_flash():
+    loop = FastLoop(StubPredictor())
+    messages = []
+    for index in range(6):
+        speed = .1 + index * .08
+        message, _ = loop.step(frame(index * .8, speed))
+        messages.append(message)
+    assert all(message["cue"] != "flash" for message in messages)
+
+
+def test_reactive_flash_cooldown_blocks_a_second_flash_for_one_second():
+    loop = FastLoop(StubPredictor())
+    sequence = [
+        (0.0, .1), (.2, .7), (.5, .1), (.8, .7),
+        (1.0, .1), (1.5, .1), (1.6, .7),
+    ]
+    messages = [loop.step(frame(t, speed))[0] for t, speed in sequence]
+    assert messages[1]["cue"] == "flash"
+    assert messages[3]["cue"] != "flash"
+    assert messages[6]["cue"] == "flash"
+
+
+def test_new_flash_requires_a_sustained_slow_period_to_rearm():
+    loop = FastLoop(StubPredictor())
+    sequence = [
+        (0.0, .1), (.2, .8), (.5, .8), (1.3, .8),
+        (1.5, .1), (2.0, .1), (2.2, .8),
+    ]
+    messages = [loop.step(frame(t, speed))[0] for t, speed in sequence]
+    assert messages[1]["cue"] == "flash"
+    assert all(message["cue"] != "flash" for message in messages[2:4])
+    assert messages[-1]["cue"] == "flash"
+
+
+def test_sitting_only_quiet_section_produces_no_reactive_flashes():
+    loop = FastLoop(StubPredictor())
+    flash_starts = 0
+    previous = None
+    for index in range(301):
+        feature = replace(frame(index / 10, .02), posture_label="sitting")
+        message, _ = loop.step(feature)
+        if message["cue"] == "flash" and previous != "flash":
+            flash_starts += 1
+        previous = message["cue"]
+    assert flash_starts == 0
+
+
+def test_quarter_speed_copy_has_fewer_reactive_flashes():
+    speeds = [.02] * 51 + [.9] * 10 + [.02] * 51 + [.9] * 10
+
+    def count_flashes(scale):
+        loop = FastLoop(StubPredictor())
+        count = 0
+        previous = None
+        for index, speed in enumerate(speeds):
+            message, _ = loop.step(frame(index / 10, speed * scale))
+            if message["cue"] == "flash" and previous != "flash":
+                count += 1
+            previous = message["cue"]
+        return count
+
+    assert count_flashes(.25) < count_flashes(1.0)
+
+
+def test_reactive_flash_does_not_interrupt_a_prearm():
+    loop = FastLoop(StubPredictor())
+    loop.step(frame(0.0, .5, energy=.1))
+    loop.step(frame(.1, .05, energy=.1))
+    message, _ = loop.step(frame(.9, .05, energy=.7))
+    assert message["phase"] == "prearm"
+    assert message["cue"] == "dim"
+    assert message["action"] != "flash_light"
+
+
+def test_speed_jump_inside_prearm_check_window_does_not_flash():
+    loop = FastLoop(StubPredictor())
+    loop.step(frame(0.0, .5))
+    loop.step(frame(.1, .05))
+    prearm, _ = loop.step(frame(.9, .05))
+    assert prearm["phase"] == "prearm"
+    assert loop.pending is not None
+    assert loop.pending.deadline_s == pytest.approx(1.9)
+
+    past_baseline = (.5 + .05 + .05) / 3
+    jump_speed = .8
+    assert jump_speed >= .5
+    assert jump_speed - past_baseline >= .3
+    jump, _ = loop.step(frame(1.0, jump_speed))
+    assert jump["phase"] == "prearm"
+    assert jump["cue"] == "dim"
+    assert jump["action"] != "flash_light"
+
+
+def test_screen_publisher_does_not_step_cap_flash_brightness():
+    from director.server import ScreenPublisher
+
+    publisher = ScreenPublisher()
+    previous = make_message(msg_id=1, time_s=0, energy=.4, phase="set", cue="dim",
+                            intensity=.25, zone="A", mood="calm", bpm=90,
+                            source="fast", reason="The light is dimmed.")
+    publisher.sent(previous)
+    flash = make_message(msg_id=2, time_s=.1, energy=.8, phase="set", cue="flash",
+                         intensity=1.0, zone="A", mood="calm", bpm=90,
+                         source="fast", reason="A reactive flash is active.")
+    assert publisher.prepare(flash)["intensity"] == 1.0
+
+
+def test_reactive_flash_waits_one_second_after_blackout():
+    loop = FastLoop(StubPredictor())
+    loop.step(frame(0.0, .5, energy=.1))
+    loop.step(frame(.1, .05, energy=.1))
+    prearm, _ = loop.step(frame(.9, .05, energy=.1))
+    assert prearm["phase"] == "prearm"
+    blackout, _ = loop.step(frame(1.9, .0, energy=.1))
+    assert blackout["phase"] == "fire" and blackout["cue"] == "blackout"
+    returned, _ = loop.step(frame(2.0, .5, energy=.9))
+    assert returned["cue"] != "flash"
+    recent, _ = loop.step(frame(2.1, .5, energy=.9))
+    assert recent["cue"] != "flash"
+
+
+def test_five_second_blackout_starts_flash_guard_when_lights_return():
+    loop = FastLoop(StubPredictor())
+    loop.step(frame(0.0, .5))
+    loop.step(frame(.1, .05))
+    prearm, _ = loop.step(frame(.9, .05))
+    assert prearm["phase"] == "prearm"
+    blackout, _ = loop.step(frame(1.9, .0))
+    assert blackout["phase"] == "fire" and blackout["cue"] == "blackout"
+    for tick in range(1, 10):
+        held, _ = loop.step(frame(1.9 + tick * .5, 0.0))
+        assert held["cue"] == "blackout"
+    returned, _ = loop.step(frame(6.9, .5))
+    assert returned["cue"] == "dim"
+    assert loop.last_blackout_return_s == pytest.approx(6.9)
+    jump, _ = loop.step(frame(7.0, .9))
+    assert jump["cue"] != "flash"
+
+
 def test_fast_loop_step_is_under_30ms():
     loop = FastLoop(StubPredictor())
     durations = []
@@ -500,6 +651,55 @@ def test_bpm_moves_no_more_than_ten_per_slow_step():
         assert loop.state.bpm == 100
 
     asyncio.run(run())
+
+
+def test_model_tempo_is_kept_inside_its_mood_range():
+    def suggest(summary, *, provider=None, retry_error=None):
+        return SlowSuggestion(mood="calm", scene="wash", bpm=120, stem="ambient",
+                              shader="soft_glow", color="#445566", reason="The stage settles.")
+
+    async def run():
+        loop = SlowLoop(model_fn=suggest)
+        await loop.update_once()
+        low, high = MOOD_MUSIC["calm"]["tempo_bpm"]
+        assert loop.state.mood == "calm"
+        assert low <= loop.state.bpm <= high
+        assert loop.state.bpm == 80
+
+    asyncio.run(run())
+
+
+def test_slow_reply_after_the_last_frame_reaches_the_end_message(monkeypatch):
+    import director.slow_loop as slow_loop_module
+    from director.server import replay
+
+    answer = SlowSuggestion(mood="calm", scene="silhouette", bpm=70, stem="drone",
+                            shader="none", color="#445566",
+                            reason="The stage settles after the walk.").model_dump_json()
+
+    def late_call(summary, *, provider=None, retry_error=None, max_muse_calls=30):
+        time.sleep(.6)
+        return answer
+
+    class Client:
+        def __init__(self):
+            self.received = []
+
+        async def send(self, payload):
+            self.received.append(json.loads(payload))
+
+    monkeypatch.setenv("MODEL_PROVIDER", "ollama")
+    monkeypatch.setattr(slow_loop_module, "call_model_raw", late_call)
+    client = Client()
+    clip = load_clip(TESTS / "synthetic" / "walk_slow_freeze_walk")
+    asyncio.run(replay(clip, speed=40, start=0, duration=None, no_model=False,
+                       clients={client}, describe="qwen"))
+    before_end = client.received[:-1]
+    end = client.received[-1]
+    assert all(message["mood"] == "curious" for message in before_end)
+    assert end["phase"] == "end"
+    assert (end["mood"], end["music_tempo"], end["scene"]) == ("calm", 80, "silhouette")
+    assert end["model_decision"] == "The stage settles after the walk."
 
 
 def test_slow_screen_update_includes_scene_stem_shader_and_throttles_color():
@@ -600,9 +800,9 @@ def test_dam_real_format_selection_and_describe_modes():
                     dam_descriptions=records)
     both = summarize(frames, {"event": "none", "prob": 0}, describe="both",
                      dam_descriptions=records)
-    assert "Qwen:" in qwen and "DAM (" not in qwen
-    assert "DAM (" in dam and "Qwen:" not in dam
-    assert "Qwen:" in both and "DAM (" in both
+    assert "Narration:" in qwen and "DAM (" not in qwen
+    assert "DAM (" in dam and "Narration:" not in dam
+    assert "Narration:" in both and "DAM (" in both
     assert len(both.split()) < 80
     assert not any(value in both for value in ("pelvis", "trunk_lean", "embedding", "[", "]"))
 

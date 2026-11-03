@@ -35,4 +35,14 @@ The recorded full-clip run returned 16/16 valid answers (mean 8.56 s, max 16.08 
 director/venv/bin/python -m pytest director/tests -q
 ```
 
-The current suite output is `49 passed in 0.75s`. The synthetic CSV replay ends with a cancel; it is not evidence of a synthetic blackout. Add `--no-model` to exercise only the fast loop, or `--speed 2` to shorten replay time.
+The current suite output is `62 passed`. The synthetic CSV replay ends with a cancel; it is not evidence of a synthetic blackout. Add `--no-model` to exercise only the fast loop, or `--speed 2` to shorten replay time.
+
+## Reactive flash check
+
+Flash cues are reactive to pelvis speed: current speed must be at least 0.5 m/s and at least 0.3 m/s above the mean of the previous four seconds. A new flash requires a sustained slow period before it can fire again. The office clip does produce flashes; one useful 30-second window is:
+
+```sh
+MODEL_PROVIDER=ollama director/venv/bin/python -m director.server examples/office --start 42 --duration 30 --describe qwen
+```
+
+The recorded no-model whole-clip pass found 6 office flashes, 7 outdoor flashes, and 9 robothome flashes. A quarter-speed copy of office produced fewer flashes than the original.

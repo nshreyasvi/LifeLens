@@ -69,7 +69,7 @@ class ScreenPublisher:
 
     def prepare(self, message: dict[str, Any]) -> dict[str, Any]:
         payload = dict(message)
-        if self.last is not None and payload.get(OUTPUT_FIELDS["cue"]) != "blackout":
+        if self.last is not None and payload.get(OUTPUT_FIELDS["cue"]) not in {"blackout", "flash"}:
             intensity = OUTPUT_FIELDS["intensity"]
             before = float(self.last[intensity])
             target = float(payload[intensity])
@@ -97,7 +97,7 @@ async def replay(clip: Clip, *, speed: float, start: float, duration: float | No
                  describe: str = "qwen") -> None:
     predictor_name = os.getenv("PREDICTOR", "stub").lower()
     if predictor_name != "stub":
-        raise ValueError("Only PREDICTOR=stub is wired; the upstream WebSocket connection is [VERIFY]")
+        raise ValueError("Only the stub predictor is supported right now.")
     predictor = StubPredictor()
     fast = FastLoop(predictor)
     dam_descriptions = load_dam_descriptions(clip.source_dir) if describe in {"dam", "both"} else []
@@ -201,6 +201,15 @@ async def replay(clip: Clip, *, speed: float, start: float, duration: float | No
     while not slow.logs.empty():
         print(f"{selected[-1].time_s:7.2f}s {slow.logs.get_nowait()}", flush=True)
     end_message = dict(message)
+    # A slow reply can finish after the last frame; carry its mood and tempo on the end message.
+    state = slow.state
+    end_message["mood"] = state.mood
+    end_message["music_tempo"] = state.bpm
+    end_message[OUTPUT_FIELDS["scene"]] = state.scene
+    end_message[OUTPUT_FIELDS["stem"]] = state.stem
+    end_message[OUTPUT_FIELDS["shader"]] = state.shader
+    end_message[OUTPUT_FIELDS["model_summary"]] = slow.latest_summary
+    end_message[OUTPUT_FIELDS["model_decision"]] = slow.latest_decision
     end_message[OUTPUT_FIELDS["id"]] = int(message[OUTPUT_FIELDS["id"]]) + 1
     end_message[OUTPUT_FIELDS["phase"]] = "end"
     end_message[OUTPUT_FIELDS["cue"]] = "dim"
