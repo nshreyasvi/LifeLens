@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#FFFFFF">
   <title>LifeLens Live Panel</title>
   <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/day.css">
 </head>
 <body>
   <header class="topbar">
@@ -37,6 +38,9 @@
       </button>
       <button class="tab" id="tab-btn-stage" type="button" role="tab" data-tab="stage" aria-controls="view-stage" aria-selected="false" tabindex="-1">
         <span class="tab-dot" aria-hidden="true"></span>Stage
+      </button>
+      <button class="tab" id="tab-btn-day" type="button" role="tab" data-tab="day" aria-controls="view-day" aria-selected="false" tabindex="-1">
+        <span class="tab-dot" aria-hidden="true"></span>Day
       </button>
     </nav>
 
@@ -124,10 +128,45 @@
         </div>
       </section>
     </section>
+    <section class="view view-day" id="view-day" data-view="day" role="tabpanel" aria-labelledby="tab-btn-day" hidden>
+      <section class="panel panel-day-wide" aria-labelledby="day-title">
+        <div class="panel-head">
+          <h2 id="day-title">Your day</h2>
+          <span class="chip" id="day-status">Loading</span>
+        </div>
+        <div class="day-stats" id="day-stats"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="day-postures-title">
+        <div class="panel-head">
+          <h2 id="day-postures-title">Time by posture</h2>
+        </div>
+        <div class="day-rows" id="day-postures"></div>
+        <ul class="day-legend" id="day-legend"></ul>
+      </section>
+
+      <section class="panel" aria-labelledby="day-summary-title">
+        <div class="panel-head">
+          <h2 id="day-summary-title">Suggestions</h2>
+        </div>
+        <div class="day-summary" id="day-summary"></div>
+        <p class="day-note" id="day-summary-note"></p>
+      </section>
+
+      <section class="panel panel-day-wide" aria-labelledby="day-timeline-title">
+        <div class="panel-head">
+          <h2 id="day-timeline-title">Second by second</h2>
+          <span class="chip">Hover or tap a bar</span>
+        </div>
+        <div class="day-rows" id="day-strips"></div>
+        <p class="day-caption" id="day-caption" aria-live="polite">Hover or tap the timeline to see what was happening.</p>
+      </section>
+    </section>
   </main>
 
   <footer class="foot">LifeLens · <span id="foot-demo">showing fictional sample data from <code>sample-data.json</code>.</span><span id="foot-live" hidden>showing live messages from the director.</span></footer>
 
   <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/day.js"></script>
 </body>
 </html>

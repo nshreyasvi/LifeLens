@@ -19,6 +19,7 @@ Build a static copy with `npm run build` (output goes to `dist/`) and preview it
 - `src/main.js`: app logic (live connection, lights, music box)
 - `src/styles.css`: styles
 - `public/sample-data.json`: demo data
+- `src/day.js`, `src/day.css`, `public/day/`: the Day tab (daily routine view), built from the day report in `examples/day/`
 - `legacy/`: the original plain HTML version (no Node needed). Run `cd legacy && python3 -m http.server 8000`.
 
 ## Notes
