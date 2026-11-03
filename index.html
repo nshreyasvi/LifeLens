@@ -4,6 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Video, director reason, AI badge and light/dark theme (src/extras.*). -->
+  <link rel="stylesheet" href="/src/extras.css">
+  <script type="module" src="/src/extras.js"></script>
+  <script>
+    // Apply the saved theme before the page draws, so it doesn't flash white first.
+    try { if (localStorage.getItem('lifelens-theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch (e) {}
+  </script>
   <meta name="theme-color" content="#FFFFFF">
   <title>LifeLens Live Panel</title>
   <link rel="stylesheet" href="/src/styles.css">
@@ -14,6 +21,16 @@
       <span class="brand-mark" aria-hidden="true"></span>
       <h1>LifeLens Live Panel</h1>
       <span class="badge" id="conn-status" role="status">Demo</span>
+      <span class="ai-badge" id="ai-badge" data-mode="demo" title="The director's AI step picks mood and tempo with Meta models: Muse Spark (Meta Model API) or Llama 3.2 3B (Meta open weights, run locally).">
+        <span class="ai-dot" aria-hidden="true"></span>
+        <span class="ai-name">Director AI: Muse Spark · Llama 3.2 (Meta)</span>
+        <span class="ai-state" id="ai-state">Sample data</span>
+      </span>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Switch to the dark theme">
+        <svg class="icon icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+        <svg class="icon icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+        <span id="theme-label">Dark</span>
+      </button>
     </div>
     <div class="buttons">
       <button class="btn btn-primary" id="play-btn" type="button">
@@ -50,11 +67,10 @@
 
   <main class="views">
     <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
-      <div class="video-box" role="img" aria-label="POV video placeholder. No video is loaded.">
-        <div class="video-label">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg>
-          <span>POV video (placeholder)</span>
-        </div>
+      <div class="video-box has-video">
+        <video class="pov-video" id="pov-video" src="/video/office-body.mp4" muted playsinline loop preload="auto"
+          aria-label="3D body of the person in the office recording, moving in time with the director"></video>
+        <p class="video-credit">3D body from the office recording · OmniEgoDB, CC BY-NC 4.0</p>
       </div>
 
       <div class="activity-cards">
@@ -96,6 +112,7 @@
           <div><dt>Brightness</dt><dd id="lights-brightness">—</dd></div>
           <div><dt>Color</dt><dd><span class="swatch" id="lights-swatch"></span><span id="lights-color">—</span></dd></div>
         </dl>
+        <p class="lights-reason" id="lights-reason" aria-live="polite" hidden></p>
       </section>
 
       <section class="panel panel-music is-paused" id="music-panel" aria-labelledby="music-title">
