@@ -223,6 +223,37 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 
 Short screen recording of the demo running on the Activity screen: [docs/avi-demo.mp4](docs/avi-demo.mp4)
 
+## Director
+
+The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints_world.csv` from a processed LifeLens clip. Its fast loop sends flash, dim, and blackout cues; its slow loop uses Muse Spark or Ollama to set mood and tempo. It sends JSON over `ws://127.0.0.1:8765` to the front-end.
+
+- Latest work: see the reactive-flash PR.
+- Run the director from the repository root:
+
+  ```sh
+  MODEL_PROVIDER=muse director/venv/bin/python -m director.server examples/office --start 42 --duration 30 --describe qwen
+  ```
+
+  Then run `npm run dev` and use Live mode in the front-end.
+  Offline: use `MODEL_PROVIDER=ollama`.
+- Message format: JSON fields are `id`, `time`, `energy`, `action`, `music_tempo`, `phase`, `cue`, `intensity`, `color`, `zone`, `mood`, `source`, `reason`, `log`, `speed`, `posture_label`, `prediction_event`, `prediction_prob`, `scene`, `stem`, `shader`, `model_summary`, and `model_decision`. Example message:
+
+  ```json
+  {"id":1,"time":"0:00:42.000","energy":"medium","action":"dim","music_tempo":90,"phase":"set","cue":"dim","intensity":0.04,"color":"#3977FF","zone":"A","mood":"curious","source":"fast","reason":"Energy is medium; the level follows the performer.","log":"Energy is medium; the level follows the performer.","speed":0.4,"posture_label":"walking","prediction_event":"none","prediction_prob":0.0,"scene":"wash","stem":"ambient","shader":"soft_glow","model_summary":"","model_decision":"Holding a calm starting scene."}
+  ```
+
+- Models: Muse Spark (Meta Model API) sets mood and tempo in the slow loop; Llama 3.2 3B (Meta open-weight, via Ollama) is the offline fallback. Narration comes from Qwen-VL output already in activity.csv. Built on top: clip replay, reactive cue logic, validated mood/tempo updates, and the JSON WebSocket.
+- Narration: `--describe qwen` reads the Qwen-VL activity narration already in the clip's `activity.csv` (from the LifeLens pipeline); the director only reads it.
+- Checklist:
+  - [x] Reactive flash
+  - [x] Blackout on freeze
+  - [x] Tempo from slow loop
+  - [ ] Run on the real daily-routine recording
+  - [ ] Swap the stand-in predictor for the real freeze model
+- Footnotes: flashes use pelvis walking speed and can miss upper-body movement; replay smoothing can make them appear about 0.25 s early. The freeze predictor is a stand-in, the camera is not live, and `music_map.py` is unused. See [director/README.md](director/README.md) for details.
+
+![Director live on the Stage page](director/docs/director-live.png)
+
 ## Team checklist
 
 - [x] Front-end on `main` (PR #2, merged)
@@ -240,7 +271,7 @@ Short screen recording of the demo running on the Activity screen: [docs/avi-dem
 
 1. Live mode needs the director running on `ws://127.0.0.1:8765`. Without it, the page shows sample data.
 2. Lights: any brightness above 0 shows at least 25%. Brightness 0 is fully off (blackout).
-3. The flash effect does not appear in `examples/office`, because the energy peak is not connected there.
+3. The office clip produces 6 flashes; 4 fall in the 42–72 s demo window.
 4. The director's slow loop uses Muse Spark and Llama. The front-end calls no models itself.
 
 ## Licenses

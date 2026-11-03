@@ -69,7 +69,7 @@ class ScreenPublisher:
 
     def prepare(self, message: dict[str, Any]) -> dict[str, Any]:
         payload = dict(message)
-        if self.last is not None and payload.get(OUTPUT_FIELDS["cue"]) != "blackout":
+        if self.last is not None and payload.get(OUTPUT_FIELDS["cue"]) not in {"blackout", "flash"}:
             intensity = OUTPUT_FIELDS["intensity"]
             before = float(self.last[intensity])
             target = float(payload[intensity])
@@ -97,7 +97,7 @@ async def replay(clip: Clip, *, speed: float, start: float, duration: float | No
                  describe: str = "qwen") -> None:
     predictor_name = os.getenv("PREDICTOR", "stub").lower()
     if predictor_name != "stub":
-        raise ValueError("Only PREDICTOR=stub is wired; the upstream WebSocket connection is [VERIFY]")
+        raise ValueError("Only the stub predictor is supported right now.")
     predictor = StubPredictor()
     fast = FastLoop(predictor)
     dam_descriptions = load_dam_descriptions(clip.source_dir) if describe in {"dam", "both"} else []

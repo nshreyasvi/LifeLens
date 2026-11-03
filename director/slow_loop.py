@@ -49,8 +49,8 @@ def summarize(frames: list[FrameFeatures], prediction: dict[str, Any], *,
     trend = "rising" if late - early > 0.08 else "falling" if early - late > 0.08 else "steady"
     pieces = [f"Posture labels over the last six seconds: {', '.join(labels) or 'unknown'}."]
     if describe in {"qwen", "both"}:
-        qwen = next((f.narration for f in reversed(recent) if f.narration), "No current Qwen narration.")
-        pieces.append(f"Qwen: {qwen}")
+        narration = next((f.narration for f in reversed(recent) if f.narration), "No current narration.")
+        pieces.append(f"Narration: {narration}")
     if describe in {"dam", "both"}:
         selected = dam_selection or select_dam_description(dam_descriptions or [], latest.time_s)
         pieces.append(f"DAM ({selected.source}, {selected.start_s:g}-{selected.end_s:g}s): {selected.text}")
