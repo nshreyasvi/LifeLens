@@ -115,6 +115,7 @@
     lightsBrightness: $('lights-brightness'),
     lightsSwatch: $('lights-swatch'),
     lightsColor: $('lights-color'),
+    lightsReason: $('lights-reason'),
     musicPanel: $('music-panel'),
     musicState: $('music-state'),
     beat: $('beat'),
@@ -332,6 +333,18 @@
     els.lightsSwatch.style.backgroundColor = color.hex;
     els.lightsSwatch.style.boxShadow = veryLight ? LIGHT_BULB_OUTLINE : '';
     els.lightsColor.textContent = color.name;
+    els.lightsReason.textContent = lightsReason(msg);
+    els.lightsReason.hidden = false;
+  }
+
+  // The director explains each change in one short sentence ("reason"). Sample data has none,
+  // so the demo describes the front-end's own rule instead.
+  const ACTION_VERBS = { dim: 'dim', change_color: 'change color', flash_light: 'flash' };
+
+  function lightsReason(msg) {
+    const reason = typeof msg.reason === 'string' ? msg.reason.trim() : '';
+    if (reason) return reason;
+    return `Energy is ${msg.energy}, so the lights ${ACTION_VERBS[msg.action]}.`;
   }
 
   function colorName(hex) {
@@ -498,6 +511,8 @@
     els.bulbs.querySelectorAll('.bulb').forEach((bulb) => { bulb.style.cssText = ''; });
     els.ambient.style.cssText = '';
     els.lightsAction.textContent = 'Waiting';
+    els.lightsReason.textContent = '';
+    els.lightsReason.hidden = true;
     els.lightsAction.classList.remove('is-active');
     els.lightsEnergy.textContent = '—';
     els.lightsBrightness.textContent = '—';
@@ -552,6 +567,7 @@
     const running = isRunning();
     const paused = running && !state.playing;
     const live = state.phase === 'live';
+    emit('state', { phase: state.phase, playing: state.playing });
 
     els.playBtn.disabled = running || live;
     els.pauseBtn.disabled = live;
@@ -594,9 +610,15 @@
     state.timer = null;
   }
 
+  // Other modules (src/extras.js) listen for these to follow the panel without changing it.
+  function emit(name, detail) {
+    document.dispatchEvent(new CustomEvent(`lifelens:${name}`, { detail }));
+  }
+
   function step() {
     state.index += 1;
     const msg = state.messages[state.index];
+    emit('message', { msg, live: false });
     if (state.phase === 'activity') {
       renderEnergy(msg);
       renderTimeline(state.index);
@@ -699,6 +721,7 @@
 
   // Live data drives both views at once, since there is no fixed list to replay in two passes.
   function applyLiveMessage(msg) {
+    emit('message', { msg, live: true });
     renderEnergy(msg);
     renderLights(msg);
     renderMusic(msg);
