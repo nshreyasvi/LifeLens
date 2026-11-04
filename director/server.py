@@ -237,7 +237,7 @@ async def run(args: argparse.Namespace) -> None:
     project_root = Path(__file__).resolve().parents[1]
     load_dotenv(project_root / "director" / ".env")
     clip = load_clip(args.clip)
-    if args.captions == "muse":
+    if args.captions == "muse" and (clip.source_dir / "narration_muse.json").exists():   # else: activity.csv's narration
         clip = with_captions(clip, clip.source_dir / "narration_muse.json")
     clients: set[Any] = set()
     ready = asyncio.Event()

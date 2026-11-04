@@ -35,7 +35,8 @@ fills the main window, as it does on any machine without the dataset.*
 | From | You get | Made by |
 |---|---|---|
 | The head-camera video | Your 3D body (SMPL-H, 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → OmniEgoCap (body) |
-| The video, every 5 s | A caption of what you are doing, and a posture | Meta Muse Spark, from 3 frames |
+| The video, every 5 s | A caption of what you are doing | Meta Muse Spark, from 3 frames |
+| The body's numbers + the captions, every 5 s | A second posture label | Meta Muse Spark |
 | The 3D body, every second | Posture: walking, standing, sitting, crouching, bending, arms raised | Fixed rules on the body (below) |
 | All of the above | A review: what you did, what to change and why, compared with other recordings | Meta Muse Spark |
 | The 3D body, live | Mood and tempo (every ~6 s), light cues (every frame) | Director: Muse Spark + speed rules |
@@ -50,6 +51,8 @@ cp director/.env.example director/.env     # then set MUSE_API_KEY=...
 DIRECTOR_PYTHON=director/venv/bin/python npm run dev     # http://localhost:8000
 ```
 
+On Windows the venv's Python is `directorenv\Scripts\python.exe`; the dev server finds either one by itself.
+
 Enter your name, then pick one:
 
 - **Open a recording.** The two examples ([`examples/office`](examples/office), 83 s indoors;
@@ -62,8 +65,9 @@ Enter your name, then pick one:
 posture timeline (rules, Muse Spark, or the seconds where both agree), the Muse review and the other recordings.
 **Music** and **Stage** keep playing while you switch between them.
 
-The `director/.env` file is gitignored; the browser never sees the key. Without a key, the director runs on its speed
-rules only, and the app shows no mood or songs rather than defaults.
+The `director/.env` file is gitignored; the browser never sees the key. Without `director/.env`, the director runs on
+its speed rules only, and the app shows no mood or songs rather than defaults. With an empty key it falls back to a
+local Llama 3.2 through Ollama, when one is running.
 
 ## How it works
 
@@ -73,16 +77,16 @@ flowchart LR
   H --> F[floor fit<br/>gravity, height]
   F --> O[OmniEgoCap<br/>full 3D body]
   O --> R[render<br/>body + kinematics]
-  V --> M[Muse Spark<br/>caption + posture / 5 s]
-  R --> I[insights<br/>posture / s]
+  V --> M[Muse Spark<br/>captions / 5 s]
+  R & M --> I[posture / s<br/>rules + Muse]
   M & I --> T[Muse Spark<br/>review]
   R & I --> D[director<br/>fast + slow loop]
   D -->|ws://127.0.0.1:8765| UI[app: Routine,<br/>Music, Stage]
   T --> UI
 ```
 
-`python pipeline/run.py <video> <name>` writes everything to `runs/<name>/`. Each stage is skipped when its output
-exists; delete the file to redo it.
+`python pipeline/run.py <video> <name>` runs steps 1–7 into `runs/<name>/`; **Process** in the app also runs the Muse
+posture labels and the review. Each stage is skipped when its output exists; delete the file to redo it.
 
 1. **Ingest:** ffmpeg makes a 30 fps working video, at most 1920 px wide.
 2. **HaWoR** ([`hawor_export.py`](pipeline/hawor_export.py)) finds the wrists and 15 finger joints per hand. DROID-SLAM
@@ -95,8 +99,9 @@ exists; delete the file to redo it.
    elbow flexion, trunk lean and walking speed.
 6. **Captions** ([`describe_muse.py`](pipeline/describe_muse.py)): Muse Spark gets 3 frames per 5 s.
 7. **Insights** ([`insights.py`](pipeline/insights.py)): a posture every second, a time split and breaks. Then the
-   Muse posture labels ([`posture_muse.py`](director/posture_muse.py)) and the review
-   ([`routine_tips.py`](director/routine_tips.py)). The review saves its whole prompt, which the app shows under
+   Muse posture labels ([`posture_muse.py`](director/posture_muse.py)), the posture sources
+   ([`posture_sources.py`](bench/posture_sources.py)) and the review ([`routine_tips.py`](director/routine_tips.py)),
+   which **Process** runs after `run.py`. The review saves its whole prompt, which the app shows under
    **View Meta Muse Spark prompt payload**.
 
 If the 3D body fails, for example because SLAM had too little motion, the run stops with the error. It never
@@ -111,7 +116,7 @@ fixed formula, as listed here.
 |---|---|---|
 | 3D body, joint angles, speed | HaWoR + OmniEgoCap on your video | Smoothing σ = 2 frames; the camera's offset from the head is fixed at (0, 0.16, 0.12) m |
 | Captions | Muse Spark, 3 frames per 5 s | Muse can misread a frame |
-| Posture "Rules" | [`insights.py`](pipeline/insights.py) on the 3D body | Walking ≥ 0.5 m/s; a low posture held 8 s or more counts as sitting; tuned on the two demos |
+| Posture "Rules" | [`insights.py`](pipeline/insights.py) on the 3D body | Walking > 0.5 m/s; a low posture held 8 s or more counts as sitting; tuned on the demo clips |
 | Posture "Muse Spark" | Muse, from the body's numbers and the captions, per 5 s | Shows unknown where Muse gave no label |
 | Posture "Both agree" | The seconds where the rules and Muse name the same posture | Grey where they differ |
 | Agreement % (examples only) | Against the same rules run on OmniEgoDB's motion capture | It shares the rules' thresholds, so it favors the rules: agreement, not accuracy |
@@ -202,8 +207,8 @@ SLAM) is not measured.
 | office (83 s) | 100% | 84% | 84% | 63% |
 | outdoor (105 s) | 90% | 79% | 77% | 30% |
 
-The motion-capture labels come from the same rules run on the Xsens skeleton, so the rules column is an upper bound,
-not accuracy.
+The motion-capture labels come from the same rules run on the Xsens skeleton, so they favor the rules column: this
+is agreement, not accuracy.
 
 **Speed** ([`bench/live_fps.py`](bench/live_fps.py), a 10 s own-video clip):
 
@@ -212,9 +217,12 @@ not accuracy.
 | HaWoR: hands + DROID-SLAM | 30–77 (78–85% of the total) |
 | OmniEgoCap | 2.2–3.5 |
 | Render | 2.2–3.9 |
-| Muse captions | 1.3–1.6 |
+| Captions | 1.3–1.6 with the local Qwen3-VL used when this was measured; Muse Spark now takes 3.4–3.7 (one call per 5 s, office and outdoor) |
 | Whole pipeline | **39–90**, i.e. 0.3–0.8 fps against the 30 fps of live video |
 | Director fast loop | 0.06 ms per frame |
+
+The run was measured when captions and the summary still used the local Qwen3-VL (3.3–3.7 s per video second
+together). Muse Spark's captions take about the same, 3.4–3.7, so the total is about the same.
 
 So the 3D body cannot be live on this laptop; it would need a machine 40–90× faster. The live session therefore shows
 Muse's captions (about 7 s per reply) and builds the body after you stop.
