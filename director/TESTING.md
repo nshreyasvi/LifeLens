@@ -7,7 +7,7 @@ From the repository root:
 ```sh
 python3 -m venv director/venv
 source director/venv/bin/activate
-python -m pip install -r director/requirements.txt -r director/requirements-dev.txt
+python -m pip install -r director/requirements.txt
 cp director/.env.example director/.env
 ```
 
@@ -29,13 +29,15 @@ MODEL_PROVIDER=muse director/venv/bin/python -m director.server examples/robotho
 
 The recorded full-clip run returned 16/16 valid answers (mean 8.56 s, max 16.08 s); mood counts were calm 415 and curious 425. It logged 10 pre-arms, 6 blackouts, and 4 cancels. The stop near 136.9 s was canceled at 137.90 s; the stops near 176.4, 214.8, and 240.9 s blacked out at 177.40, 215.80, and 241.93 s.
 
-## Tests
+## Freeze detection on the real recordings
+
+Freeze detection reads the whole 3D body against the person's own movement ([`anticipation.py`](anticipation.py) `FreezePredictor`): the summed speed of both wrists, both ankles and the pelvis, compared with its 80th percentile over the previous 4 s. The score is how far it dropped times how long it stayed under a quarter of that (full at 0.8 s); the fast loop pre-dims when the score passes its threshold, blacks out if the body stays still for 1 s more, and raises the threshold after each false trigger.
+
+On the real recordings (`--no-model --speed 8`): office 7 pre-dims, 3 blackouts (at the water dispenser, 26.9 s and 35.2 s), 4 canceled; outdoor 2 pre-dims, 1 blackout, 1 canceled.
 
 ```sh
-director/venv/bin/python -m pytest director/tests -q
+director/venv/bin/python -m director.server examples/office --no-model --speed 8
 ```
-
-The current suite output is `68 passed`. The synthetic CSV replay ends with a cancel; it is not evidence of a synthetic blackout. Add `--no-model` to exercise only the fast loop, or `--speed 2` to shorten replay time.
 
 ## Reactive flash check
 

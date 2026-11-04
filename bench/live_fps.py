@@ -130,7 +130,7 @@ def pipeline(a):
 
 def director(a):
     sys.path.insert(0, ROOT)
-    from director.anticipation import StubPredictor
+    from director.anticipation import FreezePredictor
     from director.fast_loop import FastLoop
     from director.replay import load_clip
     rows = []
@@ -140,7 +140,7 @@ def director(a):
         load_s = time.perf_counter() - t0
         steps = []
         for _ in range(a.passes):           # fresh loop per pass, as a new replay would start
-            fast = FastLoop(StubPredictor())
+            fast = FastLoop(FreezePredictor())
             for f in clip.frames:
                 t = time.perf_counter()
                 json.dumps(fast.step(f)[0])

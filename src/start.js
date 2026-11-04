@@ -171,7 +171,11 @@ export async function showRecordings() {
     $('rec-raw').replaceChildren(...raw.map((r) => {
       const at = (status.queue ?? []).indexOf(r.name);
       const state = r.name === running ? `processing ${status.percent ?? 0}%` : at >= 0 ? `queued #${at + 1}` : 'saved, not processed';
-      const li = item(r.name, `${Math.max(1, Math.round(r.size / 2 ** 20))} MB · ${state}`, 'Process', (btn) => processVideo(r.file, btn));
+      const cam = cameraSelect(Object.assign(document.createElement('select'), { className: 'rec-camera' }));
+      cam.setAttribute('aria-label', `Camera used for ${r.name}`);
+      const li = item(r.name, `${Math.max(1, Math.round(r.size / 2 ** 20))} MB · ${state}`, 'Process',
+        (btn) => processVideo(r.file, btn, note, undefined, '', cam.value));
+      li.insertBefore(cam, li.querySelector('button'));
       li.querySelector('button').disabled = r.name === running || at >= 0;
       const del = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-small-text', textContent: 'Delete' });
       del.disabled = r.name === running || at >= 0;
@@ -192,7 +196,19 @@ export async function showRecordings() {
 }
 
 // Run the pipeline on a video in recordings/; shows the dedicated Processing Studio screen with progress bar & GPU telemetry.
-export async function processVideo(file, btn, onStep = note, onReady, previewUrl = '') {
+// The head camera a clip was filmed with: run.py's --camera presets (field of view, lens position, lens correction).
+export const CAMERAS = [['phone', 'Phone on a head strap'], ['gopro-linear', 'GoPro, Linear lens'],
+  ['gopro-wide', 'GoPro, Wide lens'], ['glasses', 'Meta Ray-Ban glasses']];
+const CAMERA_KEY = 'lifelens-camera';
+export const savedCamera = () => { try { return localStorage.getItem(CAMERA_KEY) || 'phone'; } catch { return 'phone'; } };
+export function cameraSelect(select, value = savedCamera()) {
+  select.replaceChildren(...CAMERAS.map(([v, label]) => Object.assign(document.createElement('option'), { value: v, textContent: label })));
+  select.value = value;
+  select.addEventListener('change', () => { try { localStorage.setItem(CAMERA_KEY, select.value); } catch { /* private window */ } });
+  return select;
+}
+
+export async function processVideo(file, btn, onStep = note, onReady, previewUrl = '', camera = savedCamera()) {
   if (btn) btn.disabled = true;
   const clipName = file.split('/').pop().replace(/\.[^.]+$/, '');
   showProcessModal({
@@ -209,7 +225,7 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
   const res = await fetch('/api/process', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file }),
+    body: JSON.stringify({ file, camera }),
   });
   const body = await res.json().catch(() => ({}));
   if (res.status === 202) {                                 // the pipeline is busy: queued, it starts by itself

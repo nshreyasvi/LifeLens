@@ -4,7 +4,7 @@
 
 import { media } from './extras.js';
 import { openRecording, session } from './session.js';
-import { enter, processVideo } from './start.js';
+import { cameraSelect, enter, processVideo } from './start.js';
 
 const $ = (id) => document.getElementById(id);
 const btn = $('record-btn');
@@ -61,6 +61,7 @@ const say = (text) => { caption.textContent = text; };
 
 async function startCamera() {
   media.clear();
+  showRequirement();           // what a live 3D body needs, with or without a camera
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 }, facingMode: 'environment' },
@@ -69,7 +70,6 @@ async function startCamera() {
     media.setLive(stream);
     btn.disabled = false;
     captionLoop(++liveRun);
-    showRequirement();
     say('Camera live · Record, then Stop to save the session.');
   } catch (err) {
     btn.disabled = true;
@@ -146,7 +146,7 @@ async function showRequirement() {
 
 $('saved-process').addEventListener('click', () => {
   $('saved-bar').hidden = true;
-  processVideo(saved, $('saved-process'), say, async (rec) => { await openRecording(rec); enter(); }, previewBlobUrl);
+  processVideo(saved, $('saved-process'), say, async (rec) => { await openRecording(rec); enter(); }, previewBlobUrl, $('rec-camera').value);
 });
 $('saved-again').addEventListener('click', () => {
   $('saved-bar').hidden = true;
@@ -158,9 +158,11 @@ btn.addEventListener('click', () => (recorder?.state === 'recording' ? recorder.
 document.addEventListener('lifelens:session', () => {
   btn.hidden = !session.live;
   $('rec-name').hidden = !session.live;
+  $('rec-camera').hidden = !session.live;
   if (!session.live) { $('live-req').hidden = true; $('saved-bar').hidden = true; }
   document.body.classList.toggle('is-live-session', session.live);
   if (session.live) startCamera();
   else stopCamera();
 });
 document.addEventListener('lifelens:leave', stopCamera);
+cameraSelect($('rec-camera'));

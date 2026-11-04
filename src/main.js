@@ -466,7 +466,7 @@ function reset() {
   els.lightsAction.classList.remove('is-active');
   els.lightsReason.hidden = true;
   els.tempoValue.textContent = '-';
-  player.ctrl?.pause();
+  if (player.song) player.ctrl?.pause();
   player.song = null;
   player.queue = [];
   els.playerBeat.textContent = 'No song yet';
@@ -511,7 +511,7 @@ function fail(reason) {
 }
 
 async function stopDirector() {
-  player.ctrl?.pause();
+  if (player.song) player.ctrl?.pause();
   await fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
   state.phase = 'paused';
   renderControls();
@@ -565,7 +565,7 @@ function connectLive() {
   socket.addEventListener('close', () => {
     socket = null;
     if (state.phase === 'live') state.phase = 'ended'; // the director closes at the end of the recording
-    if (!state.starting) player.ctrl?.pause();
+    if (!state.starting && player.song) player.ctrl?.pause();
     renderControls();
     if (state.starting) scheduleConnect(); // retry only while a Play is waiting for the director
 

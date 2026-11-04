@@ -15,7 +15,7 @@ From the LifeLens repository root:
 ```sh
 python3 -m venv director/venv
 source director/venv/bin/activate
-python -m pip install -r director/requirements.txt -r director/requirements-dev.txt
+python -m pip install -r director/requirements.txt
 cp director/.env.example director/.env
 ollama pull llama3.2:3b
 ```
@@ -35,20 +35,17 @@ Open the front-end in Live mode with `npm run dev`; it connects to `ws://127.0.0
 
 ![Director live on the Stage page](docs/director-live.png)
 
-## Test
-
-```sh
-python -m pytest director/tests -q
-```
-
 ## Results
 
 The office clip, 23–53 s, ran with Llama 3.2 3B: `ollama ps` showed 2.2 GB, the slow loop returned 5/5 valid replies, and mean/max reply time was 2.11/2.23 s. Its screen messages had moods `calm`, `curious`, and `joyful`.
 
 The office clip, 23–53 s, previously ran with Muse Spark: HTTP 200, 4/4 valid replies, and about 8 s mean reply time. In the full robothome clip at 2× speed, Muse returned 16/16 valid replies with 8.56 s mean and 16.08 s maximum latency; the screen mood counts were 415 calm and 425 curious.
 
-Freeze thresholds were tuned on the office 23–53 s window. These replay results do not measure a live performance.
-The current local test suite passes 68 tests.
+These replay results do not measure a live performance.
+
+Freeze detection reads the whole 3D body against the person's own movement ([`anticipation.py`](anticipation.py) `FreezePredictor`): the summed speed of both wrists, both ankles and the pelvis, compared with its 80th percentile over the previous 4 s. The score is how far it dropped times how long it stayed under a quarter of that (full at 0.8 s); the fast loop pre-dims when the score passes its threshold, blacks out if the body stays still for 1 s more, and raises the threshold after each false trigger.
+
+On the real recordings (`--no-model --speed 8`): office 7 pre-dims, 3 blackouts (at the water dispenser, 26.9 s and 35.2 s), 4 canceled; outdoor 2 pre-dims, 1 blackout, 1 canceled.
 
 A no-model fast-loop pass over the full clips produced reactive flashes and blackouts:
 
@@ -63,7 +60,7 @@ A no-model fast-loop pass over the full clips produced reactive flashes and blac
 * Energy is pelvis walking speed only; arm and hand movement and dancing in place do not trigger flashes.
 * `speed_m_s` comes from `pipeline/render.py` with centred 15-frame smoothing, so replay flashes can land about 0.25 s early compared with live input.
 * Flashes are reactive to a measured speed jump, not predicted. They mostly fire when walking starts.
-* Freeze prediction uses the stand-in speed-drop predictor; its confidence value is a placeholder, not a calibrated probability.
+* Freeze detection is a rule on the whole 3D body (FreezePredictor): its score comes from the drop in movement and how long it held, not a trained, calibrated probability.
 * The demo replays a recorded clip; it is not a live camera feed yet.
 * Tempo stays inside the chosen mood's range from `music_map.py` and moves at most 10 BPM per update, so after a mood change the tempo can take a few updates to arrive.
 * The WebSocket has no authentication. Keep it bound to `127.0.0.1`.
@@ -76,4 +73,3 @@ A no-model fast-loop pass over the full clips produced reactive flashes and blac
 * [Pydantic](https://docs.pydantic.dev/)
 * [python-dotenv](https://github.com/theskumar/python-dotenv)
 * [certifi](https://github.com/certifi/python-certifi)
-* [pytest](https://docs.pytest.org/)

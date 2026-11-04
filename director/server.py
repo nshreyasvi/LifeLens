@@ -12,7 +12,7 @@ from typing import Any
 from dotenv import load_dotenv
 import websockets
 
-from .anticipation import StubPredictor
+from .anticipation import FreezePredictor
 from .fast_loop import FastLoop
 from .replay import Clip, load_clip, with_captions
 from .features import STILL_SPEED_M_S, is_still_speed
@@ -97,10 +97,7 @@ async def send_screen(clients: set[Any], publisher: ScreenPublisher,
 async def replay(clip: Clip, *, speed: float, start: float, duration: float | None,
                  no_model: bool, clients: set[Any], max_muse_calls: int = 30,
                  describe: str = "qwen") -> None:
-    predictor_name = os.getenv("PREDICTOR", "stub").lower()
-    if predictor_name != "stub":
-        raise ValueError("Only the stub predictor is supported right now.")
-    predictor = StubPredictor()
+    predictor = FreezePredictor()           # whole-body freeze detection (anticipation.py)
     fast = FastLoop(predictor)
     dam_descriptions = load_dam_descriptions(clip.source_dir) if describe in {"dam", "both"} else []
     slow = SlowLoop(no_model=no_model, max_muse_calls=max_muse_calls,

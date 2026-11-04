@@ -28,6 +28,8 @@ const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arm
 // the exercises pipeline/gymify.py knows (its EXERCISES); '' lets Muse Spark recognise it from the 3D body frames
 const GYM_EXERCISES = ['squat', 'lunge', 'jump squat', 'step-up', 'deadlift', 'good morning', 'hip hinge', 'sit-up',
   'push-up', 'bicep curl', 'shoulder press', 'tricep dip', 'jumping jacks', 'arm raise'];
+// head cameras pipeline/run.py knows (--camera): field of view, lens position in the head, lens correction
+const CAMERAS = ['phone', 'gopro-linear', 'gopro-wide', 'glasses'];
 const PATTERNS = ['pulse', 'chase', 'strobe', 'still'];
 const STAGE_FILES = { 'stage.json': 5 * 2 ** 20, 'stage_cues.csv': 20 * 2 ** 20, 'stage_show.webm': 400 * 2 ** 20 };
 const PLAN_PROMPT = `You are the lighting designer and music supervisor of a stage show made from one recording. The
@@ -193,10 +195,10 @@ function lifelensApi() {
     return { processed: [...found.values()].sort((a, b) => a.name.localeCompare(b.name)), raw };
   }
 
-  function processSteps(file, name) {
+  function processSteps(file, name, camera = '') {
     const history = recordings().processed.filter((r) => r.name !== name).map((r) => r.base).join(' ');
     return [
-      ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'`)],
+      ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'${camera ? ` --camera ${camera}` : ''}`)],
       ['3D body frames', false, ...wsl(`${env('vlm')}/python pipeline/body_frames.py --run runs/${name}`)],   // what Muse sees
       ['Meta Muse Spark posture', false, python(), ['-m', 'director.posture_muse', `runs/${name}`]],
       ['Posture sources', false, ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
@@ -229,7 +231,7 @@ function lifelensApi() {
   // Clips waiting for the pipeline, in order: the next starts when a job finishes or fails.
   const queue = [];
   const busy = () => job && !job.done && !job.error;
-  function startJob(file, name) {
+  function startJob(file, name, camera) {
     const now = Date.now();
     job = {
       file, name, step: PIPELINE_STAGES[0].label, index: 0, stageIndex: 0, stageAt: now, startedAt: now, percent: 0,
@@ -237,9 +239,9 @@ function lifelensApi() {
       failed: new Set(), // optional stages that failed or were skipped
       done: false,
     };
-    runSteps(processSteps(file, name));
+    runSteps(processSteps(file, name, camera));
   }
-  const nextJob = () => { const q = queue.shift(); if (q) startJob(q.file, q.name); };
+  const nextJob = () => { const q = queue.shift(); if (q) startJob(q.file, q.name, q.camera); };
 
   function runSteps(steps, i = 0) {
     if (i === steps.length) {
@@ -348,16 +350,17 @@ function lifelensApi() {
 
       server.middlewares.use('/api/process', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
-        const { file } = await readBody(req);
+        const { file, camera = '' } = await readBody(req);
+        if (camera && !CAMERAS.includes(camera)) return send(res, 400, { error: 'Unknown camera.' });
         const name = typeof file === 'string' ? basename(file, extname(file)) : '';
         if (!file?.startsWith('recordings/') || !VIDEO.test(file) || !NAME.test(name) || !existsSync(join(root, file))) {
           return send(res, 400, { error: 'Pick a video from recordings/.' });
         }
         if (busy()) {                                       // the pipeline is busy: wait in the queue
-          if (job.file !== file && !queue.some((q) => q.file === file)) queue.push({ file, name });
+          if (job.file !== file && !queue.some((q) => q.file === file)) queue.push({ file, name, camera });
           return send(res, 202, { queued: queue.findIndex((q) => q.file === file) + 1, running: job.name });
         }
-        startJob(file, name);
+        startJob(file, name, camera);
         send(res, 200, statusPayload());
       });
 

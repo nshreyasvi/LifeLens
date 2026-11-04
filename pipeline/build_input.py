@@ -37,12 +37,9 @@ def floor_plane(points: np.ndarray, cams: np.ndarray, iters: int = 1000, tol: fl
         inliers = np.abs((points - a) @ n) < tol
         if best is None or inliers.sum() > best.sum():
             best = inliers
-    if best is None:
-        # Fallback for desk/webcam clips where the floor 0.9-2.2 m down is out of view: use initial camera -Y as world up
-        up = np.array([0.0, -1.0, 0.0], dtype=np.float64)
-        up /= np.linalg.norm(up)
-        center = np.median(cams, axis=0) - up * 1.45
-        return up, center, 0.0
+    if best is None:      # no assumed floor: a body on a guessed floor is not a result
+        raise SystemExit('No floor found 0.9-2.2 m below the camera in the SLAM points: keep some floor in view '
+                         '(tilt the camera 20-30 deg down) and record while moving around.')
     center = points[best].mean(0)
     n = np.linalg.svd(points[best] - center)[2][-1]     # least-squares refit on the inliers
     return (n if np.median((cams - center) @ n) > 0 else -n), center, float(best.mean())
@@ -106,10 +103,12 @@ def main(a):
     with open(f'{run}/calibration.json', 'w') as f:
         json.dump(report, f, indent=2)
     print(json.dumps(report, indent=2))
-    if not 1.2 < cam_height < 2.0:
-        print(f'WARNING: camera {cam_height:.2f} m above the fitted floor at the start; floor or SLAM scale may be off')
     if report['calib_window_motion_m'] > 0.3:
         print('WARNING: camera moved > 0.3 m during the calibration window; floor and mount tilt may be off')
+    if not 1.0 < cam_height < 2.2:      # a head camera can't be there: the floor fit or the SLAM scale is wrong
+        raise SystemExit(f'Calibration failed: the camera is {cam_height:.2f} m above the fitted floor at the start '
+                         f'(floor fit {inlier_frac:.0%} of points). Stand still for the first 3 s with floor in view, '
+                         'and pick the right device (lens).')
 
 
 if __name__ == '__main__':

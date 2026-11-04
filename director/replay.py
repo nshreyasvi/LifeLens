@@ -96,8 +96,16 @@ def load_clip(path: str | Path) -> Clip:
     if not by_second:
         raise ValueError(f"activity.csv has no activity rows for clip '{clip_dir.name}'")
 
+    # whole-body motion per frame from the 3D joints: what the freeze detector reads (not the pelvis alone)
+    limbs = ("left_wrist", "right_wrist", "left_ankle", "right_ankle", "pelvis")
+    motion = [0.0]
+    for k in range(1, len(world)):
+        dt = max(1e-3, times[k] - times[k - 1])
+        motion.append(sum(math.dist([float(world[k][f"{j}_{a}"]) for a in "xyz"],
+                                    [float(world[k - 1][f"{j}_{a}"]) for a in "xyz"]) for j in limbs) / dt)
+
     frames: list[FrameFeatures] = []
-    for pose_row, point, speed, t in zip(pose, points, speeds, times):
+    for pose_row, point, speed, t, move in zip(pose, points, speeds, times, motion):
         label_row = by_second.get(int(t), {})
         frames.append(FrameFeatures(
             time_s=t,
@@ -110,6 +118,7 @@ def load_clip(path: str | Path) -> Clip:
             narration=label_row.get("narration", ""),
             floor_x=point[0],
             floor_y=point[1],
+            motion=move,
         ))
     deltas = [b.time_s - a.time_s for a, b in zip(frames, frames[1:]) if b.time_s > a.time_s]
     fps = 1.0 / (sum(deltas) / len(deltas)) if deltas else 30.0

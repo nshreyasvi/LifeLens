@@ -15,7 +15,6 @@
   <a href="#platforms"><img alt="CUDA" src="https://img.shields.io/badge/CUDA-12.6-76B900?style=flat-square&logo=nvidia&logoColor=white"></a>
   <a href="#platforms"><img alt="Apple MPS" src="https://img.shields.io/badge/Apple_MPS-partial-555555?style=flat-square&logo=apple&logoColor=white"></a>
   <a href="#set-up-the-pipeline"><img alt="Python" src="https://img.shields.io/badge/python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white"></a>
-  <a href="director/TESTING.md"><img alt="Tests" src="https://img.shields.io/badge/tests-70_passed-16794B?style=flat-square&logo=pytest&logoColor=white"></a>
   <a href="#licenses"><img alt="License" src="https://img.shields.io/badge/weights_%26_data-CC_BY--NC_4.0-57554F?style=flat-square"></a>
 </p>
 
@@ -71,7 +70,8 @@ Enter your name, then pick one:
   [`examples/outdoor`](examples/outdoor), 105 s outside) work without a GPU. So does any run in `runs/`. Saved,
   unprocessed clips in `recordings/` have **Process** and **Delete**; several can be queued.
 - **New live session.** Your camera becomes the POV, and every 6 s Muse Spark captions two frames and names your
-  posture over it. Name the recording, **Record**, then **Stop**: the clip is saved, not processed. **Process now**
+  posture over it. Name the recording, pick the camera (phone, GoPro Linear or Wide, Meta Ray-Ban glasses), **Record**,
+  then **Stop**: the clip is saved, not processed. **Process now**
   (or later, from Open a recording) builds the 3D body, the music and the stage show at full quality, and the session
   is there next time. A live 3D body would need about 1–2 fps: an NVIDIA GPU with 16 GB of VRAM or more (RTX
   4080/4090 class, estimated; an RTX 4060 Laptop measured 0.3–0.8 fps).
@@ -137,13 +137,13 @@ fixed formula, as listed here.
 | 3D body, joint angles, speed | HaWoR + OmniEgoCap on your video | Smoothing σ = 2 frames; the camera's offset from the head is fixed at (0, 0.16, 0.12) m |
 | Captions | Muse Spark, 3 frames per 5 s | Muse can misread a frame |
 | Posture "Rules" | [`insights.py`](pipeline/insights.py) on the 3D body | Walking > 0.5 m/s; a low posture held 8 s or more counts as sitting; tuned on the demo clips |
-| Posture "Muse Spark" | Muse, from a 3D body frame and the caption per 5 s ([`posture_muse.py`](director/posture_muse.py)) | No numbers: Muse looks at the body. Shows unknown where Muse gave no label |
+| Posture "Muse Spark" | Muse, from two frames per 5 s: the 3D body and the head camera ([`posture_muse.py`](director/posture_muse.py)) | Frames only: no numbers and no text. Shows unknown where Muse gave no label |
 | Posture "Both agree" | The seconds where the rules and Muse name the same posture | Grey where they differ |
 | Agreement % (examples only) | Against the same rules run on OmniEgoDB's motion capture | It shares the rules' thresholds, so it favors the rules: agreement, not accuracy |
 | Review | Muse Spark, from the posture log, captions, totals and 8 3D body frames | Other recordings may be other people (the two examples are different OmniEgoDB wearers) |
 | Mood | Muse Spark every ~6 s | |
 | Tempo | The body's rhythm: the lag (60–180 BPM) at which all four limbs' speeds over the last 8 s best repeat ([`session.js`](src/session.js) `rhythmBpm`) | Used when the match is 0.3 or more. Otherwise Muse's tempo for the mood, which moves toward the mood's range by at most 10 BPM per update ([`music_map.py`](director/music_map.py)) |
-| Overall light level, flashes, freeze | Speed rules ([`fast_loop.py`](director/fast_loop.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s. The freeze "predictor" is a stand-in with a fixed score |
+| Overall light level, flashes, freeze | Speed rules ([`fast_loop.py`](director/fast_loop.py)); freeze from the whole body ([`anticipation.py`](director/anticipation.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s. Freeze: whole-body motion against the person's own last 4 s (score = drop × time held), not a fixed score |
 | Each light | Its body part plus poses, jumps, crouches, turns and arm hits ([`stage.js`](src/stage.js)) | Fixed scales and thresholds, listed under [Music and stage](#music-and-stage) |
 | Scene (palette, beat pattern, focus, strobe) | Muse Spark, 10 s after its last answer, from the body's numbers, a 3D body frame and the song, with its reason ([`vite.config.js`](vite.config.js) `/api/stage/scene`) | Until the first answer, the rules run with the director's colour |
 | Energy (low/medium/high) | Pelvis speed divided by the clip's own 95th percentile | Relative to the clip, not absolute |
@@ -221,6 +221,11 @@ Gymify (Gym tab, [`pipeline/gymify.py`](pipeline/gymify.py)) analyses an exercis
 3. **Coaching:** Muse sees the 3D body at the start and the bottom of the first, middle and last rep, plus a POV frame,
    with the measured numbers. It returns form observations, changes (what, why, how), what went well, and a music
    profile. **Play gym music** finds songs for that profile on ReccoBeats.
+
+**Status on a real workout:** there is no workout recording in the repo yet. A public workout clip (WEAR, a head-mounted
+GoPro tilted 45° down with a wide lens) failed the camera calibration twice: the camera came out −4.4 m and −1.3 m
+above the fitted floor. The pipeline stopped instead of making a body. For your own workout, use a phone on a head
+strap, pick it in the camera list, and stand still for the first 3 s with some floor in view.
 
 ## Stagify
 
@@ -337,15 +342,16 @@ Muse's captions (about 7 s per reply) and builds the body after you stop.
   of yourself for a real history.
 - **Muse Spark** can misread a frame or time out (3 retries). Its mood updates stop after 30 calls per Play
   (`--max-muse-calls`).
-- **Freeze** detection is a stand-in (a fixed score after a sustained stop), not a trained model.
+- **Freeze** detection is a rule on the body (whole-body motion against the person's own recent movement), not a
+  trained model.
 
 ## Director
 
 [`director/server.py`](director/server.py) replays a processed recording and streams JSON cues over
 `ws://127.0.0.1:8765`. The fast loop (every frame) sets brightness, zone color and flashes from speed. The slow loop
 (about every 6 s) asks Muse Spark for mood and tempo. The app starts and stops it with **Play** and **Pause**. More
-in [director/README.md](director/README.md) and [director/TESTING.md](director/TESTING.md):
-`python -m pytest director/tests -q`, 70 passed.
+in [director/README.md](director/README.md) and [director/TESTING.md](director/TESTING.md). There are no synthetic
+tests: the checks run on the real recordings.
 
 ## Licenses
 

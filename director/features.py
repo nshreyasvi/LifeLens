@@ -33,6 +33,7 @@ class FrameFeatures:
     narration: str
     floor_x: float
     floor_y: float
+    motion: float = 0.0     # whole-body motion: summed speed (m/s) of both wrists, both ankles and the pelvis
 
     @property
     def energy_word(self) -> str:

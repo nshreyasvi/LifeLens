@@ -12,48 +12,50 @@ class Predictor(Protocol):
     def predict(self, features: Any) -> dict[str, Any]: ...
 
 
-class StubPredictor:
-    """Local speed stand-in: report freeze detection after a sustained stop from movement."""
+class FreezePredictor:
+    """Freeze detection from the whole 3D body, against the person's own movement (no fixed score):
+    moving level = the 80th percentile of whole-body motion (wrists, ankles, pelvis) over the previous 4 s;
+    drop = how far the motion of the last 0.3 s fell below that level; still = how long it has stayed under a quarter
+    of it. Score = drop x min(1, still / 0.8 s). The fast loop pre-arms when the score passes its threshold, which rises
+    after each false trigger."""
 
-    def __init__(self, *, still_speed_m_s: float = STILL_SPEED_M_S, still_for_s: float = 0.8,
-                 moving_speed_m_s: float = 0.25, moving_lookback_s: float = 4.0,
-                 cancel_cooldown_s: float = 3.0):
-        self.still_speed_m_s = still_speed_m_s
-        self.still_for_s = still_for_s
-        self.moving_speed_m_s = moving_speed_m_s
-        self.moving_lookback_s = moving_lookback_s
+    def __init__(self, *, lookback_s: float = 4.0, recent_s: float = 0.3, still_fraction: float = 0.25,
+                 full_after_s: float = 0.8, report_from: float = 0.5, cancel_cooldown_s: float = 3.0):
+        self.lookback_s, self.recent_s = lookback_s, recent_s
+        self.still_fraction, self.full_after_s, self.report_from = still_fraction, full_after_s, report_from
         self.cancel_cooldown_s = cancel_cooldown_s
-        self.last_moving_s: float | None = None
+        self.history: deque[tuple[float, float]] = deque()
         self.still_since_s: float | None = None
-        self.event_sent_for_still = False
         self.cooldown_until_s = float("-inf")
 
     def on_cancel(self, time_s: float) -> None:
         self.cooldown_until_s = max(self.cooldown_until_s, time_s + self.cancel_cooldown_s)
 
     def predict(self, features: Any) -> dict[str, Any]:
-        t = float(features.time_s if hasattr(features, "time_s") else features["time_s"])
-        speed = float(features.speed_m_s if hasattr(features, "speed_m_s") else features["speed_m_s"])
-        if not isfinite(t) or not isfinite(speed) or speed < 0:
+        get = (lambda k: getattr(features, k)) if hasattr(features, "time_s") else features.__getitem__
+        t, motion = float(get("time_s")), float(get("motion"))
+        if not isfinite(t) or not isfinite(motion) or motion < 0:
             return Prediction().model_dump()
-        if speed >= self.moving_speed_m_s:
-            self.last_moving_s = t
-        if is_still_speed(speed, self.still_speed_m_s):
-            if self.still_since_s is None:
-                self.still_since_s = t
-                self.event_sent_for_still = False
+        self.history.append((t, motion))
+        while self.history and self.history[0][0] < t - self.lookback_s - self.recent_s:
+            self.history.popleft()
+        before = sorted(m for s, m in self.history if s < t - self.recent_s)
+        recent = [m for s, m in self.history if s >= t - self.recent_s]
+        if len(before) < 10 or not recent:
+            return Prediction().model_dump()
+        level = before[int(0.8 * (len(before) - 1))]
+        now = sum(recent) / len(recent)
+        if level <= 1e-6:                    # no movement to freeze from
+            self.still_since_s = None
+            return Prediction().model_dump()
+        if now < self.still_fraction * level:
+            self.still_since_s = t if self.still_since_s is None else self.still_since_s
         else:
             self.still_since_s = None
-            self.event_sent_for_still = False
-        was_moving = (self.last_moving_s is not None and self.still_since_s is not None
-                      and self.last_moving_s < self.still_since_s
-                      and self.still_since_s - self.last_moving_s <= self.moving_lookback_s)
-        sustained = (self.still_since_s is not None and
-                     t - self.still_since_s >= self.still_for_s)
-        if (was_moving and sustained and not self.event_sent_for_still
-                and t >= self.cooldown_until_s):
-            self.event_sent_for_still = True
-            return Prediction(event="freeze", prob=0.82, eta_ms=1000).model_dump()
+        held = 0.0 if self.still_since_s is None else t - self.still_since_s
+        prob = max(0.0, 1.0 - now / level) * min(1.0, held / self.full_after_s)
+        if prob >= self.report_from and t >= self.cooldown_until_s:
+            return Prediction(event="freeze", prob=round(prob, 3), eta_ms=1000).model_dump()
         return Prediction().model_dump()
 
 

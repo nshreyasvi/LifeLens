@@ -208,7 +208,7 @@
           <div class="rec-list" id="rec-list" hidden>
             <div class="rec-list-head">
               <span>Available sessions</span>
-              <span class="rec-count-chip" id="rec-count-chip">2 ready</span>
+              <span class="rec-count-chip" id="rec-count-chip">Loading…</span>
             </div>
             <ul id="rec-processed" aria-label="Processed recordings"></ul>
             <ul id="rec-raw" aria-label="Videos to process"></ul>
@@ -264,7 +264,7 @@
           <div class="process-hw-card">
             <div class="process-card-label">
               <span>Compute &amp; Hardware Telemetry</span>
-              <span class="chip" id="hw-stack-chip">WSL2 CUDA</span>
+              <span class="chip" id="hw-stack-chip">Detecting…</span>
             </div>
             <div class="process-hw-grid">
               <div class="hw-tile">
@@ -281,7 +281,7 @@
               <div class="hw-tile hw-tile-wide">
                 <span class="hw-tile-label">Active AI &amp; Biomechanics Models</span>
                 <strong class="hw-tile-value">HaWoR · OmniEgoCap · Meta Muse Spark</strong>
-                <span class="hw-tile-sub">30 fps 3D full-body &amp; hand reconstruction + multimodal routine analysis</span>
+                <span class="hw-tile-sub">3D body and hands as 30 fps motion (processing runs at 0.3-0.8 fps on an RTX 4060 Laptop) + Muse Spark routine analysis</span>
               </div>
             </div>
           </div>
@@ -367,6 +367,7 @@
         <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2.5a.5.5 0 0 0-.8-.4L6.6 5.6a.5.5 0 0 0 0 .8l4.6 3.5a.5.5 0 0 0 .8-.4V7a5 5 0 1 1-5 5.2 1 1 0 0 0-2 0A7 7 0 1 0 12 5z"/></svg>
       </button>
       <input class="rec-name-input" id="rec-name" type="text" maxlength="40" placeholder="Name this recording" aria-label="Recording name" hidden>
+      <select class="rec-camera" id="rec-camera" aria-label="Camera used" hidden></select>
       <button class="btn btn-record" id="record-btn" type="button" hidden>
         <svg class="icon icon-rec" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
         <span id="record-label">Record</span>

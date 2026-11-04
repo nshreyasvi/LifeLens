@@ -235,3 +235,8 @@ body.show-open { overflow: hidden; }
 .gym-chip { padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 0.8rem; }
 .stagify-status { margin: 0; font-size: 0.84rem; color: var(--accent-text); }
 .stagify-out { display: flex; flex-wrap: wrap; gap: 8px; }
+.rec-camera {
+  min-height: 34px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-strong);
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem;
+}
+.rec:has(> select) { grid-template-columns: minmax(0, 1fr) auto auto auto auto; }
