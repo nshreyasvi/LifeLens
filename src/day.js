@@ -270,8 +270,9 @@ function showNow(s) {
   $('now-window').textContent = `${clock(start)}-${clock(Math.min(start + 5, view.labels.length))}`;
   $('now-posture').textContent = view.labels[s] && view.labels[s] !== 'unknown' ? capitalize(view.labels[s]) : 'No label';
   $('now-caption').textContent = cap && !cap.text.startsWith('[') ? tidy(cap.text) : 'No caption for this moment.';
-  for (const [id, name] of [['now-body', 'body'], ['now-pov', 'pov']]) {
-    const img = $(id);
+  for (const [id, name, alt] of [['now-body', 'body', 'The 3D body frame Muse Spark looked at'],
+    ['now-pov', 'pov', 'The head-camera frame Muse Spark looked at']]) {
+    const img = $(id) ?? $(`${id}-fig`).insertAdjacentElement('afterbegin', Object.assign(document.createElement('img'), { id, alt, hidden: true }));
     img.onerror = () => { img.hidden = true; };
     img.onload = () => { img.hidden = false; };
     img.src = base ? `/${base}/frames/${name}_${String(start).padStart(4, '0')}.jpg` : '';
