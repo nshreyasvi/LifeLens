@@ -1,0 +1,125 @@
+{
+  "clips": {
+    "exercising": {
+      "duration_min": 0.93,
+      "minutes": {
+        "walking": 0.42,
+        "standing": 0.25,
+        "sitting": 0.0,
+        "crouching": 0.0,
+        "bending": 0.17,
+        "arms raised": 0.1,
+        "unknown": 0.0
+      },
+      "share": {
+        "walking": 0.446,
+        "standing": 0.268,
+        "sitting": 0.0,
+        "crouching": 0.0,
+        "bending": 0.179,
+        "arms raised": 0.107,
+        "unknown": 0.0
+      },
+      "sit_stand_transitions": 0,
+      "longest_sitting_min": 0.0,
+      "walking_distance_m": 27.6,
+      "bent_over_min": 0.17
+    }
+  },
+  "total": {
+    "duration_min": 0.93,
+    "minutes": {
+      "walking": 0.42,
+      "standing": 0.25,
+      "sitting": 0.0,
+      "crouching": 0.0,
+      "bending": 0.17,
+      "arms raised": 0.1,
+      "unknown": 0.0
+    },
+    "share": {
+      "walking": 0.446,
+      "standing": 0.268,
+      "sitting": 0.0,
+      "crouching": 0.0,
+      "bending": 0.179,
+      "arms raised": 0.107,
+      "unknown": 0.0
+    },
+    "sit_stand_transitions": 0,
+    "longest_sitting_min": 0.0,
+    "walking_distance_m": 27.6,
+    "bent_over_min": 0.17
+  },
+  "posture_from": "Meta Muse Spark",
+  "log": "Total 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min\n0 times sat or crouched down, longest sitting 0.0 min, walked 27.6 m, bent over 0.17 min.\nClip exercising:\n  walking 20 s. The camera wearer walks forward. The camera wearer is walking forward.\n  standing 5 s. The camera wearer walks then squats down.\n  arms raised 5 s. The camera wearer stands and clasps hands together.\n  bending 5 s. The camera wearer unclasps their hands.\n  standing 5 s. The camera wearer stands up.\n  walking 5 s. The camera wearer spins in place.\n  bending 5 s. The camera wearer bends to touch their shoes.\n  standing 5 s. The camera wearer stands up from a crouch.\n  arms raised 1 s. The camera wearer stands still.",
+  "runtime_s": 0.3,
+  "report": {
+    "summary": "This 0.93 min exercising recording shows almost continuous movement with no sitting. The person walks forward for 0.42 min covering 27.6 m, then alternates short standing, bending and arms-raised bouts such as squatting, clasping hands and bending to touch shoes.",
+    "what_they_did": [
+      "0:00-0:20: walks forward (walking)",
+      "0:20-0:25: walks then squats down (standing)",
+      "0:25-0:30: stands and clasps hands together (arms raised)",
+      "0:30-0:35: unclasps hands (bending)",
+      "0:35-0:40: stands up (standing)",
+      "0:40-0:45: spins in place (walking)",
+      "0:45-0:50: bends to touch shoes (bending)",
+      "0:50-0:55: stands up from a crouch (standing)"
+    ],
+    "posture_and_movement": [
+      "Stayed upright for the full 0.93 min with 0.42 min walking, 0.25 min standing, 0.17 min bending and 0.1 min with arms raised, and 0 sit-downs.",
+      "Walked 27.6 m during 0.42 min walking, with longest sit 0.0 min so there was no sitting break.",
+      "Bent over for 0.17 min in two 5 s bouts at 0:30 and 0:45, with the 3D body at 0:30 showing bent knees and hands forward and the caption at 0:45 bends to touch shoes.",
+      "Standing totaled 0.25 min in 5 s bouts at 0:20, 0:35 and 0:50, with the 3D bodies at 0:20 and 0:35 showing upright still figures after walking."
+    ],
+    "compared_with_history": [
+      "No other recordings were provided, so there are no earlier recordings to compare this exercising clip with.",
+      "Without history, the 27.6 m in 0.42 min walking and 0.17 min bent over in this 0.93 min cannot be judged as more or less than usual."
+    ],
+    "improvements": [
+      {
+        "change": "Pause during the squat at 0:20",
+        "why": "Muse noted walks then squats down in a 5 s standing bout at 0:20",
+        "how": "hold the low position for a breath when squatting down before standing to clasp hands at 0:25"
+      },
+      {
+        "change": "Keep hands in sight during the clasp at 0:25",
+        "why": "arms raised lasted only 0.1 min including the 5 s at 0:25 stands and clasps hands together",
+        "how": "lift clasped hands to chest height and hold while standing still as seen in the 3D body at 0:25"
+      },
+      {
+        "change": "Bend knees when touching shoes at 0:45",
+        "why": "bent over 0.17 min includes 0:45 bends to touch their shoes",
+        "how": "soften knees like the bent-knee shape at 0:30 when reaching down to shoes then stand up at 0:50"
+      },
+      {
+        "change": "Slow the spin at 0:40",
+        "why": "walking 5 s at 0:40 is spins in place after standing up at 0:35",
+        "how": "take small steps to turn during the spin instead of pivoting fast, then stand still at 0:55"
+      }
+    ],
+    "went_well": [
+      "Kept moving for the whole 0.93 min with 0 sit-downs and longest sit 0.0 min.",
+      "Mixed walking 0.42 min and 27.6 m with standing, bending and arms-raised moves without long stops."
+    ],
+    "caveats": [
+      "Posture names from Muse can be wrong, for example the squat at 0:20 is called standing while the caption says squats down.",
+      "Legs are estimated in 3D that the head camera never sees, so foot steps, squat depth and shoe touch at 0:45 are uncertain."
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "history": [],
+    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (exercising, 0.93 min)\nRecorded 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min. Walked 27.6 m, 0 sit-downs, longest sit 0.0 min, bent over 0.17 min.\nPosture bouts and what Muse saw:\nTotal 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min\n0 times sat or crouched down, longest sitting 0.0 min, walked 27.6 m, bent over 0.17 min.\nClip exercising:\n  walking 20 s. The camera wearer walks forward. The camera wearer is walking forward.\n  standing 5 s. The camera wearer walks then squats down.\n  arms raised 5 s. The camera wearer stands and clasps hands together.\n  bending 5 s. The camera wearer unclasps their hands.\n  standing 5 s. The camera wearer stands up.\n  walking 5 s. The camera wearer spins in place.\n  bending 5 s. The camera wearer bends to touch their shoes.\n  standing 5 s. The camera wearer stands up from a crouch.\n  arms raised 1 s. The camera wearer stands still.\nMuse's captions every 5 s:\n0:00 The camera wearer walks forward.\n0:05 The camera wearer is walking forward.\n0:10 The camera wearer walks forward.\n0:15 The camera wearer walks forward.\n0:20 The camera wearer walks then squats down.\n0:25 The camera wearer stands and clasps hands together.\n0:30 The camera wearer unclasps their hands.\n0:35 The camera wearer stands up.\n0:40 The camera wearer spins in place.\n0:45 The camera wearer bends to touch their shoes.\n0:50 The camera wearer stands up from a crouch.\n0:55 The camera wearer stands still.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, 0:25, 0:30, 0:35, in order: use them for posture and movement.\n\nOTHER RECORDINGS\nnone\n\nAbout the person: 178 cm."
+  },
+  "suggestions": {
+    "lines": [
+      "Pause during the squat at 0:20",
+      "Keep hands in sight during the clasp at 0:25",
+      "Bend knees when touching shoes at 0:45"
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "earlier_days": 0,
+    "sample_days": 0
+  }
+}

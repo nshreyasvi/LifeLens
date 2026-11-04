@@ -1,0 +1,175 @@
+{
+ "activity": "squat workout",
+ "active": true,
+ "too_short": false,
+ "duration_s": 56.6,
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 18.9,
+   "features": {
+    "pace": 1.081998409893993,
+    "still": 0.0176678445229682,
+    "arm": 8.287291488435493,
+    "upright": 0.8493303180212014,
+    "rhythm": {
+     "bpm": 112.5,
+     "strength": 0.4924941430250433
+    }
+   },
+   "what_happens": "Walking forward steadily at moderate pace",
+   "style": "upbeat indie walk",
+   "mood": "joyful",
+   "why": "Bright ~112 BPM pop matches the steady 1.08 m/s forward walk and upright rhythm.",
+   "targets": {
+    "energy": 0.7409435389157013,
+    "danceability": 0.5861823575597078,
+    "valence": 0.8821986431095407,
+    "acousticness": 0.16236749116607774,
+    "instrumentalness": 0.11060070671378093,
+    "loudness": -6.983346584216724,
+    "tempo": 112,
+    "tempo_from": "body rhythm"
+   },
+   "songs": [
+    {
+     "id": "2242526e-a452-4561-90f4-adcc805a0e4b",
+     "name": "Walking On Sunshine",
+     "spotifyId": "05wIrZSwuaVWhcv5FfqeH0",
+     "artist": "Katrina & The Waves",
+     "tempo": 110,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "e4267347-ac6a-4c80-b93e-14e15923d647",
+     "name": "On Top Of The World",
+     "spotifyId": "213x4gsFDm04hSqIUkg88w",
+     "artist": "Imagine Dragons",
+     "tempo": 100,
+     "fit": 0.102
+    },
+    {
+     "id": "47b03ddf-43d4-41a2-aa78-65a3e530555e",
+     "name": "Best Day Of My Life",
+     "spotifyId": "5Hroj5K7vLpIG4FNCRIjbP",
+     "artist": "American Authors",
+     "tempo": 100,
+     "fit": 0.307
+    }
+   ]
+  },
+  {
+   "start_s": 18.9,
+   "end_s": 37.7,
+   "features": {
+    "pace": 0.22685865724381624,
+    "still": 0.09187279151943463,
+    "arm": 29.853469979022687,
+    "upright": 0.5851317093639576,
+    "rhythm": {
+     "bpm": 64.28571428571429,
+     "strength": 0.12052546725260525
+    }
+   },
+   "what_happens": "Doing five controlled bodyweight squats",
+   "style": "driving workout hip-hop",
+   "mood": "powerful",
+   "why": "Heavy driving beats match the low upright posture and powerful effort of repeated squats.",
+   "targets": {
+    "energy": 0.5539768845700824,
+    "danceability": 0.30000000000000004,
+    "valence": 0.663309269213781,
+    "acousticness": 0.21431095406360423,
+    "instrumentalness": 0.1551236749116608,
+    "loudness": -14.109511189634866,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "123a788c-60bf-411e-8a22-9aebf6d70784",
+     "name": "Eye of the Tiger",
+     "spotifyId": "2HHtWyy5CgaQbC7XSoOb0e",
+     "artist": "Survivor",
+     "tempo": 109,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "fbfdca06-bb74-4cd7-99ef-1ce3f34f1d11",
+     "name": "Stronger",
+     "spotifyId": "0VeoSHlgashtg5JYPJjl15",
+     "artist": "The Score",
+     "tempo": 192,
+     "fit": 0.278
+    },
+    {
+     "id": "50fe374d-0fad-4a0b-82aa-5ddaaccc468b",
+     "name": "Power",
+     "spotifyId": "0QyQCHHSq068oxyTapTuHd",
+     "artist": "Later.",
+     "tempo": 168,
+     "fit": 0.304
+    }
+   ]
+  },
+  {
+   "start_s": 37.7,
+   "end_s": 56.6,
+   "features": {
+    "pace": 0.15275936395759718,
+    "still": 0.30212014134275617,
+    "arm": 31.476669041892862,
+    "upright": 0.34106212014134274,
+    "rhythm": null
+   },
+   "what_happens": "Spinning, bending to touch shoes, resting",
+   "style": "calm ambient cooldown",
+   "mood": "calm",
+   "why": "Soft slow music suits the slow bending, shoe-touch stretch and increased stillness with no rhythm.",
+   "targets": {
+    "energy": 0.5200147084805653,
+    "danceability": 0.30000000000000004,
+    "valence": 0.4034779540636042,
+    "acousticness": 0.3614840989399293,
+    "instrumentalness": 0.2812720848056537,
+    "loudness": -14.727005300353357,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "9c2cc34a-9b24-4135-aad2-cd7a87b86286",
+     "name": "Breathe Me",
+     "spotifyId": "7jqzZyJJLrpkRFYGpkqSK6",
+     "artist": "Sia",
+     "tempo": 120,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "a7e4fa67-2d0d-4bad-a8e9-d85e2a2eab09",
+     "name": "Holocene",
+     "spotifyId": "35KiiILklye1JRRctaLUb4",
+     "artist": "Bon Iver",
+     "tempo": 148,
+     "fit": 0.072
+    },
+    {
+     "id": "3ac67a92-5477-42a8-9bb4-8262bb4f8bb5",
+     "name": "Let It Be",
+     "spotifyId": "5FUqfbY84XmvhOR71Ls1bW",
+     "artist": "Feestteam, Het Feestteam",
+     "tempo": 75,
+     "fit": 0.11
+    }
+   ]
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 47.0
+}

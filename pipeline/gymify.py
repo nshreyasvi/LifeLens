@@ -256,29 +256,9 @@ def main(a):
         out['review'] = review
     out['runtime_s'] = round(time.time() - t0, 1)
     json.dump(out, open(f'{run}/gym.json', 'w', encoding='utf-8'), indent=1)
-    merge_music(run)
     sm = result['summary']
     print(f"{ex['exercise']} ({ex['source']}): {sm.get('reps', 0)} reps, {sm.get('sets', 0)} sets, joint {joint}, "
           f"{out['runtime_s']} s", flush=True)
-
-
-def merge_music(run: str) -> None:
-    """Muse Spark's music for the exercise (gym.json) becomes the song style of the songs.json sections the reps fall
-    in, so the Music queue plays it there."""
-    from songs import songs_for                      # here, not at the top: songs.py imports this module
-    g = json.load(open(f'{run}/gym.json', encoding='utf-8'))
-    m, reps = (g.get('review') or {}).get('music'), g.get('reps') or []
-    if not (m and m.get('search') and reps and os.path.exists(f'{run}/songs.json')):
-        return
-    s = json.load(open(f'{run}/songs.json', encoding='utf-8'))
-    a, b = reps[0]['start_s'], reps[-1]['end_s']
-    for sec in s['sections']:
-        if sec['end_s'] > a and sec['start_s'] < b:
-            t = dict(sec['targets'], energy=m['energy'], valence=m['valence'], tempo=round(m['tempo']), tempo_from='Gymify')
-            t.update({k: m[k] for k in ('danceability', 'instrumentalness') if m.get(k) is not None})
-            sec.update(style=m['search'], why=m.get('reason', ''), targets=t, source='Gymify',
-                       songs=songs_for(m['search'], t) or sec['songs'])
-    json.dump(s, open(f'{run}/songs.json', 'w', encoding='utf-8'), indent=1)
 
 
 if __name__ == '__main__':

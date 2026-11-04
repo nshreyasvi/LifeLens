@@ -55,7 +55,7 @@
   "log": "Total 0.4 min: sitting 0.32 min, bending 0.08 min\n1 times sat or crouched down, longest sitting 0.32 min, walked 3.3 m, bent over 0.08 min.\nClip eating:\n  bending 5 s. The camera wearer sits down.\n  sitting 19 s. The camera wearer stirs noodles in a bowl with a spoon. The camera wearer eats food from a bowl. The camera wearer stirs noodles in a bowl. Stirs noodles in a bowl with a spoon.",
   "runtime_s": 0.3,
   "report": {
-    "summary": "This 0.4 min head-camera recording shows a short eating moment. The person sits down and then spends the rest of the clip seated stirring noodles in a bowl and eating from the bowl.",
+    "summary": "This 0.4 min eating clip shows the camera wearer sitting down and then stirring and eating noodles from a bowl. Almost the whole time is spent sitting, with a brief bending moment at the start and only 3.3 m walked.",
     "what_they_did": [
       "0:00-0:05: sits down (bending)",
       "0:05-0:10: stirs noodles in a bowl with a spoon (sitting)",
@@ -64,44 +64,44 @@
       "0:20-0:24: stirs noodles in a bowl with a spoon (sitting)"
     ],
     "posture_and_movement": [
-      "Spent 0.32 min sitting out of 0.4 min total, with 0.08 min bending at the start to sit down.",
-      "Longest sitting bout was 0.32 min straight for 19 s of stirring noodles and eating, with 1 sit-down in total.",
-      "Walked only 3.3 m in the whole 0.4 min, so almost no stepping once seated.",
-      "Bent over for 0.08 min during the 0:00 sit-down before the seated eating from 0:05 to 0:20."
+      "Spent 0.32 min sitting and 0.08 min bending out of 0.4 min total.",
+      "Had 1 sit-down with longest sit 0.32 min, so almost the whole clip was one sitting bout.",
+      "Walked 3.3 m in 0.4 min, showing almost no stepping while eating.",
+      "Bent over for 0.08 min around the 0:00 sits down moment."
     ],
     "compared_with_history": [
-      "No other recordings were given, so there is no earlier routine to compare this 0.4 min eating clip with.",
-      "Without any history, it is not possible to tell if 1 sit-down, 0.32 min sitting, and 3.3 m walking is usual for eating."
+      "No earlier recordings were provided, so there is nothing to compare this eating clip with.",
+      "Without other recordings, this 0.4 min record with 0.32 min sitting and 3.3 m walked stands alone."
     ],
     "improvements": [
       {
-        "change": "Stand up after finishing the bowl",
-        "why": "sat 0.32 min straight with only 3.3 m walked in 0.4 min",
-        "how": "after the last stir at 0:20, stand and walk the bowl to the sink instead of staying seated"
+        "change": "Stand up after the bowl is finished",
+        "why": "you had 1 sit-down with longest sit 0.32 min out of 0.4 min",
+        "how": "after the last stir at 0:20, put down the spoon, stand from the eating spot and walk a few steps"
       },
       {
-        "change": "Sit upright while stirring and eating",
-        "why": "bent over 0.08 min at the 0:00 sit-down and leaned forward while seated",
-        "how": "pull the noodle bowl closer and keep elbows near the body while stirring at 0:05, 0:15 and 0:20"
+        "change": "Walk a few steps around eating",
+        "why": "you walked only 3.3 m in the whole 0.4 min",
+        "how": "before sitting down at 0:00 and after eating from the bowl, walk to put the bowl down"
+      },
+      {
+        "change": "Sit tall while stirring and eating",
+        "why": "you bent over 0.08 min and the 0:00 caption is sits down",
+        "how": "while stirring noodles with a spoon at 0:05, 0:15 and 0:20 and eating at 0:10, keep the bowl close and head up"
       },
       {
         "change": "Pause stirring between spoonfuls",
-        "why": "stirred noodles at 0:05, 0:15 and 0:20 with eating at 0:10 in between",
-        "how": "put the spoon down in the bowl after stirring, take a bite, then stir again"
-      },
-      {
-        "change": "Add a short walk before sitting to eat",
-        "why": "only 3.3 m walked with 1 sit-down in this clip",
-        "how": "walk to get the spoon and bowl before the 0:00 sit-down instead of sitting right away"
+        "why": "you stirred noodles at 0:05, 0:15 and 0:20 while sitting 0.32 min",
+        "how": "between stirring the noodles in the bowl, rest hands briefly instead of stirring nonstop while seated"
       }
     ],
     "went_well": [
-      "Settled with one sit-down and stayed seated to handle the bowl of noodles.",
-      "Kept movement steady and contained while stirring at 0:05, 0:15 and 0:20 and eating at 0:10."
+      "Stayed settled in one spot to stir noodles and eat from the bowl.",
+      "Kept movement small and steady during the short 0.4 min eating time."
     ],
     "caveats": [
-      "Posture labels can be wrong, and sitting 0.32 min and bending 0.08 min come from a model that can mix up sitting, crouching and bending.",
-      "Legs are only a 3D estimate that the head camera never sees, so the bent-knee shape in the images at 0:00, 0:05, 0:10, 0:15 and 0:20 may not match the real legs."
+      "The head camera never sees the legs, so the 3D body leg bend at 0:00, 0:05, 0:10, 0:15, 0:20 is estimated and sitting may look like crouching.",
+      "Muse posture labels can be wrong, so bending 5 s and sitting 19 s may not match the true posture."
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",
@@ -110,9 +110,9 @@
   },
   "suggestions": {
     "lines": [
-      "Stand up after finishing the bowl",
-      "Sit upright while stirring and eating",
-      "Pause stirring between spoonfuls"
+      "Stand up after the bowl is finished",
+      "Walk a few steps around eating",
+      "Sit tall while stirring and eating"
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",

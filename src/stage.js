@@ -413,13 +413,18 @@ const show = $('show');
 document.querySelector('#media .media-stage')?.append(show);
 show.classList.add('is-inline');
 export function openShow(on) {
+  const allowed = Boolean(on) && session.active !== false && !session.tooShort;
   const was = stage.open;
-  stage.open = on;
-  show.hidden = !on;
-  if (!on) hq.pause();
-  if (on) { renderScene(); renderCues(); renderOut(); if (!was) requestAnimationFrame(draw); }
+  stage.open = allowed;
+  show.hidden = !allowed;
+  if (!allowed) hq.pause();
+  if (allowed) { renderScene(); renderCues(); renderOut(); if (!was) requestAnimationFrame(draw); }
 }
 document.addEventListener('lifelens:tab', (e) => openShow(e.detail.tab === 'stage'));
+document.addEventListener('lifelens:activity', () => {
+  const onStage = document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.tab === 'stage';
+  openShow(onStage);
+});
 
 export function setFx() {
   stage.fx = false;

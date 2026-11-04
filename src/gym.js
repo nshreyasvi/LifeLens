@@ -3,7 +3,7 @@
 // Meta Muse Spark: the exercise (from 3D body and POV frames, unless picked), form feedback from frames of the
 // first, middle and last rep with the numbers, and the music to train to.
 
-import { media } from './extras.js';
+import { buildQuirkyCard, media } from './extras.js';
 import { session } from './session.js';
 import { bodyKey, keyedBody } from './stage.js';
 import { profile } from './start.js';
@@ -91,20 +91,23 @@ function render(g) {
   view.g = g;
   const box = $('gym-result');
   if (!g) {
+    if (session.active === false) {
+      box.replaceChildren(buildQuirkyCard('gym', session.activity || 'an everyday moment'));
+      $('gym-status').textContent = 'Rest day';
+      return;
+    }
     box.replaceChildren(el('p', 'gym-empty', 'Gymify names the exercise from the 3D body (Muse Spark), then measures every rep: range of motion, tempo and left-right difference, sets and rests. Muse gives form feedback from frames of the reps.'));
     $('gym-status').textContent = 'Not run yet';
     return;
   }
   const ex = g.exercise;
-  $('gym-status').textContent = ex.exercise === 'none' ? 'No exercise found' : `${g.summary.reps ?? 0} reps`;
+  $('gym-status').textContent = ex.exercise === 'none' ? 'Rest day · 0 reps' : `${g.summary.reps ?? 0} reps`;
   const head = el('div', 'gym-ex');
-  head.append(el('strong', '', ex.exercise === 'none' ? 'No exercise' : cap(ex.exercise)),
+  head.append(el('strong', '', ex.exercise === 'none' ? 'Rest day · No workout exercise' : cap(ex.exercise)),
     el('span', 'gym-ex-src', ex.source === 'you' ? 'picked by you' : `Muse Spark${ex.confidence != null ? ` · ${Math.round(100 * ex.confidence)}% sure` : ''}`));
   if (ex.reason) head.appendChild(el('p', 'gym-ex-why', cleanGymText(ex.reason, 110)));
   if (!g.reps.length) {
-    box.replaceChildren(head, el('p', 'gym-empty', ex.exercise === 'none'
-      ? 'Muse Spark saw no repeated exercise in this recording, so no reps are counted.'
-      : 'No clear reps on the main joint: the movement is too small or too irregular to count.'));
+    box.replaceChildren(head, buildQuirkyCard('gym', session.activity || ex.reason || 'an everyday moment'));
     return;
   }
   const sm = g.summary;
@@ -437,10 +440,14 @@ function drawGym() {
     if (k === cur) { gg.strokeStyle = '#FFFFFF'; gg.lineWidth = 2 * dpr; gg.stroke(); }
   });
 }
-document.addEventListener('lifelens:tab', (e) => {
-  view.open = e.detail.tab === 'gym';
-  canvas.hidden = !view.open;
-  if (view.open) requestAnimationFrame(drawGym);
-});
+function syncGymCanvas() {
+  const onGym = document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.tab === 'gym';
+  const active = onGym && session.active !== false && !session.tooShort;
+  view.open = active;
+  canvas.hidden = !active;
+  if (active) requestAnimationFrame(drawGym);
+}
+document.addEventListener('lifelens:tab', () => syncGymCanvas());
+document.addEventListener('lifelens:activity', () => { syncGymCanvas(); if (session.rec) load(); });
 canvas.addEventListener('click', () => $('play-btn').click());
 document.addEventListener('lifelens:session', () => { if (session.rec) load(); else render(null); });

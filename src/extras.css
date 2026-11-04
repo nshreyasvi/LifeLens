@@ -343,11 +343,150 @@ body.show-open { overflow: hidden; }
 @media (min-width: 1100px) { .gym-cols { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
 .gym-col { display: grid; gap: 14px; align-content: start; }
 .gym-col-title { margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em; }
-/* Stage / Gym on an everyday recording: a note over the main view */
-.rest-note { position: absolute; inset: 0; z-index: 6; display: grid; place-content: center; gap: 8px; padding: 32px;
-  text-align: center; background: var(--surface); }
-.rest-note strong { font-size: 1.35rem; letter-spacing: -0.02em; }
-.rest-note p { margin: 0 auto; max-width: 46ch; color: var(--muted); line-height: 1.55; }
+/* Stage / Gym / Short-Clip Music: cute illustrated cards when a mode is resting or clip is <10s */
+.rest-note[hidden], .gym-view[hidden], .show[hidden] { display: none !important; }
+.rest-note {
+  position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 20px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+.quirky-card {
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  max-width: 660px;
+  width: 100%;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(20, 18, 14, 0.08);
+  text-align: left;
+}
+@media (max-width: 640px) {
+  .quirky-card { grid-template-columns: 1fr; text-align: center; }
+}
+#stage-rail-quirky .quirky-card,
+.queue-quirky-item .quirky-card {
+  grid-template-columns: 1fr;
+  padding: 14px 16px;
+  gap: 12px;
+}
+.quirky-art {
+  display: grid;
+  place-items: center;
+}
+.quirky-svg {
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  display: block;
+}
+.quirky-body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.quirky-kicker {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.quirky-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--text);
+}
+.quirky-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.quirky-pill {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.quirky-back-btn {
+  justify-self: start;
+  margin-top: 4px;
+}
+.queue-quirky-item { list-style: none; }
+.queue-section {
+  list-style: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 8px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.queue-section.is-current {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
+  box-shadow: 0 4px 14px rgba(20, 18, 14, 0.06);
+}
+.queue-why {
+  margin: 2px 0 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.queue-mood.is-synced {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  font-weight: 650;
+}
+.song-play.is-active {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: transparent;
+}
+.queue-rule-footer {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-strong);
+  background: var(--surface);
+  margin-top: 4px;
+}
+.queue-rule-text {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.queue-short-preview-btn {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.queue-short-preview-btn:hover {
+  filter: brightness(1.06);
+}
 
 /* Routine: what Muse Spark saw at the playhead */
 .now-frames { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 10px; }
