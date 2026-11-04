@@ -284,6 +284,9 @@ body.show-open { overflow: hidden; }
 
 /* The Stage tab's main view: the show over the POV (stage.js); full screen is .show without .is-inline */
 .show.is-inline { position: absolute; inset: 0; z-index: 4; border-radius: inherit; overflow: hidden; }
+.stage-dock { margin-top: 12px; }
+.stage-dock .panel-lights { margin: 0; }
+.media-transport { display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 8px; }
 .show.is-inline .show-box { font-size: 0.8rem; }
 .show.is-inline .show-cues-box { display: none; }
 .show-play { display: inline-flex; align-items: center; gap: 6px; }

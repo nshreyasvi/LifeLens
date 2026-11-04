@@ -450,27 +450,18 @@ function draw() {
   pip(videoOf('pov'), 20 * dpr, H - 20 * dpr - W * 0.27 * 9 / 16, W * 0.27, 'POV');
 }
 
-// The show is the Stage tab's main view (over the POV, which it shows as an inset); Full screen takes the whole window.
+// The show is the Stage tab's main view (over the POV, which it shows as an inset).
 const show = $('show');
 document.querySelector('#media .media-stage')?.append(show);
 show.classList.add('is-inline');
-export function openShow(on, full = false) {
+export function openShow(on) {
   const was = stage.open;
   stage.open = on;
   show.hidden = !on;
-  show.classList.toggle('is-inline', !full);
-  document.body.classList.toggle('show-open', on && full);
-  $('show-full').textContent = full ? 'Exit full screen (Esc)' : 'Full screen';
   if (!on) hq.pause();
   if (on) { renderScene(); renderCues(); renderOut(); if (!was) requestAnimationFrame(draw); }
 }
-const syncPlay = (playing) => {
-  $('show-play').dataset.state = playing ? 'pause' : 'play';
-  $('show-play').querySelector('span').textContent = playing ? 'Pause' : 'Play';
-};
-document.addEventListener('lifelens:state', (e) => syncPlay(e.detail.playing));
 document.addEventListener('lifelens:tab', (e) => openShow(e.detail.tab === 'stage'));
-$('show-play')?.addEventListener('click', () => $('play-btn').click());
 
 export function setFx(on) {
   stage.fx = on;
@@ -483,7 +474,4 @@ export function resetStage() {
   renderScene(); renderCues();
 }
 
-$('show-btn')?.addEventListener('click', () => openShow(true, true));
-$('show-full')?.addEventListener('click', () => openShow(true, show.classList.contains('is-inline')));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && stage.open && !show.classList.contains('is-inline')) openShow(true); });
 for (const id of ['show-fx', 'stage-fx']) $(id)?.addEventListener('click', () => setFx(!stage.fx));

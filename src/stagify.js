@@ -72,7 +72,7 @@ async function save(file, body, type) {
 
 // Replay the recording from 0:00 in the Show view; record the canvas and the sound effects; sample the lights.
 async function recordShow() {
-  openShow(true, true);              // record the full-screen stage
+  openShow(true);                    // record the stage view
   const fx = recordFx();
   const stream = new MediaStream([...$('show-canvas').captureStream(30).getVideoTracks(), ...fx.stream.getAudioTracks()]);
   const type = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t));

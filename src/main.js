@@ -76,6 +76,10 @@ function selectTab(name, { focus = false } = {}) {
   if (name === 'music') dock.append(bar, $('song-queue'));
   else { els.player.querySelector('.player-embed').before(bar); $('song-queue-home').append($('song-queue')); }
   dock.hidden = name !== 'music';
+  const rig = document.querySelector('.panel-lights');
+  if (name === 'stage') $('stage-dock').append(rig);
+  else $('view-stage').append(rig);
+  $('stage-dock').hidden = name !== 'stage';
   emit('tab', { tab: name });
 }
 
@@ -309,7 +313,7 @@ function preSection(t) {
   els.songsMood.textContent = 'Picked when the recording was processed: body numbers + a Meta Muse Spark style per section';
   els.songsNote.hidden = true;
   renderBar();
-  if (state.phase === 'live' && (!player.song || player.song.ended)) playSong(sec.songs[0]);
+  if (state.phase === 'live') playSong(sec.songs[0]);      // the movement changed: so does the music
 }
 
 async function loadPreSongs() {
@@ -460,7 +464,7 @@ async function playSong(song) {
   player.song = { ...song, ended: false };
   // Some recommended tracks can't play in Spotify's embed (region or rights): if it hasn't started in 6 s, the next one
   setTimeout(() => {
-    if (player.song?.spotifyId !== song.spotifyId || player.song.started || state.phase !== 'live') return;
+    if (player.song?.spotifyId !== song.spotifyId || player.song.started) return;
     song.unplayable = true;
     const next = player.queue.find((s) => s.spotifyId !== song.spotifyId && !s.unplayable);
     if (next) playSong(next);
