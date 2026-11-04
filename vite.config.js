@@ -17,11 +17,15 @@ import { output as lightsOutput, status as lightsStatus } from './server/lights.
 //   POST /api/live/caption {images}   live session: Meta Muse Spark captions 1-2 camera frames and names the posture
 //   POST /api/stage/scene {body, song, mood}   Meta Muse Spark as lighting designer: the next scene for the 6 fixtures
 //   GET|POST /api/lights          the fixtures to real lights (server/lights.js: simulator, Art-Net or Hue)
+//   POST /api/gymify {run, exercise}   pipeline/gymify.py on a processed recording -> <run>/gym.json; GET .../status
 const MAX_RECORDING_BYTES = 500 * 2 ** 20;
 const VIDEO = /\.(mp4|mov|webm|mkv)$/i;
 const SKIP = new Set(['day', '_smoke']);
 const NAME = /^[A-Za-z0-9_-]{1,64}$/;
 const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised'];
+// the exercises pipeline/gymify.py knows (its EXERCISES); '' lets Muse Spark recognise it from the 3D body frames
+const GYM_EXERCISES = ['squat', 'lunge', 'jump squat', 'step-up', 'deadlift', 'good morning', 'hip hinge', 'sit-up',
+  'push-up', 'bicep curl', 'shoulder press', 'tricep dip', 'jumping jacks', 'arm raise'];
 const PATTERNS = ['pulse', 'chase', 'strobe', 'still'];
 const FOCUS = ['arms', 'legs', 'torso', 'all'];
 const SCENE_PROMPT = `You are the lighting designer of a live stage show. The performer wears a head camera and LifeLens
@@ -41,7 +45,7 @@ const PIPELINE_STAGES = [
   { id: 'ingest', label: 'Video ingest & 30 fps normalization', pct: 8 },
   { id: 'hawor', label: 'HaWoR 3D hand tracking & DROID-SLAM', pct: 24 },
   { id: 'build_input', label: 'Floor plane & camera height calibration', pct: 42 },
-  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body SMPL-H reconstruction', pct: 60 },
+  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body reconstruction', pct: 60 },
   { id: 'render', label: '3D body mesh & kinematics stream rendering', pct: 74 },
   { id: 'describe_muse', label: 'Meta Muse Spark egocentric scene narration', pct: 84 },
   { id: 'posture_muse', label: 'Biomechanical & Meta Muse Spark posture analysis', pct: 92 },
@@ -50,6 +54,7 @@ const PIPELINE_STAGES = [
 
 function lifelensApi() {
   let director = null;
+  let gym = null; // the Gymify job: { run, exercise, log, error, done }
   let job = null;
   let root = '';
   const mac = process.platform === 'darwin';
@@ -163,7 +168,7 @@ function lifelensApi() {
           body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
           graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
           files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json', 'postures.json',
-            'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4'].map((f) => [f, url(f)])),
+            'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4', 'gym.json'].map((f) => [f, url(f)])),
         });
       }
     }
@@ -411,6 +416,28 @@ function lifelensApi() {
         } catch (err) {
           send(res, 502, { error: museError(err) });
         }
+      });
+
+      // Gymify: one job at a time; Muse Spark sees 3D body frames (and POV frames), the rest is measured.
+      server.middlewares.use('/api/gymify/status', (req, res) => send(res, 200, gym ?? { idle: true }));
+      server.middlewares.use('/api/gymify', async (req, res) => {
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
+        if (gym && !gym.done && !gym.error) return send(res, 409, { error: `Gymify is running on ${gym.run}.` });
+        const { run, exercise = '' } = await readBody(req);
+        const known = recordings().processed.find((r) => r.base === run);
+        if (!known) return send(res, 400, { error: 'Unknown recording.' });
+        if (exercise && !GYM_EXERCISES.includes(exercise)) return send(res, 400, { error: 'Unknown exercise.' });
+        if (!existsSync(join(root, 'director', '.env'))) return send(res, 503, { error: 'Gymify needs a Muse key (director/.env).' });
+        gym = { run, exercise, log: '', error: '', done: false, startedAt: Date.now() };
+        const [cmd, args] = wsl(`${env('vlm')}/python pipeline/gymify.py --run '${run}'${exercise ? ` --exercise '${exercise}'` : ''}`);
+        const proc = spawn(cmd, args, { cwd: root, env: { ...process.env, PYTHONUNBUFFERED: '1' } });
+        const job = gym;
+        const keep = (d) => { job.log = (job.log + d).slice(-1200); };
+        proc.stdout.on('data', keep);
+        proc.stderr.on('data', keep);
+        proc.on('error', (err) => { job.error = err.message; });
+        proc.on('exit', (code) => { if (code === 0) job.done = true; else job.error = job.log.trim().split('\n').pop() || `exit ${code}`; });
+        send(res, 200, { ok: true });
       });
 
       server.middlewares.use('/api/lights', async (req, res) => {

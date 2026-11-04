@@ -70,7 +70,7 @@ function selectTab(name, { focus = false } = {}) {
   for (const view of els.views) view.hidden = view.dataset.view !== name;
   const routineDeck = $('view-day');
   if (routineDeck) routineDeck.hidden = name !== 'activity';
-  els.player.hidden = !['music', 'stage'].includes(name);
+  els.player.hidden = !['music', 'stage', 'gym'].includes(name);
   emit('tab', { tab: name });
 }
 
@@ -210,6 +210,8 @@ function musicTargets(f, msg) {
     danceability: clamp01(0.2 + 0.7 * (rhythm?.strength ?? 0) + 0.1 * Math.min(f.arm / 20, 1)),
     valence: clamp01(0.25 + 0.45 * f.upright + (MOOD_VALENCE[mood] ?? 0)),
     acousticness: clamp01(0.15 + 0.7 * f.still),
+    instrumentalness: clamp01(0.1 + 0.6 * f.still),       // still, focused stretches: fewer vocals
+    loudness: -16 + 10 * clamp01(f.pace / 1.2),           // dB: louder songs for faster movement
     tempo: rhythm ? Math.round(rhythm.bpm) : mood ? msg.music_tempo : null,
     tempoFrom: rhythm ? 'body rhythm' : mood ? 'Muse Spark' : '',
     mood,
@@ -254,7 +256,7 @@ const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStar
 const RECCO = 'https://api.reccobeats.com/v1';
 const RECCO_TIMEOUT_MS = 6000;
 const ASK_EVERY_MS = 15000;    // at most one request per 15 s, and only when the body changed
-const songs = { asked: null, at: 0, request: 0, seeds: {} };
+const songs = { asked: null, at: 0, request: 0, seeds: {}, profile: null };   // profile: Gymify's music, while it is on
 
 async function reccoGet(path) {
   const ctrl = new AbortController();
@@ -272,22 +274,23 @@ async function reccoGet(path) {
 
 const spotifyId = (href) => (typeof href === 'string' && href.match(/open\.spotify\.com\/track\/([A-Za-z0-9]{22})/)?.[1]) || null;
 
-// The seed song: ReccoBeats' top match for the mood the director's AI picked (no fixed seed).
-async function seedFor(mood) {
-  if (!songs.seeds[mood]) {
-    const found = await reccoGet(`/track/search?searchText=${encodeURIComponent(mood)}&size=5`);
+// The seed song: ReccoBeats' top match for the words given: the mood the director's AI picked, or Gymify's style
+// words from Muse Spark (no fixed seed).
+async function seedFor(words) {
+  if (!songs.seeds[words]) {
+    const found = await reccoGet(`/track/search?searchText=${encodeURIComponent(words)}&size=5`);
     const hit = (found.content ?? []).find((t) => t.id);
-    if (!hit) throw new Error(`ReccoBeats found no song for "${mood}"`);
-    songs.seeds[mood] = { id: hit.id, name: hit.trackTitle };
+    if (!hit) throw new Error(`ReccoBeats found no song for "${words}"`);
+    songs.seeds[words] = { id: hit.id, name: hit.trackTitle };
   }
-  return songs.seeds[mood];
+  return songs.seeds[words];
 }
 
 const changed = (a, b) => !b || a.mood !== b.mood || Math.abs(a.tempo - b.tempo) > 8
   || ['energy', 'danceability', 'valence', 'acousticness'].some((k) => Math.abs(a[k] - b[k]) > 0.12);
 
 function maybeAskSongs(t) {
-  if (!t.mood || performance.now() - songs.at < ASK_EVERY_MS || !changed(t, songs.asked)) return;
+  if (songs.profile || !t.mood || performance.now() - songs.at < ASK_EVERY_MS || !changed(t, songs.asked)) return;
   songs.asked = t;
   songs.at = performance.now();
   const request = ++songs.request;
@@ -307,10 +310,12 @@ function maybeAskSongs(t) {
   });
 }
 
+const FEATURES = ['energy', 'danceability', 'valence', 'acousticness', 'instrumentalness', 'loudness'];
+
 async function askSongs(t) {
-  const seed = await seedFor(t.mood);
-  const params = new URLSearchParams({ size: '10', seeds: seed.id, tempo: String(t.tempo) });
-  for (const k of ['energy', 'danceability', 'valence', 'acousticness']) params.set(k, t[k].toFixed(2));
+  const seed = await seedFor(t.search || t.mood);
+  const params = new URLSearchParams({ size: '10', seeds: seed.id, tempo: String(Math.round(t.tempo)) });
+  for (const k of FEATURES) if (Number.isFinite(t[k])) params.set(k, t[k].toFixed(2));
   const data = await reccoGet(`/track/recommendation?${params}`);
   const seen = new Set();
   const list = (data.content ?? []).map((s) => ({
@@ -325,7 +330,8 @@ async function askSongs(t) {
     const x = by.get(s.spotifyId);
     s.tempo = x ? Math.round(x.tempo) : null;
     s.fit = x ? Math.abs(x.tempo - t.tempo) / 60 + Math.abs(x.energy - t.energy) + Math.abs(x.valence - t.valence) : 9;
-    s.why = `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo} BPM, ${t.mood} mood.`;
+    s.why = t.search ? `Gym music from Muse Spark: ${t.search}, ${Math.round(t.tempo)} BPM, energy ${t.energy.toFixed(2)}.`
+      : `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo} BPM, ${t.mood} mood.`;
   }
   list.sort((a, b) => a.fit - b.fit);
   return { seed: `"${seed.name}"`, songs: list.slice(0, 5) };
@@ -460,6 +466,7 @@ function reset() {
   els.playerNote.textContent = 'Press Play: the first song ReccoBeats picks for the body starts here.';
   songs.asked = null;
   songs.at = 0;
+  songs.profile = null;
   els.songList.replaceChildren();
   els.songsNote.hidden = false;
   els.songsNote.textContent = 'Songs come once the body has moved for a few seconds.';
@@ -564,6 +571,22 @@ document.addEventListener('lifelens:session', () => {
   if (state.phase === 'live') fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
   reset();
   renderControls();
+});
+document.addEventListener('lifelens:music-profile', async (e) => {
+  const m = e.detail;
+  songs.profile = m;
+  els.songsMood.textContent = 'Gym music (Muse Spark)';
+  try {
+    const list = await askSongs({ search: m.search, tempo: m.tempo, energy: m.energy, valence: m.valence,
+      danceability: m.danceability, instrumentalness: m.instrumentalness, at: els.body.currentTime });
+    player.queue = list.songs;
+    drawSongs(list.songs);
+    els.songsNote.hidden = true;
+    playSong(list.songs[0]);
+  } catch (err) {
+    els.songsNote.hidden = false;
+    els.songsNote.textContent = `No gym music: ${err.message}.`;
+  }
 });
 document.addEventListener('lifelens:leave', () => {
   if (state.phase === 'live') stopDirector();

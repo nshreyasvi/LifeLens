@@ -15,7 +15,7 @@ const DEFAULT_STAGES = [
   { id: 'ingest', label: 'Video ingest & 30 fps normalization', state: 'active' },
   { id: 'hawor', label: 'HaWoR 3D hand tracking & DROID-SLAM', state: 'pending' },
   { id: 'build_input', label: 'Floor plane & camera height calibration', state: 'pending' },
-  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body SMPL-H reconstruction', state: 'pending' },
+  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body reconstruction', state: 'pending' },
   { id: 'render', label: '3D body mesh & kinematics stream rendering', state: 'pending' },
   { id: 'describe_muse', label: 'Meta Muse Spark egocentric scene narration', state: 'pending' },
   { id: 'posture_muse', label: 'Biomechanical & Meta Muse Spark posture analysis', state: 'pending' },

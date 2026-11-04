@@ -41,7 +41,7 @@ could change, and it drives music and stage lights from your movement.
 
 | From | You get | Made by |
 |---|---|---|
-| The head-camera video | Your 3D body (SMPL-H, 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → OmniEgoCap (body) |
+| The head-camera video | Your 3D body (with 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → OmniEgoCap (body) |
 | The video, every 5 s | A caption of what you are doing | Meta Muse Spark, from 3 frames |
 | The body's numbers + the captions, every 5 s | A second posture label | Meta Muse Spark |
 | The 3D body, every second | Posture: walking, standing, sitting, crouching, bending, arms raised | Fixed rules on the body (below) |
@@ -217,8 +217,6 @@ The body models need a free registration at https://mano.is.tue.mpg.de:
 | MANO `mano_v1_2.zip`: `models/MANO_RIGHT.pkl` | `third_party/HaWoR/_DATA/data/mano/` |
 | MANO `mano_v1_2.zip`: `models/MANO_LEFT.pkl` | `third_party/HaWoR/_DATA/data_left/mano_left/` |
 
-To check the install: `conda activate omniegocap && python bench/smoke_test.py`.
-
 ```bash
 conda activate omniegocap
 python pipeline/run.py my_walk.mov my_walk        # → runs/my_walk/
@@ -297,8 +295,7 @@ Muse's captions (about 7 s per reply) and builds the body after you stop.
 `ws://127.0.0.1:8765`. The fast loop (every frame) sets brightness, zone color and flashes from speed. The slow loop
 (about every 6 s) asks Muse Spark for mood and tempo. The app starts and stops it with **Play** and **Pause**. More
 in [director/README.md](director/README.md) and [director/TESTING.md](director/TESTING.md):
-`python -m pytest director/tests -q`, 70 passed. The stage mode's rhythm, Art-Net and Hue code:
-`node bench/test_stage.mjs`.
+`python -m pytest director/tests -q`, 70 passed.
 
 ## Licenses
 

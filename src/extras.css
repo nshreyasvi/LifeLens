@@ -190,3 +190,46 @@ body.show-open { overflow: hidden; }
   margin: 0; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--border-strong);
   font-size: 0.84rem; line-height: 1.5; color: var(--muted);
 }
+
+/* ---------- Gym tab (gym.js) ---------- */
+
+.panel-gym { gap: 14px; }
+.gym-run { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.gym-pick { display: grid; gap: 4px; font-size: 0.8rem; color: var(--muted); }
+.gym-pick select {
+  min-height: 36px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-strong);
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.88rem;
+}
+.gym-result { display: grid; gap: 14px; }
+.gym-empty, .gym-note { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
+.gym-ex { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.gym-ex strong { font-size: 1.3rem; letter-spacing: -0.01em; }
+.gym-ex-src { font-size: 0.8rem; color: var(--accent-text); }
+.gym-ex-why { flex-basis: 100%; margin: 0; font-size: 0.84rem; color: var(--muted); line-height: 1.45; }
+.gym-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gym-tile {
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 8px; padding: 10px;
+  border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2);
+}
+.gym-tile .gym-icon { grid-row: span 2; color: var(--accent); align-self: center; }
+.gym-tile strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.gym-tile span { font-size: 0.74rem; color: var(--muted); }
+.gym-chart { width: 100%; height: auto; }
+.gym-chart-label { font-size: 11px; fill: var(--muted); }
+.gym-chart-rest { font-size: 11px; fill: var(--muted); font-style: italic; }
+.gym-bar { cursor: pointer; }
+.gym-bar:hover, .gym-bar:focus-visible { opacity: 0.8; outline: none; stroke: var(--text); stroke-width: 1.5; }
+.gym-summary { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+.gym-changes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.gym-changes li { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); }
+.gym-why { font-size: 0.8rem; color: var(--muted); }
+.gym-how { font-size: 0.86rem; }
+.gym-good { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: 0.86rem; }
+.gym-good li::marker { content: '✓  '; color: var(--p-walking); }
+.gym-more summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; }
+.gym-more p { margin: 6px 0 0; font-size: 0.84rem; line-height: 1.45; }
+.gym-caveat { color: var(--muted); font-style: italic; }
+.gym-music { display: grid; gap: 8px; padding: 12px; border-radius: 12px; border: 1px solid var(--accent-line); background: var(--accent-soft); }
+.gym-label { font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-text); }
+.gym-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.gym-chip { padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 0.8rem; }

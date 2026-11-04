@@ -14,11 +14,12 @@ const $ = (id) => document.getElementById(id);
 
 const SYNC_TOLERANCE_S = 0.75;
 const LIVE_IDLE_MS = 3000;
-const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body'] };
+const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body'], gym: ['body', 'graph'] };
 const TAB_TEXT = {
-  activity: 'First-person POV, 3D SMPL-H body, live kinematics & session routine.',
+  activity: 'First-person POV, 3D body, live kinematics & session routine.',
   music: 'Movement pace, step cadence & arm swing select the tracks.',
   stage: 'Lights follow each body part, poses, jumps, turns and hits; Muse Spark designs the scene. Try the Show view.',
+  gym: 'Gymify: reps, sets, range of motion, tempo and symmetry from the 3D body; Muse Spark coaches the form.',
 };
 
 const mediaRoot = $('media');

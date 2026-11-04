@@ -71,7 +71,7 @@
           Turn a single head-mounted camera into articulated <strong>3D body motion</strong>, <strong>Meta Muse Spark</strong> routine coaching, and body-driven <strong>stage music</strong>.
         </p>
 
-        <!-- Custom vector graphic diagram: Head POV -> 3D SMPL-H Body -> Routine & Stage -->
+        <!-- Custom vector graphic diagram: Head POV -> 3D body -> Routine & Stage -->
         <div class="start-vector-art" aria-hidden="true">
           <svg viewBox="0 0 460 210" fill="none" class="start-art-svg">
             <defs>
@@ -98,7 +98,7 @@
             <circle cx="51" cy="102" r="3" fill="#FFFFFF"/>
             <text x="54" y="146" text-anchor="middle" fill="currentColor" fill-opacity="0.72" font-size="10" font-weight="600">POV Optics</text>
 
-            <!-- Center: 3D Articulated Skeleton (SMPL-H + Hands) -->
+            <!-- Center: 3D articulated body with hands -->
             <g stroke="#2B44E8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <!-- Head & Torso -->
               <circle cx="230" cy="48" r="11" fill="#2B44E8" fill-opacity="0.18"/>
@@ -129,7 +129,7 @@
             <!-- Articulated hand highlights (Coral) -->
             <circle cx="172" cy="90" r="4.5" fill="#E04826"/>
             <circle cx="290" cy="84" r="4.5" fill="#E04826"/>
-            <text x="230" y="24" text-anchor="middle" fill="currentColor" fill-opacity="0.78" font-size="10" font-weight="600">3D SMPL-H + Hands</text>
+            <text x="230" y="24" text-anchor="middle" fill="currentColor" fill-opacity="0.78" font-size="10" font-weight="600">3D body + hands</text>
 
             <!-- Right: Routine Pulse & Stage Music Bars -->
             <circle cx="378" cy="105" r="54" fill="url(#stage-aura)" stroke="#E04826" stroke-opacity="0.35" stroke-width="1.2"/>
@@ -280,7 +280,7 @@
               </div>
               <div class="hw-tile hw-tile-wide">
                 <span class="hw-tile-label">Active AI &amp; Biomechanics Models</span>
-                <strong class="hw-tile-value">HaWoR · OmniEgoCap (SMPL-H) · Meta Muse Spark</strong>
+                <strong class="hw-tile-value">HaWoR · OmniEgoCap · Meta Muse Spark</strong>
                 <span class="hw-tile-sub">30 fps 3D full-body &amp; hand reconstruction + multimodal routine analysis</span>
               </div>
             </div>
@@ -350,6 +350,11 @@
         <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.2 2.2M16.2 16.2l2.2 2.2M18.4 5.6l-2.2 2.2M7.8 16.2l-2.2 2.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Stage</span>
       </button>
+      <button class="tab" id="tab-btn-gym" type="button" role="tab" data-tab="gym" aria-controls="view-gym" aria-selected="false" tabindex="-1">
+        <span class="tab-dot" aria-hidden="true"></span>
+        <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Gym</span>
+      </button>
     </nav>
 
     <div class="controls" role="group" aria-label="Playback">
@@ -383,7 +388,7 @@
         <div class="panel-head media-head">
           <div>
             <h2 id="media-title">Recording</h2>
-            <p class="panel-sub" id="media-sub">First-person POV, 3D SMPL-H body &amp; kinematics.</p>
+            <p class="panel-sub" id="media-sub">First-person POV, 3D body &amp; kinematics.</p>
           </div>
           <div class="toggles" role="group" aria-label="Show next to the POV">
             <button class="toggle" type="button" data-toggle="body" aria-pressed="false">3D body</button>
@@ -497,6 +502,30 @@
               </div>
               <p class="stage-out" id="stage-out">Lights out: simulator (no hardware set)</p>
             </div>
+          </section>
+        </section>
+
+        <!-- Gymify (gym.js, pipeline/gymify.py): the exercise, reps, sets, range, tempo, symmetry; Muse Spark's coaching. -->
+        <section class="view view-gym" id="view-gym" data-view="gym" role="tabpanel" aria-labelledby="tab-btn-gym" hidden>
+          <section class="panel panel-gym" aria-labelledby="gym-title">
+            <div class="panel-head">
+              <h2 id="gym-title">Gymify</h2>
+              <span class="chip" id="gym-status">Not run yet</span>
+            </div>
+            <div class="gym-run">
+              <label class="gym-pick">
+                <span>Exercise</span>
+                <select id="gym-exercise">
+                  <option value="">Muse Spark recognises it</option>
+                  <option>squat</option><option>lunge</option><option>jump squat</option><option>step-up</option>
+                  <option>deadlift</option><option>good morning</option><option>hip hinge</option><option>sit-up</option>
+                  <option>push-up</option><option>bicep curl</option><option>shoulder press</option><option>tricep dip</option>
+                  <option>jumping jacks</option><option>arm raise</option>
+                </select>
+              </label>
+              <button class="btn btn-small-text btn-primary" id="gym-btn" type="button">Gymify</button>
+            </div>
+            <div class="gym-result" id="gym-result"></div>
           </section>
         </section>
 
@@ -618,5 +647,6 @@
   <script type="module" src="/src/main.js"></script>
   <script type="module" src="/src/extras.js"></script>
   <script type="module" src="/src/day.js"></script>
+  <script type="module" src="/src/gym.js"></script>
 </body>
 </html>
