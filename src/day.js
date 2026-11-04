@@ -1,25 +1,19 @@
-// LifeLens front-end: Routine tab, for the open recording.
-// From its day report (pipeline/insights.py), posture sources (bench/posture_sources.py), Muse's captions
-// (pipeline/describe_muse.py) and Muse's review (director/routine_tips.py): what the wearer did, played with its POV
-// and 3D body; posture by rules, Muse, Qwen or their vote; the review; and the other recordings as history.
+// LifeLens front-end: Activity, Routine & Past Routines workspace inside the Routine view.
+// Uses the main POV + 3D body media player (extras.js) directly—no duplicate video elements—and showcases
+// the active session's posture timeline, timestamped action log, past routine comparisons, and Meta Muse Spark coaching.
 
-import { mediaSet } from './media.js';
+import { media } from './extras.js';
 import { fetchRecordings, openRecording, session } from './session.js';
 
 const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised'];
-// Same hue per posture as the pipeline's activity.png (README), in this page's palette.
-// Per-theme colors in styles.css (--p-*), checked for color-blind separation (docs/brand/palette.json).
 const POSTURE_COLORS = {
   walking: 'var(--p-walking)', standing: 'var(--p-standing)', sitting: 'var(--p-sitting)',
   crouching: 'var(--p-crouching)', bending: 'var(--p-bending)', 'arms raised': 'var(--p-arms)',
 };
-const CAPTIONS_KEY = 'lifelens-captions';
-const savedCaptions = () => { try { return localStorage.getItem(CAPTIONS_KEY) === 'muse' ? 'muse' : 'qwen'; } catch { return 'qwen'; } };
 const SOURCES = {
-  rules: { name: 'Rules', how: 'Fixed thresholds on the 3D body\'s speed, hip height, knee angle and trunk lean, every second.' },
-  muse: { name: 'Muse Spark', how: 'Meta Muse Spark reads each 5 s window\'s body numbers and description and names the posture.' },
-  qwen: { name: 'Qwen3-VL', how: 'Qwen3-VL-2B watches each 5 s of head-camera video and names the posture.' },
-  combined: { name: 'Combined', how: 'Each second, the posture at least two of the three name; when all three differ, the rules\'.' },
+  rules: { name: '3D Rules', how: '3D kinematics thresholds (speed, hip height, knee flexion & trunk lean) per second.' },
+  muse: { name: 'Muse Spark', how: 'Meta Muse Spark classifies each 5 s window from 3D kinematics + egocentric scene.' },
+  combined: { name: 'Combined', how: 'Consensus of 3D biomechanical rules and Meta Muse Spark posture classification.' },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -28,7 +22,14 @@ const el = (tag, className, text) => Object.assign(document.createElement(tag), 
   text === undefined ? {} : { textContent: text });
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const minutes = (m) => (!Number.isFinite(m) ? '-' : m < 1 ? `${Math.round(m * 60)} s` : `${m.toFixed(1)} min`);
-const tidy = (t) => { const s = t.replace(/^the (camera )?(wearer|person)\s+(is\s+)?/i, '').trim(); return s ? capitalize(s) : ''; };
+const tidy = (t) => { const s = String(t || '').replace(/^the (camera )?(wearer|person)\s+(is\s+)?/i, '').trim(); return s ? capitalize(s) : ''; };
+const brief = (t, max = 108) => {
+  const s = String(t || '').replace(/\s+/g, ' ').trim();
+  if (s.length <= max) return s;
+  const firstSentence = s.split(/(?<=[.!?])\s+/)[0];
+  if (firstSentence && firstSentence.length <= max + 20) return firstSentence;
+  return `${s.slice(0, max - 1).replace(/[,;:\s]+$/, '')}…`;
+};
 const getJson = async (url) => (url ? (await fetch(url, { cache: 'no-store' })).json() : null);
 
 function parseCsv(text) {
@@ -92,19 +93,20 @@ function drawRuns(box, labels) {
   }
 }
 
-// ---------- This recording ----------
+// ---------- Active Recording Routine ----------
 
-const media = mediaSet($('routine-media'));
 const video = media.body;
-const view = { rows: [], postures: null, captions: { qwen: [], muse: [] }, source: 'rules', cap: savedCaptions(), labels: [],
+const view = { rows: [], postures: null, captions: [], source: 'rules', labels: [],
   entries: [], items: [], current: -1, marker: null };
 
-function entriesFrom(kind) {
-  if (kind === 'muse' && view.captions.muse.length) {
-    return view.captions.muse.filter((c) => !c.text.startsWith('[')).map((c) => ({ start: c.start_s, end: Math.ceil(c.end_s), text: tidy(c.text) }));
+function entriesFromMuse() {
+  if (view.captions.length) {
+    return view.captions
+      .filter((c) => c.text && !c.text.startsWith('['))
+      .map((c) => ({ start: c.start_s, end: Math.ceil(c.end_s), text: tidy(c.text) }));
   }
   const out = [];
-  for (const r of view.rows) { // consecutive seconds with the same Qwen narration make one line
+  for (const r of view.rows) {
     const s = Number(r.second);
     const last = out[out.length - 1];
     if (last && (!r.narration || r.narration === last.raw)) last.end = s + 1;
@@ -135,7 +137,7 @@ function drawStrip() {
 }
 
 function drawLog() {
-  view.entries = entriesFrom(view.cap);
+  view.entries = entriesFromMuse();
   view.items = view.entries.map((e) => {
     const li = el('li', 'log-item');
     const btn = el('button', 'log-btn');
@@ -146,7 +148,10 @@ function drawLog() {
     const posture = el('span', 'log-posture');
     posture.append(dot, capitalize(label));
     btn.append(el('time', 'log-time', clock(e.start)), el('span', 'log-text', e.text), posture);
-    btn.addEventListener('click', () => { media.seek(e.start + 0.05); media.play(); });
+    btn.addEventListener('click', () => {
+      media.seek(e.start + 0.05);
+      media.play();
+    });
     li.appendChild(btn);
     return li;
   });
@@ -155,7 +160,7 @@ function drawLog() {
 }
 
 function update() {
-  if (!view.labels.length) return;
+  if (!view.labels.length || !view.marker) return;
   const s = Math.min(Math.max(Math.floor(video.currentTime || 0), 0), view.labels.length - 1);
   view.marker.style.left = `${((s + 0.5) / view.labels.length) * 100}%`;
   const strip = $('routine-strip');
@@ -183,28 +188,22 @@ function redraw() {
 }
 
 function pickSource(source) {
-  view.source = source;
-  for (const b of $('posture-switch').children) b.setAttribute('aria-pressed', String(b.dataset.source === source));
+  view.source = SOURCES[source] ? source : 'rules';
+  for (const b of $('posture-switch').children) b.setAttribute('aria-pressed', String(b.dataset.source === view.source));
   const a = view.postures?.agreement;
-  $('posture-how').textContent = SOURCES[source].how + (a ? ` Agrees with the motion capture ${Math.round(a[source] * 100)}% of the time; `
-    + `saying "standing" every second scores ${Math.round(a.always_standing * 100)}%. The motion capture is labelled with the rules' `
-    + 'thresholds, so it favors the rules.' : '');
+  const match = a && Number.isFinite(a[view.source]) ? ` · ${Math.round(a[view.source] * 100)}% mocap match` : '';
+  $('posture-how').textContent = `${SOURCES[view.source].how}${match}`;
   redraw();
 }
 
-// The header switch: which model's captions the Routine shows and the director reads (main.js), remembered here.
-function pickCaptions(cap, save = true) {
-  if (save) { view.cap = cap; try { localStorage.setItem(CAPTIONS_KEY, cap); } catch { /* private window */ } }
-  const shown = cap === 'muse' && view.captions.muse.length ? 'muse' : 'qwen';
-  for (const b of $('caption-switch').children) b.setAttribute('aria-pressed', String(b.dataset.captions === view.cap));
-  $('did-captions').textContent = shown === 'muse' ? 'Muse Spark captions' : 'Qwen3-VL captions';
-  drawLog();
-  update();
-}
-
 function renderStats(total) {
-  const stats = [['Recorded', minutes(total.duration_min)], ['Walked', `${Math.round(total.walking_distance_m)} m`],
-    ['Sit-downs', String(total.sit_stand_transitions)], ['Longest sit', minutes(total.longest_sitting_min)]];
+  const walkShare = Math.round(((total.share?.walking ?? 0) + (total.share?.['arms raised'] ?? 0)) * 100);
+  const stats = [
+    ['Duration', minutes(total.duration_min)],
+    ['Distance', `${Math.round(total.walking_distance_m)} m`],
+    ['Active ratio', `${walkShare}%`],
+    ['Sit transitions', `${total.sit_stand_transitions} · max ${minutes(total.longest_sitting_min)}`],
+  ];
   $('day-stats').replaceChildren(...stats.map(([name, value]) => {
     const tile = el('div', 'day-stat');
     tile.append(el('span', 'day-stat-value', value), el('span', 'day-stat-name', name));
@@ -226,7 +225,6 @@ function renderPostures() {
   }));
 }
 
-// Muse's review: summary, what they did, posture, history, changes (with why and how), what went well, caveats.
 function renderReview(report) {
   const box = $('review');
   const r = report.report;
@@ -234,91 +232,206 @@ function renderReview(report) {
     box.replaceChildren(el('p', 'day-note', 'No review yet: run python -m director.routine_tips on this recording.'));
     return;
   }
-  const list = (title, items) => {
-    const sec = el('section', 'review-part');
+  const chipList = (title, items, extraClass = '') => {
+    const sec = el('section', `review-part ${extraClass}`.trim());
     sec.append(el('h3', '', title));
-    const ul = el('ul');
-    ul.append(...items.map((t) => el('li', '', t)));
+    const ul = el('ul', 'review-chips');
+    ul.append(...items.slice(0, 3).map((t) => {
+      const li = el('li', 'review-chip-item');
+      li.append(el('span', 'review-bullet'), el('span', '', brief(t, 96)));
+      return li;
+    }));
     sec.appendChild(ul);
     return sec;
   };
+
+  const headline = el('div', 'review-headline-box');
+  headline.append(
+    el('span', 'review-kicker', 'Session Takeaway'),
+    el('p', 'review-summary', brief(r.summary, 180)),
+  );
+
   const changes = el('section', 'review-part review-changes');
-  changes.append(el('h3', '', 'What to change'));
+  changes.append(el('h3', '', 'Recommended habit adjustments'));
   const ol = el('ol', 'changes');
-  ol.append(...r.improvements.map((c) => {
+  ol.append(...(r.improvements ?? []).slice(0, 3).map((c, idx) => {
     const li = el('li');
-    li.append(el('strong', '', c.change), el('span', 'change-why', c.why ?? ''), el('span', 'change-how', c.how ?? ''));
+    li.append(
+      el('span', 'change-step-tag', `Action ${idx + 1}`),
+      el('strong', '', brief(c.change, 78)),
+      el('span', 'change-why', brief(c.why ?? '', 90)),
+      el('span', 'change-how', brief(c.how ?? '', 95)),
+    );
     return li;
   }));
   changes.appendChild(ol);
+
+  const subgrid = el('div', 'review-subgrid');
+  if (r.compared_with_history?.length) subgrid.appendChild(chipList('Vs. past routines', r.compared_with_history, 'review-history-callout'));
+  if (r.what_they_did?.length) subgrid.appendChild(chipList('Observed activities', r.what_they_did));
+  if (r.posture_and_movement?.length) subgrid.appendChild(chipList('Biomechanical notes', r.posture_and_movement));
+  if (r.went_well?.length) subgrid.appendChild(chipList('Positive habits', r.went_well));
+
   const read = el('details', 'review-prompt');
-  read.append(el('summary', '', 'What Muse read'), el('pre', '', r.prompt ?? 'Not saved with this review.'));
-  box.replaceChildren(el('p', 'review-summary', r.summary), changes,
-    list('What they did', r.what_they_did ?? []), list('Posture and movement', r.posture_and_movement ?? []),
-    list('Compared with history', r.compared_with_history ?? []), list('What went well', r.went_well ?? []),
-    list('What the data can\'t tell', r.caveats ?? []), read);
-  $('review-source').textContent = `${r.provider}, vs ${r.history?.length ?? 0} recordings`;
+  read.append(el('summary', '', 'View Meta Muse Spark prompt payload'), el('pre', '', r.prompt ?? 'Not saved with this review.'));
+  box.replaceChildren(headline, changes, subgrid, read);
+  $('review-source').textContent = `Meta Muse Spark · vs ${r.history?.length ?? 0} past`;
 }
 
-// ---------- History: the other processed recordings ----------
+// ---------- Past Routines & Cross-Session Comparison ----------
 
 async function renderHistory(current) {
-  const table = $('days-table');
   const { processed } = await fetchRecordings();
-  const others = processed.filter((r) => r.name !== current.name);
-  const loaded = await Promise.all(others.map(async (r) => ({ r, ins: await getJson(r.files['insights.json']),
-    post: await getJson(r.files['postures.json']).catch(() => null) })));
-  const head = el('thead');
+  const loaded = await Promise.all(processed.map(async (r) => ({
+    r,
+    ins: await getJson(r.files['insights.json']),
+    post: await getJson(r.files['postures.json']).catch(() => null),
+  })));
+
+  $('past-count').textContent = `${loaded.length} session${loaded.length === 1 ? '' : 's'}`;
+
+  const totalMin = loaded.reduce((s, x) => s + (x.ins?.total?.duration_min ?? 0), 0);
+  const totalWalkM = loaded.reduce((s, x) => s + (x.ins?.total?.walking_distance_m ?? 0), 0);
+  const totalSits = loaded.reduce((s, x) => s + (x.ins?.total?.sit_stand_transitions ?? 0), 0);
+  const avgWalkShare = loaded.length
+    ? Math.round((loaded.reduce((s, x) => s + (x.ins?.total?.share?.walking ?? 0), 0) / loaded.length) * 100)
+    : 0;
+
+  const summaryItems = [
+    ['Total time', minutes(totalMin)],
+    ['Total distance', `${Math.round(totalWalkM)} m`],
+    ['Avg walking', `${avgWalkShare}%`],
+    ['Sit transitions', String(totalSits)],
+  ];
+  $('past-summary').replaceChildren(...summaryItems.map(([label, val]) => {
+    const item = el('div', 'past-sum-item');
+    item.append(el('span', 'past-sum-val', val), el('span', 'past-sum-label', label));
+    return item;
+  }));
+
+  const sorted = [...loaded].sort((a, b) => {
+    if (a.r.name === current?.name) return 1;
+    if (b.r.name === current?.name) return -1;
+    return a.r.name.localeCompare(b.r.name);
+  });
+  const curIns = loaded.find((x) => x.r.name === current?.name)?.ins?.total;
+
+  $('past-cards').replaceChildren(...sorted.map(({ r, ins, post }) => {
+    const isCurrent = r.name === current?.name;
+    const t = ins.total;
+    const share = shareOf(post?.labels?.rules ?? []);
+    const card = el('article', `past-card ${isCurrent ? 'is-current-routine' : 'is-past-routine'}`);
+
+    const head = el('div', 'past-card-head');
+    const titleWrap = el('div', 'past-card-title');
+    titleWrap.append(
+      el('h3', 'past-card-name', r.name),
+      el('span', `badge ${isCurrent ? 'badge-current' : 'badge-past'}`, isCurrent ? 'Active' : 'Past routine'),
+    );
+    head.appendChild(titleWrap);
+
+    if (!isCurrent) {
+      const btn = el('button', 'btn btn-small-text', 'Load routine');
+      btn.type = 'button';
+      btn.addEventListener('click', async () => {
+        await openRecording(r);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      head.appendChild(btn);
+    }
+
+    const barWrap = el('div', 'past-card-bar');
+    barWrap.appendChild(stackedBar(share));
+    const topPostures = POSTURES
+      .filter((p) => share[p] >= 0.02)
+      .sort((a, b) => share[b] - share[a])
+      .map((p) => `${capitalize(p)} ${Math.round(share[p] * 100)}%`)
+      .join(' · ');
+    barWrap.appendChild(el('p', 'past-card-shares', topPostures));
+
+    const metrics = el('dl', 'past-card-metrics');
+    for (const [k, v] of [
+      ['Duration', minutes(t.duration_min)],
+      ['Walked', `${Math.round(t.walking_distance_m)} m`],
+      ['Sit-downs', String(t.sit_stand_transitions)],
+      ['Max sit', minutes(t.longest_sitting_min)],
+    ]) {
+      const cell = el('div');
+      cell.append(el('dt', '', k), el('dd', '', v));
+      metrics.appendChild(cell);
+    }
+
+    card.append(head, barWrap, metrics);
+
+    if (!isCurrent && curIns) {
+      const dWalk = Math.round(t.walking_distance_m - curIns.walking_distance_m);
+      const dWalkPct = Math.round(((t.share?.walking ?? 0) - (curIns.share?.walking ?? 0)) * 100);
+      const deltaText = `${dWalk >= 0 ? `+${dWalk}` : dWalk} m vs ${current.name} · `
+        + `${dWalkPct >= 0 ? `+${dWalkPct}` : dWalkPct}% walking`;
+      card.appendChild(el('p', 'past-card-delta', deltaText));
+    }
+    return card;
+  }));
+
+  const table = $('days-table');
+  const thead = el('thead');
   const hr = el('tr');
-  hr.append(...['Recording', 'Posture', 'Recorded', 'Walked', 'Muse / Qwen', ''].map((t) => Object.assign(el('th', '', t), { scope: 'col' })));
-  head.appendChild(hr);
-  const body = el('tbody');
-  for (const { r, ins, post } of loaded) {
+  hr.append(...['Session', 'Status', 'Posture split', 'Duration', 'Walked', 'Muse match', ''].map((t) => Object.assign(el('th', '', t), { scope: 'col' })));
+  thead.appendChild(hr);
+  const tbody = el('tbody');
+  for (const { r, ins, post } of sorted) {
+    const isCurrent = r.name === current?.name;
     const tr = el('tr');
-    const bar = el('td');
-    bar.appendChild(stackedBar(shareOf(post?.labels?.rules ?? [])));
+    const barTd = el('td');
+    barTd.appendChild(stackedBar(shareOf(post?.labels?.rules ?? [])));
     const a = post?.agreement;
-    const open = el('button', 'btn btn-small-text', 'Open');
-    open.type = 'button';
-    open.addEventListener('click', () => openRecording(r));
-    const td = el('td');
-    td.appendChild(open);
-    tr.append(Object.assign(el('th', '', r.name), { scope: 'row' }), bar, el('td', 'num', minutes(ins.total.duration_min)),
+    const actionTd = el('td');
+    if (!isCurrent) {
+      const open = el('button', 'btn btn-small-text', 'Open');
+      open.type = 'button';
+      open.addEventListener('click', () => {
+        openRecording(r);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      actionTd.appendChild(open);
+    } else {
+      actionTd.appendChild(el('span', 'past-active-tag', 'Active'));
+    }
+    tr.append(
+      Object.assign(el('th', '', r.name), { scope: 'row' }),
+      el('td', '', isCurrent ? 'Current' : 'Past'),
+      barTd,
+      el('td', 'num', minutes(ins.total.duration_min)),
       el('td', 'num', `${Math.round(ins.total.walking_distance_m)} m`),
-      el('td', 'num', a ? `${Math.round(a.muse * 100)}% / ${Math.round(a.qwen * 100)}%` : '-'), td);
-    body.appendChild(tr);
+      el('td', 'num', a && Number.isFinite(a.muse) ? `${Math.round(a.muse * 100)}%` : 'Muse Spark'),
+      actionTd,
+    );
+    tbody.appendChild(tr);
   }
-  table.replaceChildren(head, body);
+  table.replaceChildren(thead, tbody);
 }
 
 async function load(rec) {
   $('day-status').textContent = 'Loading';
-  const [report, csv, postures, muse] = await Promise.all([getJson(rec.files['insights.json']),
-    fetch(rec.files['activity.csv']).then((r) => r.text()), getJson(rec.files['postures.json']),
-    getJson(rec.files['narration_muse.json'])]);
-  Object.assign(view, { rows: parseCsv(csv), postures, captions: { muse: muse ?? [] } });
+  const [report, csv, postures, muse] = await Promise.all([
+    getJson(rec.files['insights.json']),
+    fetch(rec.files['activity.csv'], { cache: 'no-store' }).then((r) => r.text()),
+    getJson(rec.files['postures.json']),
+    getJson(rec.files['narration_muse.json']),
+  ]);
+  Object.assign(view, { rows: parseCsv(csv), postures, captions: muse ?? [] });
   $('posture-switch').closest('.posture-pick').hidden = !postures;
-  media.setSources({ pov: rec.pov, body: rec.body });
   renderStats(report.total);
   renderReview(report);
-  pickCaptions(view.cap, false);
   pickSource('rules');
   $('day-status').textContent = `${rec.name} · ${clock(view.rows.length)}`;
-  renderHistory(rec).catch(() => {});
+  await renderHistory(rec);
 }
 
 for (const b of $('posture-switch').children) b.addEventListener('click', () => pickSource(b.dataset.source));
-for (const b of $('caption-switch').children) b.addEventListener('click', () => pickCaptions(b.dataset.captions));
-const playBtn = $('routine-play');
-const syncPlay = () => {
-  const playing = !video.paused && !video.ended;
-  playBtn.dataset.state = playing ? 'pause' : 'play';
-  playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-};
-playBtn.addEventListener('click', () => (video.paused || video.ended ? media.play() : media.pause()));
-for (const ev of ['play', 'pause', 'ended']) video.addEventListener(ev, syncPlay);
 video.addEventListener('timeupdate', update);
 video.addEventListener('seeked', update);
+
 const strip = $('routine-strip');
 const secondAt = (e) => {
   const rect = strip.getBoundingClientRect();
@@ -335,12 +448,17 @@ strip.addEventListener('keydown', (e) => {
   e.preventDefault();
   media.seek(Math.min(Math.max(to, 0), view.labels.length - 1) + 0.05);
 });
-document.addEventListener('lifelens:tab', (e) => { if (e.detail.tab !== 'day') media.pause(); });
-document.addEventListener('lifelens:leave', () => media.pause());
+
 document.addEventListener('lifelens:session', () => {
-  document.body.classList.toggle('no-recording', !session.rec);
-  if (session.rec) load(session.rec).catch((err) => { $('day-status').textContent = `Not loaded: ${err.message}`; });
+  const hasRec = Boolean(session.rec);
+  document.body.classList.toggle('no-recording', !hasRec);
+  for (const id of ['routine-current-summary', 'routine-current-timeline', 'routine-current-review']) {
+    const sec = $(id);
+    if (sec) sec.hidden = !hasRec;
+  }
+  if (hasRec) {
+    load(session.rec).catch((err) => { $('day-status').textContent = `Not loaded: ${err.message}`; });
+  } else if (session.live) {
+    renderHistory(null).catch(() => {});
+  }
 });
-// Routine has nothing to drive Play: hide Play and Restart while it is open.
-const dayView = $('view-day');
-new MutationObserver(() => document.body.classList.toggle('on-day', !dayView.hidden)).observe(dayView, { attributes: true, attributeFilter: ['hidden'] });

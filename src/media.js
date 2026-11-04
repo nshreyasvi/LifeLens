@@ -28,12 +28,11 @@ export function mediaSet(root) {
     for (const t of toggles) {
       const name = t.dataset.toggle;
       t.setAttribute('aria-pressed', String(!live && (open.has(name) || (povMissing && name === 'body'))));
-      t.disabled = live || (povMissing && name === 'body'); // live: no 3D body yet; no POV: it fills the main window
+      t.disabled = live || (povMissing && name === 'body');
     }
     if (note) note.hidden = !povMissing;
   };
 
-  // No POV file: the main window plays the 3D body instead, on the same clock.
   const standIn = () => {
     povMissing = true;
     pov.dataset.standIn = 'true';
@@ -75,10 +74,36 @@ export function mediaSet(root) {
     play() { play(body); },
     pause() { body.pause(); },
     seek(t) { if (Number.isFinite(body.duration) && t >= 0 && t < body.duration) body.currentTime = t; },
-    // Open these windows next to the POV (a tab's default); the toggles change them afterwards.
     show(names) { open = new Set(names); render(); align(); },
     shown() { return [...open]; },
-    // Point the videos at a recording; a missing POV is replaced by the 3D body.
+    // Wipe any previously loaded video sources so old sessions never linger when switching to Live mode.
+    clear() {
+      live = true;
+      povMissing = false;
+      delete pov.dataset.standIn;
+      for (const v of [pov, body, graph].filter(Boolean)) {
+        v.pause();
+        v.srcObject = null;
+        v.removeAttribute('src');
+        v.load();
+      }
+      render();
+    },
+    // Show the newly recorded clip immediately in the POV window while the 3D pipeline runs.
+    setPreview(blobUrl) {
+      live = true;
+      povMissing = false;
+      delete pov.dataset.standIn;
+      for (const v of [body, graph].filter(Boolean)) {
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+      }
+      pov.srcObject = null;
+      pov.src = blobUrl;
+      play(pov);
+      render();
+    },
     setSources({ pov: povSrc, body: bodySrc, graph: graphSrc }) {
       live = false;
       body.pause();
@@ -91,7 +116,6 @@ export function mediaSet(root) {
       else standIn();
       render();
     },
-    // A live session: the camera is the POV.
     setLive(stream) {
       live = true;
       povMissing = false;

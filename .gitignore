@@ -22,3 +22,7 @@ dist/
 public/video/input/
 # camera clips saved by the page's Record button
 recordings/
+# large local raw dataset files and tool caches in archive/
+archive/raw-data/
+archive/playwright-logs/
+archive/graphify-out/cache/

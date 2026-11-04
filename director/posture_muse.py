@@ -38,7 +38,8 @@ Answer with exactly one line per window, "<window number>: <posture>", and nothi
 def windows(clip: Path) -> list[dict]:
     rows = list(csv.DictReader(open(clip / 'pose_timeseries.csv', encoding='utf-8')))
     stand = sorted(float(r['pelvis_height_m']) for r in rows)[int(0.95 * (len(rows) - 1))]   # standing pelvis height
-    said = {round(n['start_s']): n['text'] for n in json.load(open(clip / 'narration.json', encoding='utf-8'))}
+    narr_file = clip / 'narration_muse.json' if (clip / 'narration_muse.json').exists() else clip / 'narration.json'
+    said = {round(n['start_s']): n['text'] for n in json.load(open(narr_file, encoding='utf-8'))} if narr_file.exists() else {}
     out: dict[int, list[dict]] = {}
     for r in rows:
         out.setdefault(int(float(r['time_s']) // WINDOW_S), []).append(r)

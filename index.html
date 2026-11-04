@@ -8,7 +8,7 @@
     // Apply the saved theme before the page draws, so it doesn't flash white first.
     try { if (localStorage.getItem('lifelens-theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch (e) {}
   </script>
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#FAF9F5">
   <meta name="description" content="LifeLens beta: your whole body, routine and music from a head-mounted camera.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <title>LifeLens beta</title>
@@ -17,53 +17,317 @@
   <link rel="stylesheet" href="/src/day.css">
 </head>
 <body class="is-starting">
-  <!-- Start: who you are, then a recording or a new live session. -->
+  <!-- Ambient optical & kinematic vector graphics backdrop across both Start and Studio views -->
+  <div class="studio-bg-vectors" aria-hidden="true">
+    <svg class="bg-vector-svg" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="vec-cobalt" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="currentColor" stop-opacity="0.16"/>
+          <stop offset="100%" stop-color="currentColor" stop-opacity="0.02"/>
+        </linearGradient>
+        <linearGradient id="vec-coral" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#E04826" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#2B44E8" stop-opacity="0.02"/>
+        </linearGradient>
+        <pattern id="vec-grid" width="72" height="72" patternUnits="userSpaceOnUse">
+          <path d="M 72 0 L 0 0 0 72" stroke="currentColor" stroke-opacity="0.045" stroke-width="1"/>
+          <circle cx="72" cy="72" r="1.2" fill="currentColor" fill-opacity="0.1"/>
+        </pattern>
+      </defs>
+      <rect width="1440" height="900" fill="url(#vec-grid)"/>
+      <!-- Optical lens projection arcs -->
+      <circle cx="180" cy="140" r="260" stroke="url(#vec-cobalt)" stroke-width="1.5" stroke-dasharray="6 8"/>
+      <circle cx="180" cy="140" r="390" stroke="url(#vec-cobalt)" stroke-width="1"/>
+      <circle cx="1290" cy="760" r="310" stroke="url(#vec-coral)" stroke-width="1.5" stroke-dasharray="10 10"/>
+      <circle cx="1290" cy="760" r="460" stroke="url(#vec-cobalt)" stroke-width="1"/>
+      <!-- Kinematic trajectory wave & skeletal nodes -->
+      <path d="M-60 680 C 240 560, 460 790, 760 630 C 1040 480, 1210 670, 1500 520" stroke="url(#vec-cobalt)" stroke-width="2"/>
+      <path d="M-60 720 C 260 610, 490 830, 790 670 C 1070 520, 1230 710, 1500 560" stroke="url(#vec-coral)" stroke-width="1.2" stroke-dasharray="4 6"/>
+      <g stroke="currentColor" stroke-opacity="0.12" stroke-width="1.2">
+        <line x1="1120" y1="110" x2="1280" y2="190"/>
+        <line x1="1280" y1="190" x2="1220" y2="310"/>
+        <line x1="1280" y1="190" x2="1360" y2="290"/>
+        <circle cx="1120" cy="110" r="4" fill="currentColor" fill-opacity="0.18"/>
+        <circle cx="1280" cy="190" r="5" fill="currentColor" fill-opacity="0.22"/>
+        <circle cx="1220" cy="310" r="3.5" fill="currentColor" fill-opacity="0.15"/>
+        <circle cx="1360" cy="290" r="3.5" fill="currentColor" fill-opacity="0.15"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Start screen: expressive 2-column Studio Launcher with vector artwork & live hardware telemetry -->
   <section class="start" id="start" aria-labelledby="start-title">
-    <div class="start-card">
-      <img class="start-logo" src="/logo-mark.svg" alt="" width="72" height="72">
-      <h1 class="start-title" id="start-title">LifeLens <span class="badge">beta</span></h1>
-      <p class="start-sub">Your whole body, your routine and its music, from a head camera.</p>
-      <label class="field">
-        <span>Your name</span>
-        <input id="user-name" type="text" maxlength="40" autocomplete="given-name" placeholder="Name">
-      </label>
-      <div class="choices">
-        <button class="choice" id="choose-live" type="button">
-          <svg class="icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
-          <span class="choice-name">New live session</span>
-          <span class="choice-sub">Camera with live Muse captions; 3D body after</span>
-        </button>
-        <button class="choice" id="choose-rec" type="button">
-          <svg class="icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h3.6l2 2H17.5A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/></svg>
-          <span class="choice-name">Open a recording</span>
-          <span class="choice-sub">One LifeLens processed, or a new video</span>
-        </button>
+    <div class="start-shell">
+      <div class="start-showcase">
+        <div class="start-brand-row">
+          <img class="start-logo" src="/logo-mark.svg" alt="" width="52" height="52">
+          <div class="start-header-copy">
+            <div class="start-eyebrow">Egocentric 3D Motion &amp; AI Director</div>
+            <h1 class="start-title" id="start-title">LifeLens <span class="badge">beta</span></h1>
+          </div>
+        </div>
+
+        <p class="start-lead">
+          Turn a single head-mounted camera into articulated <strong>3D body motion</strong>, <strong>Meta Muse Spark</strong> routine coaching, and body-driven <strong>stage music</strong>.
+        </p>
+
+        <!-- Custom vector graphic diagram: Head POV -> 3D SMPL-H Body -> Routine & Stage -->
+        <div class="start-vector-art" aria-hidden="true">
+          <svg viewBox="0 0 460 210" fill="none" class="start-art-svg">
+            <defs>
+              <linearGradient id="fov-cone" x1="40" y1="105" x2="230" y2="105" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2B44E8" stop-opacity="0.32"/>
+                <stop offset="100%" stop-color="#2B44E8" stop-opacity="0.02"/>
+              </linearGradient>
+              <linearGradient id="stage-aura" x1="290" y1="30" x2="430" y2="180" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E04826" stop-opacity="0.24"/>
+                <stop offset="100%" stop-color="#2B44E8" stop-opacity="0.08"/>
+              </linearGradient>
+            </defs>
+            <!-- Perspective floor grid -->
+            <path d="M150 175 L310 175 L350 198 L110 198 Z" stroke="currentColor" stroke-opacity="0.16" stroke-width="1"/>
+            <line x1="190" y1="175" x2="170" y2="198" stroke="currentColor" stroke-opacity="0.12"/>
+            <line x1="230" y1="175" x2="230" y2="198" stroke="currentColor" stroke-opacity="0.12"/>
+            <line x1="270" y1="175" x2="290" y2="198" stroke="currentColor" stroke-opacity="0.12"/>
+
+            <!-- Left: POV Glasses / Camera Lens node -->
+            <path d="M58 105 L215 36 L215 174 Z" fill="url(#fov-cone)"/>
+            <path d="M58 105 L215 36 M58 105 L215 174" stroke="#2B44E8" stroke-opacity="0.45" stroke-width="1.3" stroke-dasharray="4 4"/>
+            <circle cx="54" cy="105" r="24" fill="#2B44E8" fill-opacity="0.12" stroke="#2B44E8" stroke-width="1.8"/>
+            <circle cx="54" cy="105" r="10" fill="#2B44E8"/>
+            <circle cx="51" cy="102" r="3" fill="#FFFFFF"/>
+            <text x="54" y="146" text-anchor="middle" fill="currentColor" fill-opacity="0.72" font-size="10" font-weight="600">POV Optics</text>
+
+            <!-- Center: 3D Articulated Skeleton (SMPL-H + Hands) -->
+            <g stroke="#2B44E8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Head & Torso -->
+              <circle cx="230" cy="48" r="11" fill="#2B44E8" fill-opacity="0.18"/>
+              <line x1="230" y1="59" x2="230" y2="112"/>
+              <!-- Shoulders & Arms -->
+              <line x1="204" y1="72" x2="256" y2="72"/>
+              <line x1="204" y1="72" x2="186" y2="100"/>
+              <line x1="186" y1="100" x2="172" y2="90"/>
+              <line x1="256" y1="72" x2="274" y2="98"/>
+              <line x1="274" y1="98" x2="290" y2="84"/>
+              <!-- Hips & Legs -->
+              <line x1="216" y1="112" x2="244" y2="112"/>
+              <line x1="216" y1="112" x2="206" y2="146"/>
+              <line x1="206" y1="146" x2="198" y2="180"/>
+              <line x1="244" y1="112" x2="256" y2="144"/>
+              <line x1="256" y1="144" x2="266" y2="180"/>
+            </g>
+            <!-- Joint keypoint nodes -->
+            <g fill="#FFFFFF" stroke="#2B44E8" stroke-width="2">
+              <circle cx="204" cy="72" r="3.5"/>
+              <circle cx="256" cy="72" r="3.5"/>
+              <circle cx="186" cy="100" r="3"/>
+              <circle cx="274" cy="98" r="3"/>
+              <circle cx="230" cy="112" r="4"/>
+              <circle cx="206" cy="146" r="3.5"/>
+              <circle cx="256" cy="144" r="3.5"/>
+            </g>
+            <!-- Articulated hand highlights (Coral) -->
+            <circle cx="172" cy="90" r="4.5" fill="#E04826"/>
+            <circle cx="290" cy="84" r="4.5" fill="#E04826"/>
+            <text x="230" y="24" text-anchor="middle" fill="currentColor" fill-opacity="0.78" font-size="10" font-weight="600">3D SMPL-H + Hands</text>
+
+            <!-- Right: Routine Pulse & Stage Music Bars -->
+            <circle cx="378" cy="105" r="54" fill="url(#stage-aura)" stroke="#E04826" stroke-opacity="0.35" stroke-width="1.2"/>
+            <g stroke="#E04826" stroke-width="3" stroke-linecap="round">
+              <line x1="348" y1="118" x2="348" y2="92"/>
+              <line x1="360" y1="126" x2="360" y2="78"/>
+              <line x1="372" y1="132" x2="372" y2="68"/>
+              <line x1="384" y1="122" x2="384" y2="86"/>
+              <line x1="396" y1="128" x2="396" y2="74"/>
+              <line x1="408" y1="116" x2="408" y2="94"/>
+            </g>
+            <path d="M298 105 L322 105" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="378" y="176" text-anchor="middle" fill="currentColor" fill-opacity="0.72" font-size="10" font-weight="600">Muse Spark &amp; Stage</text>
+          </svg>
+        </div>
+
+        <div class="start-pillars">
+          <div class="start-pillar">
+            <span class="start-pillar-kicker">3D Reconstruction</span>
+            <strong>OmniEgoCap + HaWoR</strong>
+          </div>
+          <div class="start-pillar">
+            <span class="start-pillar-kicker">Vision &amp; Coaching</span>
+            <strong>Meta Muse Spark</strong>
+          </div>
+          <div class="start-pillar">
+            <span class="start-pillar-kicker">Adaptive Stage</span>
+            <strong>ReccoBeats + 6 Lights</strong>
+          </div>
+        </div>
+
+        <div class="start-hw-pill" id="start-hw-pill">
+          <span class="hw-dot" aria-hidden="true"></span>
+          <span id="start-hw-text">Detecting local GPU &amp; processor…</span>
+        </div>
       </div>
-      <div class="rec-list" id="rec-list" hidden>
-        <ul id="rec-processed" aria-label="Processed recordings"></ul>
-        <ul id="rec-raw" aria-label="Videos to process"></ul>
-        <p class="rec-note" id="rec-note" aria-live="polite"></p>
+
+      <div class="start-card">
+        <div class="start-card-head">
+          <div>
+            <span class="start-step-tag">Studio Session</span>
+            <h2 class="start-card-title" id="start-greeting">Welcome to LifeLens</h2>
+          </div>
+          <span class="chip is-active">Meta Muse Spark</span>
+        </div>
+
+        <div class="start-body">
+          <label class="field">
+            <span>Creator / wearer name</span>
+            <input id="user-name" type="text" maxlength="40" autocomplete="given-name" placeholder="Enter your name (optional)">
+          </label>
+
+          <div class="choices">
+            <button class="choice" id="choose-live" type="button">
+              <span class="choice-icon-wrap choice-icon-live" aria-hidden="true">
+                <svg class="icon" width="22" height="22" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5"/>
+                  <path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="choice-name">New live session</span>
+              <span class="choice-sub">Record camera with live Muse Spark captions &amp; full 3D pipeline</span>
+            </button>
+
+            <button class="choice" id="choose-rec" type="button">
+              <span class="choice-icon-wrap" aria-hidden="true">
+                <svg class="icon" width="22" height="22" viewBox="0 0 24 24">
+                  <path d="M3.5 6.5A2.5 2.5 0 0 1 6 4h3.4l2 2H18a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 18 20H6a2.5 2.5 0 0 1-2.5-2.5z"/>
+                </svg>
+              </span>
+              <span class="choice-name">Open a recording</span>
+              <span class="choice-sub">Select a benchmark session or process a raw recording</span>
+            </button>
+          </div>
+
+          <div class="rec-list" id="rec-list" hidden>
+            <div class="rec-list-head">
+              <span>Available sessions</span>
+              <span class="rec-count-chip" id="rec-count-chip">2 ready</span>
+            </div>
+            <ul id="rec-processed" aria-label="Processed recordings"></ul>
+            <ul id="rec-raw" aria-label="Videos to process"></ul>
+            <p class="rec-note" id="rec-note" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dedicated Processing Studio Screen: shown after recording stops or when processing a video -->
+  <section class="process-screen" id="process-screen" aria-labelledby="process-title" hidden>
+    <div class="process-card">
+      <div class="process-head">
+        <div class="process-head-left">
+          <div class="process-spinner" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="42" height="42">
+              <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="3.5"/>
+              <path d="M24 5a19 19 0 0 1 19 19" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="process-kicker">3D Body &amp; Meta Muse Spark Pipeline</div>
+            <h2 id="process-title">Processing your recording</h2>
+          </div>
+        </div>
+        <div class="process-head-meta">
+          <span class="chip is-active" id="process-rec-name">live-session</span>
+          <span class="media-clock" id="process-elapsed">0:00</span>
+        </div>
+      </div>
+
+      <div class="process-progress-box">
+        <div class="process-progress-top">
+          <span class="process-step-label" id="process-step-label">Preparing video stream…</span>
+          <span class="process-pct" id="process-pct">0%</span>
+        </div>
+        <div class="process-bar-track" role="progressbar" id="process-progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="process-bar-fill" id="process-bar-fill"></div>
+        </div>
+      </div>
+
+      <div class="process-grid">
+        <div class="process-col-left">
+          <div class="process-preview-card" id="process-preview-wrap" hidden>
+            <div class="process-card-label">
+              <span>Recorded POV clip</span>
+              <span class="badge">New capture</span>
+            </div>
+            <video id="process-preview-video" muted playsinline loop autoplay></video>
+          </div>
+
+          <div class="process-hw-card">
+            <div class="process-card-label">
+              <span>Compute &amp; Hardware Telemetry</span>
+              <span class="chip" id="hw-stack-chip">WSL2 CUDA</span>
+            </div>
+            <div class="process-hw-grid">
+              <div class="hw-tile">
+                <span class="hw-tile-label">GPU Accelerator</span>
+                <strong class="hw-tile-value" id="hw-gpu-name">Detecting GPU…</strong>
+                <div class="hw-meter"><div class="hw-meter-fill" id="hw-gpu-bar"></div></div>
+                <span class="hw-tile-sub" id="hw-gpu-meta">VRAM &amp; utilization</span>
+              </div>
+              <div class="hw-tile">
+                <span class="hw-tile-label">Host Processor</span>
+                <strong class="hw-tile-value" id="hw-cpu-name">Detecting CPU…</strong>
+                <span class="hw-tile-sub" id="hw-cpu-meta">Threads &amp; system memory</span>
+              </div>
+              <div class="hw-tile hw-tile-wide">
+                <span class="hw-tile-label">Active AI &amp; Biomechanics Models</span>
+                <strong class="hw-tile-value">HaWoR · OmniEgoCap (SMPL-H) · Meta Muse Spark</strong>
+                <span class="hw-tile-sub">30 fps 3D full-body &amp; hand reconstruction + multimodal routine analysis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-col-right">
+          <div class="process-stages-card">
+            <div class="process-card-label">
+              <span>Pipeline stages</span>
+              <span class="chip" id="process-stage-count">Stage 1 of 8</span>
+            </div>
+            <ol class="process-stages" id="process-stages"></ol>
+          </div>
+
+          <div class="process-log-card">
+            <div class="process-card-label">
+              <span>Live pipeline output</span>
+              <button class="chip-btn" id="process-close-btn" type="button" hidden>Return to studio</button>
+            </div>
+            <pre class="process-log" id="process-log">Starting pipeline…</pre>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <header class="topbar">
     <div class="brand">
-      <img class="brand-logo" src="/logo-mark.svg" alt="" width="28" height="28">
-      <h1>LifeLens</h1>
-      <span class="badge">beta</span>
-      <span class="who" id="who"></span>
-      <button class="chip-btn" id="change-btn" type="button">Change</button>
-      <span class="ai-badge" id="ai-badge" data-mode="idle" title="The director's AI step picks mood and tempo with Meta Muse Spark (Meta Model API) or Llama 3.2 3B (Meta open weights, run locally).">
-        <span class="ai-dot" aria-hidden="true"></span>
-        <span class="ai-name">Director AI</span>
-        <span class="ai-state" id="ai-state">Idle</span>
-      </span>
-      <div class="toggles toggles-small" id="caption-switch" role="group" aria-label="Captions by" title="Which model describes the video, for the director and the Routine: Qwen3-VL-2B on this machine, or Meta Muse Spark">
-        <button class="toggle" type="button" data-captions="qwen" aria-pressed="true">Qwen3-VL</button>
-        <button class="toggle" type="button" data-captions="muse" aria-pressed="false">Muse Spark</button>
+      <div class="brand-id">
+        <img class="brand-logo" src="/logo-mark.svg" alt="" width="34" height="34">
+        <h1>LifeLens</h1>
+        <span class="badge">beta</span>
+      </div>
+      <div class="brand-session">
+        <span class="who" id="who"></span>
+        <button class="chip-btn" id="change-btn" type="button">Switch session</button>
+      </div>
+      <div class="brand-telemetry">
+        <span class="ai-badge" id="ai-badge" data-mode="idle" title="Meta Muse Spark drives scene narration, posture classification, routine coaching, and live director cues.">
+          <span class="ai-dot" aria-hidden="true"></span>
+          <span class="ai-name">Meta Muse Spark</span>
+          <span class="ai-state" id="ai-state">Ready</span>
+        </span>
       </div>
     </div>
+
     <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Switch to the dark theme">
       <svg class="icon icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
       <svg class="icon icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
@@ -72,16 +336,19 @@
 
     <nav class="segmented" id="tabs" role="tablist" aria-label="Views">
       <button class="tab" id="tab-btn-activity" type="button" role="tab" data-tab="activity" aria-controls="view-activity" aria-selected="true">
-        <span class="tab-dot" aria-hidden="true"></span>Activity
-      </button>
-      <button class="tab" id="tab-btn-day" type="button" role="tab" data-tab="day" aria-controls="view-day" aria-selected="false" tabindex="-1">
-        <span class="tab-dot" aria-hidden="true"></span>Routine
+        <span class="tab-dot" aria-hidden="true"></span>
+        <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Routine</span>
       </button>
       <button class="tab" id="tab-btn-music" type="button" role="tab" data-tab="music" aria-controls="view-music" aria-selected="false" tabindex="-1">
-        <span class="tab-dot" aria-hidden="true"></span>Music
+        <span class="tab-dot" aria-hidden="true"></span>
+        <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l11-2v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/></svg>
+        <span>Music</span>
       </button>
       <button class="tab" id="tab-btn-stage" type="button" role="tab" data-tab="stage" aria-controls="view-stage" aria-selected="false" tabindex="-1">
-        <span class="tab-dot" aria-hidden="true"></span>Stage
+        <span class="tab-dot" aria-hidden="true"></span>
+        <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.2 2.2M16.2 16.2l2.2 2.2M18.4 5.6l-2.2 2.2M7.8 16.2l-2.2 2.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Stage</span>
       </button>
     </nav>
 
@@ -109,13 +376,13 @@
   <div id="error" class="error" role="alert" hidden></div>
 
   <main class="views">
-    <!-- Activity, Music and Stage: the POV on the left, never hidden; the 3D body and the tab's details in the rail. -->
-    <div class="shell" id="media">
+    <!-- Top studio deck: POV on the left (16:9 edge-to-edge); 3D body and active view telemetry in the right rail. -->
+    <div class="shell" id="media" data-open="body graph">
       <section class="panel media shell-main" aria-labelledby="media-title">
         <div class="panel-head media-head">
           <div>
             <h2 id="media-title">Recording</h2>
-            <p class="panel-sub" id="media-sub">What the head camera saw.</p>
+            <p class="panel-sub" id="media-sub">First-person POV, 3D SMPL-H body &amp; kinematics.</p>
           </div>
           <div class="toggles" role="group" aria-label="Show next to the POV">
             <button class="toggle" type="button" data-toggle="body" aria-pressed="false">3D body</button>
@@ -138,14 +405,14 @@
         <p class="media-note" hidden>No POV video for this recording on this machine, so the 3D body fills the main window.</p>
       </section>
 
-      <aside class="shell-rail" aria-label="3D body and details">
+      <aside class="shell-rail" aria-label="3D body and activity">
         <div class="media-pane media-side" data-pane="body" hidden>
           <video muted playsinline loop preload="auto" aria-label="3D body, reconstructed from the head camera"></video>
         </div>
         <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
           <section class="panel panel-energy" aria-labelledby="energy-title">
             <div class="panel-head">
-              <h2 id="energy-title">Energy</h2>
+              <h2 id="energy-title">Live activity</h2>
               <span class="chip" id="energy-chip">Waiting</span>
             </div>
             <div class="energy-value" id="energy-value" aria-live="polite">-</div>
@@ -155,12 +422,12 @@
               </div>
               <div class="energy-scale" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span></div>
             </div>
-            <p class="energy-note" id="energy-note">Press Play.</p>
+            <p class="energy-note" id="energy-note">Press Play to stream activity cues.</p>
           </section>
 
           <section class="panel panel-timeline" aria-labelledby="timeline-title">
             <div class="panel-head">
-              <h2 id="timeline-title">Director cues</h2>
+              <h2 id="timeline-title">Activity stream</h2>
               <span class="chip" id="timeline-count">0 cues</span>
             </div>
             <ol class="timeline" id="timeline"></ol>
@@ -170,16 +437,16 @@
         <section class="view view-music" id="view-music" data-view="music" role="tabpanel" aria-labelledby="tab-btn-music" hidden>
           <section class="panel panel-chain" aria-labelledby="chain-title">
             <div class="panel-head">
-              <h2 id="chain-title">From the body to the music</h2>
+              <h2 id="chain-title">Body to music</h2>
               <span class="chip" id="chain-state">Waiting</span>
             </div>
-            <p class="panel-sub" id="chain-window">The last 10 s of the 3D body.</p>
+            <p class="panel-sub" id="chain-window">10 s biomechanical window.</p>
             <dl class="features" id="music-features"></dl>
           </section>
 
           <section class="panel panel-music is-paused" id="music-panel" aria-labelledby="music-title">
             <div class="panel-head">
-              <h2 id="music-title">Music</h2>
+              <h2 id="music-title">Music match</h2>
               <span class="chip" id="music-state">Waiting</span>
             </div>
             <div class="tempo">
@@ -191,23 +458,23 @@
             </div>
             <div class="songs">
               <div class="songs-head">
-                <h3 id="songs-title">Songs for this moment</h3>
+                <h3 id="songs-title">Matched tracks</h3>
                 <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
               </div>
               <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
-              <p class="songs-note" id="songs-note">Songs come once the body has moved for a few seconds.</p>
+              <p class="songs-note" id="songs-note">Tracks appear as movement pace settles.</p>
             </div>
           </section>
         </section>
 
-        <section class="view view-stage" id="view-stage" data-view="stage" role="tabpanel" aria-labelledby="tab-btn-stage" hidden>
+        <section class="view view-stage" id="view-stage" data-view="stage" aria-labelledby="tab-btn-stage" role="tabpanel" hidden>
           <section class="panel panel-lights" aria-labelledby="lights-title">
             <div class="ambient" id="ambient" aria-hidden="true"></div>
             <div class="panel-head">
-              <h2 id="lights-title">Stage lights</h2>
+              <h2 id="lights-title">Stage rig</h2>
               <span class="chip" id="lights-action">Waiting</span>
             </div>
-            <p class="panel-sub">Each light follows one part of the body; the director sets the color and the flashes.</p>
+            <p class="panel-sub">6 body-coupled fixtures driven by limb velocity &amp; Muse Spark mood.</p>
             <div class="bulbs" id="bulbs"></div>
             <dl class="stats">
               <div><dt>Energy</dt><dd id="lights-energy">-</dd></div>
@@ -221,96 +488,92 @@
         <!-- Music and Stage share one player, so a song keeps playing between them; the lights pulse to its beat. -->
         <section class="panel panel-player" id="player" aria-labelledby="player-title" hidden>
           <div class="panel-head">
-            <h2 id="player-title">Playing</h2>
+            <h2 id="player-title">Now playing</h2>
             <span class="chip" id="player-beat">No song yet</span>
           </div>
           <div class="player-embed"><div id="player-embed"></div></div>
-          <p class="panel-sub" id="player-note">Press Play: the first song ReccoBeats picks for the body starts here.</p>
+          <p class="panel-sub" id="player-note">Press Play to start the top ReccoBeats track.</p>
         </section>
       </aside>
     </div>
 
-    <section class="view view-day" id="view-day" data-view="day" role="tabpanel" aria-labelledby="tab-btn-day" hidden>
-      <section class="panel panel-day-wide" aria-labelledby="day-title">
-        <div class="panel-head">
-          <h2 id="day-title">Routine</h2>
-          <span class="chip" id="day-status">Loading</span>
-        </div>
-        <div class="day-stats" id="day-stats"></div>
-      </section>
-
-      <section class="panel panel-day-wide" aria-labelledby="did-title">
-        <div class="panel-head">
-          <h2 id="did-title">What they did</h2>
-          <span class="chip" id="did-captions">Qwen3-VL captions</span>
-        </div>
-        <div class="posture-pick">
-          <span class="posture-pick-name" id="posture-pick-name">Posture from</span>
-          <div class="toggles" id="posture-switch" role="group" aria-labelledby="posture-pick-name">
-            <button class="toggle" type="button" data-source="rules" aria-pressed="true">Rules</button>
-            <button class="toggle" type="button" data-source="muse" aria-pressed="false">Muse Spark</button>
-            <button class="toggle" type="button" data-source="qwen" aria-pressed="false">Qwen3-VL</button>
-            <button class="toggle" type="button" data-source="combined" aria-pressed="false">Combined</button>
-          </div>
-          <p class="posture-how" id="posture-how" aria-live="polite"></p>
-        </div>
-        <div class="routine">
-          <div class="routine-player">
-            <div class="media media-compact" id="routine-media">
-              <div class="media-bar">
-                <button class="btn btn-icon btn-small" id="routine-play" type="button" aria-label="Play">
-                  <svg class="icon icon-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
-                  <svg class="icon icon-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
-                </button>
-                <span class="media-clock" id="routine-clock">0:00</span>
-                <div class="toggles" role="group" aria-label="Windows over the POV">
-                  <button class="toggle" type="button" data-toggle="body" aria-pressed="false">3D body</button>
-                </div>
-              </div>
-              <div class="media-stage">
-                <div class="media-pane media-base" data-pane="pov">
-                  <video muted playsinline preload="auto" aria-label="Head-camera video of this recording"></video>
-                </div>
-                <div class="media-pane media-window" data-pane="body" hidden>
-                  <video muted playsinline preload="auto" aria-label="3D body of this recording"></video>
-                </div>
-              </div>
-              <p class="media-note" hidden>No POV video for this recording on this machine: the 3D body fills the main window.</p>
+    <!-- Integrated inside Routine tab: Activity breakdown, Interactive Scrubber, Past Routines & Muse Spark Coaching -->
+    <section class="routine-deck" id="view-day" aria-label="Session activity and past routines">
+      <div class="routine-grid-top">
+        <section class="panel panel-routine-summary" id="routine-current-summary" aria-labelledby="day-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="day-title">Activity breakdown</h2>
+              <p class="panel-sub">3D posture split &amp; movement metrics for this session.</p>
             </div>
-            <div class="strip-row"><span class="strip-name" id="strip-source-name">Rules</span><div class="day-strip" id="routine-strip"></div></div>
-            <div class="strip-row" hidden><span class="strip-name">Motion capture</span><div class="day-strip day-strip-ref" id="routine-ref" aria-hidden="true"></div></div>
-            <p class="day-caption" id="routine-caption" aria-live="polite"></p>
+            <span class="chip is-active" id="day-status">Waiting</span>
           </div>
-          <ol class="log" id="routine-log" aria-label="What they did, in time order"></ol>
-        </div>
-      </section>
+          <div class="day-stats" id="day-stats"></div>
+          <div class="routine-postures-block">
+            <h3 class="subhead" id="day-postures-title">Posture distribution</h3>
+            <div class="day-rows" id="day-postures"></div>
+            <ul class="day-legend" id="day-legend"></ul>
+          </div>
+        </section>
 
-      <section class="panel panel-day-wide" aria-labelledby="review-title">
-        <div class="panel-head">
-          <h2 id="review-title">Review</h2>
-          <span class="chip" id="review-source">Meta Muse Spark</span>
-        </div>
-        <div class="review" id="review"></div>
-      </section>
+        <section class="panel panel-routine-timeline" id="routine-current-timeline" aria-labelledby="did-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="did-title">Activity timeline &amp; log</h2>
+              <p class="panel-sub">Click any second or action card to scrub the POV &amp; 3D body above.</p>
+            </div>
+            <span class="chip is-active" id="did-captions">Meta Muse Spark</span>
+          </div>
+          <div class="posture-pick">
+            <span class="posture-pick-name" id="posture-pick-name">Classifier</span>
+            <div class="toggles" id="posture-switch" role="group" aria-labelledby="posture-pick-name">
+              <button class="toggle" type="button" data-source="rules" aria-pressed="true">3D Rules</button>
+              <button class="toggle" type="button" data-source="muse" aria-pressed="false">Muse Spark</button>
+              <button class="toggle" type="button" data-source="combined" aria-pressed="false">Combined</button>
+            </div>
+            <p class="posture-how" id="posture-how" aria-live="polite"></p>
+          </div>
+          <div class="scrubber-box">
+            <div class="scrubber-meta">
+              <span class="media-clock" id="routine-clock">0:00</span>
+              <p class="day-caption" id="routine-caption" aria-live="polite"></p>
+            </div>
+            <div class="strip-row"><span class="strip-name" id="strip-source-name">3D Rules</span><div class="day-strip" id="routine-strip"></div></div>
+            <div class="strip-row" hidden><span class="strip-name">Motion capture</span><div class="day-strip day-strip-ref" id="routine-ref" aria-hidden="true"></div></div>
+          </div>
+          <ol class="log" id="routine-log" aria-label="Session actions in time order"></ol>
+        </section>
+      </div>
 
-      <section class="panel" aria-labelledby="day-postures-title">
-        <div class="panel-head">
-          <h2 id="day-postures-title">Time by posture</h2>
-        </div>
-        <div class="day-rows" id="day-postures"></div>
-        <ul class="day-legend" id="day-legend"></ul>
-      </section>
+      <div class="routine-grid-bottom">
+        <section class="panel panel-past-routines" aria-labelledby="days-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="days-title">Past routines</h2>
+              <p class="panel-sub">Cross-session posture habits, walking distance &amp; active ratio.</p>
+            </div>
+            <span class="chip" id="past-count">0 sessions</span>
+          </div>
+          <div class="past-summary" id="past-summary"></div>
+          <div class="past-cards" id="past-cards"></div>
+          <div class="days-wrap"><table class="days" id="days-table"></table></div>
+        </section>
 
-      <section class="panel" aria-labelledby="days-title">
-        <div class="panel-head">
-          <h2 id="days-title">History</h2>
-        </div>
-        <div class="days-wrap"><table class="days" id="days-table"></table></div>
-      </section>
+        <section class="panel panel-routine-review" id="routine-current-review" aria-labelledby="review-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="review-title">Muse Spark coaching</h2>
+              <p class="panel-sub">Structured ergonomic takeaways &amp; habit adjustments.</p>
+            </div>
+            <span class="chip is-active" id="review-source">Meta Muse Spark</span>
+          </div>
+          <div class="review" id="review"></div>
+        </section>
+      </div>
     </section>
   </main>
 
-  <footer class="foot">© 2026 LifeLens team · beta research prototype, not medical advice · OmniEgoDB recordings CC BY-NC 4.0 · SMPL-H and MANO under the MPI license · Models: Meta Muse Spark, Llama 3.2, Qwen3-VL</footer>
+  <footer class="foot">© 2026 LifeLens team</footer>
 
   <script type="module" src="/src/start.js"></script>
   <script type="module" src="/src/main.js"></script>

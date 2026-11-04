@@ -78,10 +78,11 @@ def long_low_is_sitting(labels: list) -> list:
 
 
 def narration_at(run: str, seconds: int) -> list:
-    if not os.path.exists(f'{run}/narration.json'):
+    path = f'{run}/narration_muse.json' if os.path.exists(f'{run}/narration_muse.json') else f'{run}/narration.json'
+    if not os.path.exists(path):
         return [''] * seconds
     text = [''] * seconds
-    for n in json.load(open(f'{run}/narration.json')):
+    for n in json.load(open(path, encoding='utf-8')):
         for s in range(int(n['start_s']), min(int(np.ceil(n['end_s'])), seconds)):
             text[s] = n['text']
     return text
@@ -198,5 +199,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('runs', nargs='+', help='Run folders, one clip each, in time order.')
     parser.add_argument('--out', default=None, help='Report folder (default: the first run).')
-    parser.add_argument('--model', default='Qwen/Qwen3-VL-2B-Instruct', help="Summary LLM; '' for numbers only.")
+    parser.add_argument('--model', default='', help="Optional local summary LLM; default '' uses Meta Muse Spark via routine_tips.")
     main(parser.parse_args())

@@ -19,7 +19,10 @@ from urllib.request import Request, urlopen
 
 import cv2
 
-from describe import PROMPT, WIDTH
+WIDTH = 448
+PROMPT = ('What is the camera wearer doing in this clip? Answer with one short sentence (under 15 words), starting '
+          'with a third-person verb or "The camera wearer...". Do not describe the room or objects unless the wearer '
+          'is interacting with them.')
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 URL = 'https://api.meta.ai/v1/responses'

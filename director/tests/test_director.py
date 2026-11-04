@@ -349,11 +349,11 @@ def test_local_model_prompt_varies_with_low_medium_and_high_energy():
     assert all("Mood guide:" in prompt for prompt in prompts)
 
 
-def test_server_description_mode_defaults_to_qwen():
+def test_server_captions_mode_defaults_to_muse():
     from director.server import _arg_parser
 
     args = _arg_parser().parse_args(["examples/office"])
-    assert args.describe == "qwen"
+    assert args.captions == "muse"
 
 
 def test_ollama_request_uses_small_context_and_new_default_model(monkeypatch):
@@ -784,10 +784,19 @@ def test_slow_loop_skips_an_in_flight_cycle():
     asyncio.run(run())
 
 
-def test_dam_real_format_selection_and_describe_modes():
-    clip_dir = Path(__file__).parents[2] / "examples" / "office"
+def test_dam_real_format_selection_and_describe_modes(tmp_path):
+    clip_dir = tmp_path
+    (clip_dir / "dam_ego.json").write_text(json.dumps([
+        {"start_s": 10, "end_s": 15, "text": "The camera moves across the desk while hands type."}
+    ]))
+    (clip_dir / "dam_pose.json").write_text(json.dumps([
+        {"start_s": 10, "end_s": 15, "text": "A humanoid figure stands upright and turns slightly. Its arms are bent."}
+    ]))
+    (clip_dir / "dam_both.json").write_text(json.dumps([
+        {"start_s": 10, "end_s": 15, "text": "The person stands still near the workstation."}
+    ]))
     records = load_dam_descriptions(clip_dir)
-    assert len(records) == 51
+    assert len(records) == 3
     assert {row.source for row in records} == {"ego", "pose", "both"}
     selected = select_dam_description(records, 12)
     assert selected.source in {"pose", "both"}
