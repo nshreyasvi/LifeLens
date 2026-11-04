@@ -30,7 +30,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
 const ICONS = {
   time: 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18', walk: 'M13 4a1.5 1.5 0 1 0 0 .1M10 21l2-6l3 3v3M9 12l3-4l3 3l3 1M12 8l-3 1l-2 3',
-  active: 'M3 12h4l3-7l4 14l3-7h4', sit: 'M6 3v9h10v9M6 12v9M16 12V7', sun: 'M12 4v2M12 18v2M4 12h2M18 12h2M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8',
+  active: 'M3 12h4l3-7l4 14l3-7h4', sit: 'M9 3.2a1.8 1.8 0 1 0 0.01 0M9 7v7h6v6M9 10l4 2M5 20h4', sun: 'M12 4v2M12 18v2M4 12h2M18 12h2M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8',
 };
 function iconTile(icon, value, label) {
   const tile = el('div', 'day-stat');
@@ -184,7 +184,7 @@ function drawLog() {
     meta.append(dot, el('time', '', clock(e.start)));
     btn.title = `${clock(e.start)} · ${capitalize(label)} · ${e.text}`;
     btn.append(img, meta);
-    btn.addEventListener('click', () => { media.seek(e.start + 0.05); media.play(); });
+    btn.addEventListener('click', () => jumpTo(e.start + 0.05));
     li.appendChild(btn);
     return li;
   });
@@ -203,12 +203,13 @@ function drawTrack(r) {
     const sp = spanOf(item);
     if (!sp) continue;
     const text = sp.text.replace(/\s*\([^)]*\)\s*$/, '');
-    const b = el('button', 'track-span', text.split(/\s+/).slice(0, 4).join(' '));
+    const b = el('button', 'track-span');                     // its label: on hover, and below the bar when picked
+    b.setAttribute('aria-label', text);
     b.type = 'button';
     b.style.left = pct(sp.start);
     b.style.width = `calc(${pct(Math.max(1, sp.end - sp.start))} - 2px)`;
     b.title = `${clock(sp.start)}-${clock(sp.end)} · ${text}`;
-    b.addEventListener('click', () => { media.seek(sp.start + 0.05); $('routine-caption').textContent = b.title; });
+    b.addEventListener('click', () => { jumpTo(sp.start + 0.05); $('routine-caption').textContent = b.title; });
     parts.push(b);
   }
   (r?.improvements ?? []).forEach((c, k) => {
@@ -218,7 +219,7 @@ function drawTrack(r) {
     pin.type = 'button';
     pin.style.left = pct(t);
     pin.title = `${k + 1}. ${c.change}: ${c.how ?? ''}`;
-    pin.addEventListener('click', () => { media.seek(t + 0.05); $('routine-caption').textContent = pin.title; });
+    pin.addEventListener('click', () => { jumpTo(t + 0.05); $('routine-caption').textContent = pin.title; });
     parts.push(pin);
   });
   track.replaceChildren(...parts);
@@ -325,6 +326,21 @@ function renderPostures() {
   }));
 }
 
+// A shortened line keeps its whole text; clicking its card (.expandable) swaps between the two.
+// A moment link (photo, highlight, tip, rep): jump there and stay paused (the app's Pause also stops the music).
+const jumpTo = (t) => { if (document.getElementById('play-btn')?.dataset.state === 'pause') document.getElementById('play-btn').click(); media.seek(t); };
+
+function longText(span, full) {
+  if (full && full !== span.textContent) span.dataset.full = full;
+  return span;
+}
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.expandable');
+  if (!card || e.target.closest('button, a, summary')) return;
+  for (const s of card.querySelectorAll('[data-full]')) [s.textContent, s.dataset.full] = [s.dataset.full, s.textContent];
+  card.classList.toggle('is-open');
+});
+
 function cleanReviewText(s, max = 68) {
   const cleaned = String(s || '')
     .replace(/\b(in\s+)?(rep\s+\d+\s+)?images?\s+\d+(?:\s*(?:and|-|to)\s*\d+)?/gi, '')
@@ -366,7 +382,7 @@ function renderReview(report) {
   changes.append(el('h3', '', 'Small changes to try'));
   const ol = el('ol', 'changes');
   ol.append(...(r.improvements ?? []).slice(0, 3).map((c, idx) => {
-    const li = el('li', 'change-card');
+    const li = el('li', 'change-card expandable');
     const t = firstTime(c.why) ?? firstTime(c.how) ?? 0;
     const snap = Math.max(0, Math.floor(t / 5) * 5);
     const pad = String(snap).padStart(4, '0');
@@ -375,7 +391,7 @@ function renderReview(report) {
     const mediaBtn = el('button', 'change-media');
     mediaBtn.type = 'button';
     mediaBtn.title = `Jump to ${clock(t)} in video`;
-    mediaBtn.addEventListener('click', () => media.seek(t + 0.05));
+    mediaBtn.addEventListener('click', () => jumpTo(t + 0.05));
 
     if (base) {
       const thumbsWrap = el('div', 'change-thumbs');
@@ -410,12 +426,12 @@ function renderReview(report) {
 
     if (c.how) {
       const tryRow = el('div', 'change-cue-row is-try');
-      tryRow.append(el('span', 'change-cue-pill', 'TRY'), el('span', 'change-cue-text', cleanReviewText(c.how, 68)));
+      tryRow.append(el('span', 'change-cue-pill', 'TRY'), longText(el('span', 'change-cue-text', cleanReviewText(c.how, 68)), cleanReviewText(c.how, 9999)));
       bodyBox.appendChild(tryRow);
     }
     if (c.why) {
       const whyRow = el('div', 'change-cue-row is-why');
-      whyRow.append(el('span', 'change-cue-pill', 'SEEN'), el('span', 'change-cue-text', cleanReviewText(c.why, 62)));
+      whyRow.append(el('span', 'change-cue-pill', 'SEEN'), longText(el('span', 'change-cue-text', cleanReviewText(c.why, 62)), cleanReviewText(c.why, 9999)));
       bodyBox.appendChild(whyRow);
     }
 
@@ -434,10 +450,10 @@ function renderReview(report) {
     wellSec.append(el('h3', '', 'Went well'));
     const ul = el('ul', 'review-well-grid');
     ul.append(...r.went_well.slice(0, 3).map((t) => {
-      const li = el('li', 'review-well-card');
+      const li = el('li', 'review-well-card expandable');
       const check = el('span', 'review-well-icon', '✓');
       check.setAttribute('aria-hidden', 'true');
-      li.append(check, el('span', 'review-well-text', cleanReviewText(t, 74)));
+      li.append(check, longText(el('span', 'review-well-text', cleanReviewText(t, 74)), cleanReviewText(t, 9999)));
       return li;
     }));
     wellSec.appendChild(ul);
@@ -472,7 +488,11 @@ async function renderHistory(current) {
     name.type = 'button';
     name.disabled = isCurrent;
     name.title = isCurrent ? 'Open now' : `Open ${r.name}`;
-    name.addEventListener('click', async () => { await openRecording(r); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    name.addEventListener('click', async () => {
+      await openRecording(r);
+      $('who').textContent = [session.user, r.name].filter(Boolean).join(' · ');   // the header names the open session
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     const wrap = el('div', 'past-row-bar');
     const bar = stackedBar(shareOf(post?.labels?.rules ?? []));
     bar.style.width = `${(100 * t.duration_min) / longest}%`;
@@ -492,9 +512,11 @@ async function renderHistory(current) {
     for (const { r, ins } of loaded) {
       const v = f(ins.total);
       const b = el('span', `vs-bar${r.name === current?.name ? ' is-current' : ''}`);
-      b.style.width = `${(100 * v) / top}%`;
+      const pct = (100 * v) / top, label = `${r.name} ${unit === 'm' ? Math.round(v) : v.toFixed(1)}`;
+      b.style.width = `${pct}%`;
       b.title = `${r.name}: ${unit === 'm' ? Math.round(v) : v.toFixed(2)} ${unit}`;
-      b.textContent = `${r.name} ${unit === 'm' ? Math.round(v) : v.toFixed(1)}`;
+      if (pct >= 40) b.textContent = label;
+      else { b.dataset.label = label; b.classList.add('is-short'); }      // too short to hold its label
       bars.appendChild(b);
     }
     row.appendChild(bars);
@@ -514,7 +536,9 @@ async function load(rec) {
   redraw();
   renderReview(report);
   drawSpeed();
-  $('day-status').textContent = [rec.name, clock(view.rows.length), rec.camera?.label].filter(Boolean).join(' · ');
+  const cam = rec.camera?.lens?.replace(/, fisheye corrected$/, '').replace(/,\s*/g, ' ').replace(/\s+lens$/i, '');
+  $('day-status').textContent = [rec.name, clock(view.rows.length), cam].filter(Boolean).join(' · ');
+  $('day-status').title = rec.camera?.label ?? '';                       // the full camera line on hover
   await renderHistory(rec);
 }
 
@@ -551,3 +575,9 @@ document.addEventListener('lifelens:session', () => {
     renderHistory(null).catch(() => {});
   }
 });
+
+// The picked moment's label sits below the highlight bar (the bar itself shows only colours and pins).
+{
+  const picked = document.getElementById('routine-caption');
+  if (picked) document.getElementById('routine-track')?.closest('.scrubber-box')?.append(picked);
+}

@@ -120,7 +120,7 @@ export function buildQuirkyCard(kind, activity = 'an everyday moment', custom = 
       kicker: '🏋️ Gymify Rest Day · 0 Workout Reps',
       title: "Wrist curls with a fork don't count as a set (we checked!)",
       text: `Meta Muse Spark inspected every 3D joint and spotted ${act} instead of a workout set. The dumbbells are officially napping under a blanket — enjoy the fuel-up, and bring squats, lunges, or push-ups when you're ready to track reps, depth, and left-right symmetry!`,
-      pill: 'Open the exercising session to see live 3D rep & depth coaching',
+      pill: 'Open the exercising session to see live 3D rep & depth feedback',
     },
     music: {
       kicker: custom.kicker || '⏱️ Short Clip (< 10 seconds) · AI DJ Warming Up',
@@ -157,7 +157,7 @@ const TAB_TEXT = {
   activity: 'Your camera view, 3D body (MHR), movement flow, and session summary.',
   music: 'Video & music in sync, plus your day vibe and recommendations for next time.',
   stage: 'Six stage lights follow your moves while Meta Muse Spark sets the scene.',
-  gym: 'Workout coach: counts your reps, depth, and balance with form tips.',
+  gym: 'Gymify: counts your reps, depth, and balance, with form feedback.',
 };
 
 const mediaRoot = $('media');
@@ -318,4 +318,57 @@ themeBtn.addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   applyTheme(next);
   try { localStorage.setItem(THEME_KEY, next); } catch { /* private window */ }
+});
+
+// The movement graph under the 3D body: the last 10 s of knee, hip and elbow flexion (left, right), trunk lean and
+// walking speed, drawn from the 3D body's joint angles (session.pose), two charts a row, so every label stays readable.
+const GRAPHS = [['Knee', 'knee', 150, '°'], ['Hip', 'hip', 150, '°'], ['Elbow', 'elbow', 160, '°'],
+  ['Trunk lean', 'trunk_lean', 90, '°'], ['Walking speed', 'speed_m_s', 2.5, ' m/s']];
+const graphPane = document.querySelector('#media [data-pane="graph"]');
+const graphCanvas = graphPane?.appendChild(Object.assign(document.createElement('canvas'), { className: 'graph-canvas' }));
+function drawGraph() {
+  requestAnimationFrame(drawGraph);
+  const p = session.pose;
+  if (!graphCanvas || graphPane.hidden || !p) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.round(graphCanvas.clientWidth * dpr), H = Math.round(graphCanvas.clientHeight * dpr);
+  if (!W || !H) return;
+  if (graphCanvas.width !== W || graphCanvas.height !== H) Object.assign(graphCanvas, { width: W, height: H });
+  const g = graphCanvas.getContext('2d');
+  const css = getComputedStyle(document.documentElement);
+  const ink = css.getPropertyValue('--text').trim() || '#1A1A1A', muted = css.getPropertyValue('--muted').trim() || '#777';
+  const line = css.getPropertyValue('--border').trim() || '#DDD';
+  g.clearRect(0, 0, W, H);
+  const t = media.body?.currentTime ?? 0, i1 = Math.max(0, Math.min(p.n - 1, Math.round(t * 30))), i0 = Math.max(0, i1 - 300);
+  const cw = W / 2, ch = H / 3, pad = 6 * dpr, font = (px, w = 500) => `${w} ${px * dpr}px Geist, system-ui, sans-serif`;
+  GRAPHS.forEach(([name, key, max, unit], k) => {
+    const x0 = (k % 2) * cw + pad, y0 = Math.floor(k / 2) * ch + pad, w = cw - 2 * pad, top = y0 + 14 * dpr, h = ch - 2 * pad - 14 * dpr;
+    const series = p[key] ? [[p[key], ink]] : [[p[`${key}_l`], '#E07B2A'], [p[`${key}_r`], '#2B44E8']];
+    g.font = font(11, 650); g.fillStyle = ink; g.textAlign = 'left'; g.fillText(name, x0, y0 + 10 * dpr);
+    const now = series.map(([a]) => a?.[i1]).filter(Number.isFinite).map((v) => (unit === '°' ? `${Math.round(v)}°` : v.toFixed(2)));
+    g.font = font(11); g.fillStyle = muted; g.textAlign = 'right'; g.fillText(now.join(' / ') + (unit === '°' ? '' : unit), x0 + w, y0 + 10 * dpr);
+    g.strokeStyle = line; g.lineWidth = 1; g.strokeRect(x0, top, w, h);
+    for (const [a, color] of series) {
+      if (!a) continue;
+      g.strokeStyle = color; g.lineWidth = 1.6 * dpr; g.beginPath();
+      for (let i = i0; i <= i1; i++) {
+        const x = x0 + (w * (i - i0)) / 300, y = top + h - (h * Math.min(max, Math.max(0, a[i]))) / max;
+        if (i === i0) g.moveTo(x, y); else g.lineTo(x, y);
+      }
+      g.stroke();
+    }
+  });
+  const lx = cw + pad, ly = 2 * ch + pad + 14 * dpr;                       // the sixth cell: the legend
+  g.font = font(11); g.textAlign = 'left';
+  [['#E07B2A', 'Left'], ['#2B44E8', 'Right'], [ink, 'One value · last 10 s']].forEach(([c, label], k) => {
+    g.fillStyle = c; g.fillRect(lx, ly + k * 15 * dpr, 14 * dpr, 3 * dpr);
+    g.fillStyle = muted; g.fillText(label, lx + 20 * dpr, ly + k * 15 * dpr + 4 * dpr);
+  });
+}
+requestAnimationFrame(drawGraph);
+
+// Live sessions have no processed frames yet: hide 'Current Moment' (it would show the last recording's).
+document.addEventListener('lifelens:session', () => {
+  const card = document.querySelector('.panel-now');
+  if (card) card.hidden = Boolean(session.live);
 });

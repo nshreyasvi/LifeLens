@@ -20,7 +20,7 @@ const DEFAULT_STAGES = [
   { id: 'render', label: 'Rendering 3D body & movement flow', state: 'pending' },
   { id: 'describe_muse', label: 'Meta Muse Spark describing each moment', state: 'pending' },
   { id: 'posture_muse', label: 'Meta Muse Spark reading your posture', state: 'pending' },
-  { id: 'routine_tips', label: 'Meta Muse Spark writing your coaching tips', state: 'pending' },
+  { id: 'routine_tips', label: 'Meta Muse Spark writing your movement tips', state: 'pending' },
 ];
 
 function updateGreeting() {
@@ -152,6 +152,9 @@ export function hideProcessModal() {
   if (previewWrap) previewWrap.hidden = true;
 }
 
+// 'GoPro, Linear lens' -> 'GoPro Linear' for the session list (the full camera line is in the Session Summary)
+const shortCamera = (c) => (c?.lens ? c.lens.replace(/, fisheye corrected$/, '').replace(/,\s*/g, ' ').replace(/\s+lens$/i, '') : '');
+
 function item(name, meta, action, onClick) {
   const li = Object.assign(document.createElement('li'), { className: 'rec' });
   const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-small-text btn-primary', textContent: action });
@@ -168,7 +171,7 @@ export async function showRecordings() {
     const { processed, raw } = await fetchRecordings();
     const countChip = $('rec-count-chip');
     if (countChip) countChip.textContent = `${processed.length} ready${raw.length ? ` · ${raw.length} raw` : ''}`;
-    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, [clock(rec.seconds), rec.camera?.label || '3D session'].filter(Boolean).join(' · '), 'Open', async (btn) => {
+    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, [clock(rec.seconds), shortCamera(rec.camera) || '3D session'].filter(Boolean).join(' · '), 'Open', async (btn) => {
       btn.disabled = true;
       await openRecording(rec);
       enter();

@@ -1000,3 +1000,26 @@ body.show-open { overflow: hidden; }
   background: var(--surface);
   border: 1px solid var(--border);
 }
+
+/* ===== UI test fixes (5 Nov) ===== */
+/* Movement graph under the 3D body: drawn on a canvas (extras.js), two charts a row */
+.shell-rail > .media-graph { aspect-ratio: auto; height: 220px; background: var(--surface); }
+.shell-rail > .media-graph video { display: none; }
+.graph-canvas { display: block; width: 100%; height: 100%; }
+/* Player in the side rail (Stage, Gym): the current part only, the time on its own line */
+#media[data-tab="stage"] #player .p-segments, #media[data-tab="gym"] #player .p-segments { display: none; }
+#player .player-bar { grid-template-columns: auto auto auto minmax(0, 1fr); }
+#player .p-time { grid-column: 1 / -1; justify-self: end; }
+#player .p-now > span { white-space: normal; }
+/* No empty Spotify box before the first song */
+#player:not(.has-song) .player-embed { display: none; }
+/* Session list: short labels in the body font, every session visible */
+.rec-list { max-height: none; overflow: visible; }
+#rec-processed .rec-meta { font-family: inherit; font-size: 0.8rem; white-space: normal; }
+/* Routine: the timeline card is as tall as its content */
+.routine-deck .routine-grid-top { align-items: start; }       /* beats day.css's stretch */
+.vs-bars { gap: 7px; }
+.vs-bar { min-height: 15px; }
+/* Click-to-expand cards */
+.expandable:has([data-full]) { cursor: pointer; }
+.expandable:has([data-full]):hover { border-color: var(--border-strong); }

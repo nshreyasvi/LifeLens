@@ -851,3 +851,8 @@
 @media (max-width: 700px) { .past-row { grid-template-columns: 1fr; } .day-stats, .past-summary { grid-template-columns: 1fr 1fr; } }
 .routine-grid-bottom { align-items: start; }
 .vs-row { grid-template-columns: 96px minmax(0, 1fr); }
+
+/* vs-past bars too short for their label: the label sits beside the bar */
+.vs-bar.is-short { position: relative; overflow: visible; }
+.vs-bar.is-short::after { content: attr(data-label); position: absolute; left: calc(100% + 6px); top: 50%;
+  transform: translateY(-50%); white-space: nowrap; color: var(--muted); font-size: 0.72rem; }

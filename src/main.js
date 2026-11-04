@@ -186,7 +186,7 @@ function renderFeatures(f, t) {
     ['Rhythm', f.rhythm?.strength > 0.3 ? `${Math.round(f.rhythm.bpm)}/min · ${Math.round(f.rhythm.strength * 100)}%` : 'none'],
     ['Arm swing', `${Math.round(f.arm)}°`], ['Upright', `${Math.round(f.upright * 100)}%`],
     ['Still', `${Math.round(f.still * 100)}%`], ['Energy', t.energy.toFixed(2)], ['Dance', t.danceability.toFixed(2)],
-    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? (t.tempoFrom === 'body rhythm' ? `${t.tempo}/min · body rhythm` : `${t.tempo} BPM · ${t.tempoFrom}`) : (player.song?.tempo ? `${player.song.tempo} BPM · track` : '-')],
+    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? (t.tempoFrom === 'body rhythm' ? `${t.tempo}/min · body rhythm` : `${t.tempo} BPM · ${t.tempoFrom}`) : (player.song?.tempo ? `${player.song.tempo} BPM (song)` : '-')],
   ];
   els.features.replaceChildren(...rows.map(([k, v], i) => {
     const row = Object.assign(document.createElement('div'), { className: i < 5 ? 'feat feat-in' : 'feat feat-out' });
@@ -207,7 +207,9 @@ function frame() {
   lastFeaturesAt = performance.now();
   const targets = { ...musicTargets(f, state.last), at: t };
   renderFeatures(f, targets);
-  els.chainWindow.textContent = `Matched to your movement (${clock(Math.max(0, t - f.window))}–${clock(t)}) · synced with player.`;
+  els.chainWindow.textContent = els.body.paused && !state.videoPlaying && t < 0.5
+    ? 'Press Play: the music follows your movement as the clip plays.'
+    : `Matched to your movement (${clock(Math.max(0, t - f.window))}–${clock(t)}) · synced with player.`;
   maybeAskSongs(targets);
   preSection(t);
   renderBar();
@@ -405,6 +407,8 @@ async function askSongs(t) {
 function jumpToSection(k) {
   if (!songs.pre?.[k]) return;
   const sec = songs.pre[k];
+  // while the show plays, the director's clock leads the video: restart it at the part instead of seeking
+  if (state.phase === 'live' || state.starting) { startDirector(sec.start_s + 0.05); return; }
   media.seek(sec.start_s + 0.05);
   state.videoPlaying = true;
   media.play();
@@ -690,6 +694,7 @@ function seekClipAndPlaySong(targetSec) {
   const dur = clipTotalDuration();
   if (!(dur > 0)) return;
   const t = Math.min(Math.max(0, targetSec), Math.max(0, dur - 0.08));
+  if (state.phase === 'live' || state.starting) { startDirector(t); return; }   // the director's clock leads while live
   media.seek(t);
   state.videoPlaying = true;
   media.play();
@@ -775,7 +780,7 @@ async function playSong(song) {
     if (player.song?.spotifyId !== song.spotifyId || player.song.started) return;
     song.unplayable = true;
     const next = player.queue.find((s) => s.spotifyId !== song.spotifyId && !s.unplayable);
-    if (next) playSong(next);
+    if (next) { playSong(next); els.playerNote.textContent = `Skipped "${song.name}": Spotify can't play it here.`; }
   }, 6000);
   const sec = songs.pre?.[songs.preAt];
   els.playerBeat.textContent = song.tempo ? `${song.tempo} BPM · Synced` : 'Synced';
@@ -787,13 +792,15 @@ async function playSong(song) {
   renderPlayerSegments();
   renderBar();
   const uri = `spotify:track:${song.spotifyId}`;
+  els.player.classList.add('has-song');
   if (player.ctrl) {
+    player.loaded = true;                       // a list is loaded: resume/pause are safe from here on
     player.ctrl.loadUri(uri);
     player.ctrl.play();
     for (const ms of [600, 1500, 3000]) {
       setTimeout(() => {
         if (player.paused && player.song?.spotifyId === song.spotifyId && (state.phase === 'live' || state.videoPlaying)) {
-          player.ctrl.resume();
+          (player.loaded && player.ctrl.resume());
         }
       }, ms);
     }
@@ -804,6 +811,7 @@ async function playSong(song) {
     const api = await spotifyApi();
     api.createController(els.playerEmbed, { uri, width: '100%', height: 80 }, (ctrl) => {
       player.ctrl = ctrl;
+      player.loaded = true;
       player.creating = false;
       ctrl.addListener('ready', () => {
         if (player.pendingSong && player.pendingSong.spotifyId !== song.spotifyId) {
@@ -880,7 +888,7 @@ function reset() {
   els.lightsAction.classList.remove('is-active');
   els.lightsReason.hidden = true;
   els.tempoValue.textContent = '-';
-  if (player.song) player.ctrl?.pause();
+  if (player.song) (player.loaded && player.ctrl?.pause());
   player.song = null;
   player.queue = [];
   els.playerBeat.textContent = 'No song yet';
@@ -888,6 +896,7 @@ function reset() {
   songs.asked = null;
   songs.at = 0;
   songs.profile = null;
+  songs.planSong = null;
   els.songList.replaceChildren();
   if ($('vibe-recs')) $('vibe-recs').hidden = true;
   els.songsNote.hidden = false;
@@ -924,7 +933,7 @@ async function stopDirector() {
   state.videoPlaying = false;
   state.starting = false;
   media.pause();
-  if (player.song) player.ctrl?.pause();
+  if (player.song) (player.loaded && player.ctrl?.pause());
   await fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
   state.phase = 'paused';
   if (songs.pre && !songs.profile) drawQueue();
@@ -949,7 +958,7 @@ els.body?.addEventListener('play', () => {
       state.phase = 'playing';
     }
     preSection(els.body.currentTime || 0, { forcePlay: true });
-    if (player.song && player.ctrl) player.ctrl.resume();
+    if (player.song && player.ctrl) (player.loaded && player.ctrl.resume());
     else if (player.queue.length) playSong(player.queue[0]);
     renderControls();
   }
@@ -990,7 +999,7 @@ function connectLive() {
     retryMs = LIVE_RETRY_MS;
     els.error.hidden = true;
     if (media.body.paused) media.play();
-    if (player.song && !player.song.ended && player.ctrl) player.ctrl.resume();
+    if (player.song && !player.song.ended && player.ctrl) (player.loaded && player.ctrl.resume());
     else if (player.queue.length) playSong(player.queue[0]);
     renderControls();
   });
@@ -1012,7 +1021,7 @@ function connectLive() {
       state.phase = 'ended';
       state.videoPlaying = false;
     }
-    if (!state.starting && player.song) player.ctrl?.pause();
+    if (!state.starting && player.song) (player.loaded && player.ctrl?.pause());
     renderControls();
     if (state.starting) scheduleConnect();
   });
@@ -1027,13 +1036,28 @@ document.addEventListener('lifelens:session', () => {
   loadPreSongs();
 });
 
+// The Stagify plan's songs play on the Stage tab; every other tab plays the parts' songs (songs.json).
 document.addEventListener('lifelens:play-song', (e) => {
-  songs.profile = e.detail;
-  player.queue = [e.detail];
-  drawSongs([e.detail]);
+  songs.planSong = e.detail;
+  if (state.tab === 'stage') applyPlanSong();
+});
+function applyPlanSong() {
+  const s = songs.planSong;
+  songs.profile = s;
+  player.queue = [s];
+  drawSongs([s]);
   els.songsMood.textContent = 'Stagify plan · Synced';
   els.songsNote.hidden = true;
-  if (state.phase === 'live' || state.videoPlaying) playSong(e.detail);
+  if (state.phase === 'live' || state.videoPlaying) playSong(s);
+}
+document.addEventListener('lifelens:tab', (e) => {
+  state.tab = e.detail.tab;
+  if (state.tab === 'stage') { if (songs.planSong && songs.profile !== songs.planSong) applyPlanSong(); }
+  else if (songs.profile && songs.profile === songs.planSong) {    // back to the parts' songs where the video is
+    songs.profile = null;
+    songs.preAt = -1;
+    preSection(els.body.currentTime || 0);
+  }
 });
 export { askSongs };
 

@@ -12,6 +12,10 @@ const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
 const el = (tag, cls = '', text = '') => Object.assign(document.createElement(tag), { className: cls, textContent: text });
 const svg = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+// a shortened line keeps its whole text for the click-to-expand cards (the listener is in day.js)
+// A moment link (photo, highlight, tip, rep): jump there and stay paused (the app's Pause also stops the music).
+const jumpTo = (t) => { if (document.getElementById('play-btn')?.dataset.state === 'pause') document.getElementById('play-btn').click(); media.seek(t); };
+const longText = (span, full) => { if (full && full !== span.textContent) span.dataset.full = full; return span; };
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // left-right difference at the bottom of a rep: under 6 degrees even, under 12 uneven, else lopsided
@@ -55,7 +59,7 @@ function repChart(g, seconds) {
     const tip = svg('title', {});
     tip.textContent = `Rep ${k + 1} at ${clock(r.bottom_s)}: ${Math.round(r.rom_deg)}° range, ${r.down_s} s down, ${r.up_s} s up, ${r.asym_deg}° left-right`;
     bar.appendChild(tip);
-    const go = () => { media.seek(r.bottom_s); media.play(); };
+    const go = () => jumpTo(r.bottom_s);
     bar.addEventListener('click', go);
     bar.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     const split = w * (r.down_s / Math.max(0.01, r.down_s + r.up_s));
@@ -168,7 +172,7 @@ function render(g) {
         const thumbBtn = el('button', 'gym-card-thumb');
         thumbBtn.type = 'button';
         thumbBtn.title = `Jump to Rep ${repIdx} (${clock(repObj.bottom_s)})`;
-        thumbBtn.addEventListener('click', () => { media.seek(repObj.bottom_s); media.play(); });
+        thumbBtn.addEventListener('click', () => jumpTo(repObj.bottom_s));
         const img = Object.assign(document.createElement('img'), {
           src: `/${base}/frames/body_${pad}.jpg`,
           alt: `3D body at Rep ${repIdx}`,
@@ -186,7 +190,7 @@ function render(g) {
       if (repObj) {
         const go = el('button', 'gym-rep-link', `Rep ${repIdx} · ${clock(repObj.bottom_s)}`);
         go.type = 'button';
-        go.addEventListener('click', () => { media.seek(repObj.bottom_s); media.play(); });
+        go.addEventListener('click', () => jumpTo(repObj.bottom_s));
         headRow.appendChild(go);
       }
       content.appendChild(headRow);
@@ -213,18 +217,19 @@ function render(g) {
       const howClean = cleanGymText(c.how, 68);
       if (howClean) {
         const fixRow = el('div', 'gym-cue-line is-fix');
-        fixRow.append(el('span', 'gym-cue-badge', 'TRY'), el('span', '', howClean));
+        fixRow.append(el('span', 'gym-cue-badge', 'TRY'), longText(el('span', '', howClean), cleanGymText(c.how, 9999)));
         content.appendChild(fixRow);
       }
       const whyClean = cleanGymText(c.why, 66);
       if (whyClean) {
         const whyRow = el('div', 'gym-cue-line is-why');
-        whyRow.append(el('span', 'gym-cue-badge', 'SEEN'), el('span', '', whyClean));
+        whyRow.append(el('span', 'gym-cue-badge', 'SEEN'), longText(el('span', '', whyClean), cleanGymText(c.why, 9999)));
         content.appendChild(whyRow);
       }
 
       cardGrid.appendChild(content);
       li.appendChild(cardGrid);
+      li.classList.add('expandable');                 // click: the whole text (day.js)
       return li;
     }));
     parts.push(list);
@@ -234,8 +239,8 @@ function render(g) {
       good.appendChild(el('span', 'gym-section-kicker', 'Went well'));
       const ul = el('ul', 'gym-well-list');
       ul.append(...r.went_well.slice(0, 3).map((t) => {
-        const li = el('li', 'gym-well-pill');
-        li.append(el('span', 'gym-well-check', '✓'), el('span', '', cleanGymText(t, 74)));
+        const li = el('li', 'gym-well-pill expandable');
+        li.append(el('span', 'gym-well-check', '✓'), longText(el('span', '', cleanGymText(t, 74)), cleanGymText(t, 9999)));
         return li;
       }));
       good.appendChild(ul);
@@ -297,7 +302,7 @@ function repTable(g) {
     lr.append(dot, `${r.asym_deg}°`);
     row.append(el('td', '', String(k + 1)), depth, el('td', '', `${r.down_s} s`), el('td', '', `${r.up_s} s`), lr);
     row.tabIndex = 0;
-    row.addEventListener('click', () => { media.seek(r.bottom_s); media.play(); });
+    row.addEventListener('click', () => jumpTo(r.bottom_s));
     body.appendChild(row);
   });
   return t;
