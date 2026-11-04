@@ -38,7 +38,7 @@ def clock(s: float) -> str:
 def windows(clip: Path) -> list[dict]:
     times = [float(r['time_s']) for r in csv.DictReader(open(clip / 'pose_timeseries.csv', encoding='utf-8'))]
     out = []
-    for w in range(int(times[-1] // WINDOW_S) + 1):
+    for w in range(int(times[-1] // WINDOW_S) + (times[-1] % WINDOW_S >= 1)):
         start, end = w * WINDOW_S, min((w + 1) * WINDOW_S, round(times[-1] + 1 / 30, 2))
         out.append({'start_s': start, 'end_s': end, 'frame': clip / 'frames' / f'body_{int(start):04d}.jpg',
                     'pov': clip / 'frames' / f'pov_{int(start):04d}.jpg'})

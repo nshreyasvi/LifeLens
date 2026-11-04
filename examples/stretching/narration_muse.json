@@ -1,0 +1,77 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "text": "The camera wearer walks forward."
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "text": "The camera wearer walks forward."
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "text": "The camera wearer walks then checks his wrist."
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "text": "The camera wearer performs a squat."
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 25.0,
+  "text": "The camera wearer stands with hands clasped."
+ },
+ {
+  "start_s": 25.0,
+  "end_s": 30.0,
+  "text": "The camera wearer stands up from a seated position."
+ },
+ {
+  "start_s": 30.0,
+  "end_s": 35.0,
+  "text": "The camera wearer stumbles sideways with arms raised."
+ },
+ {
+  "start_s": 35.0,
+  "end_s": 40.0,
+  "text": "The camera wearer walks with arms outstretched."
+ },
+ {
+  "start_s": 40.0,
+  "end_s": 45.0,
+  "text": "The camera wearer walks forward while balancing with arms."
+ },
+ {
+  "start_s": 45.0,
+  "end_s": 50.0,
+  "text": "The camera wearer walks forward."
+ },
+ {
+  "start_s": 50.0,
+  "end_s": 55.0,
+  "text": "The camera wearer walks while adjusting their pants."
+ },
+ {
+  "start_s": 55.0,
+  "end_s": 60.0,
+  "text": "The camera wearer walks forward."
+ },
+ {
+  "start_s": 60.0,
+  "end_s": 65.0,
+  "text": "The camera wearer balances on one leg."
+ },
+ {
+  "start_s": 65.0,
+  "end_s": 70.0,
+  "text": "The camera wearer walks forward."
+ },
+ {
+  "start_s": 70.0,
+  "end_s": 75.0,
+  "text": "The camera wearer walks forward."
+ }
+]

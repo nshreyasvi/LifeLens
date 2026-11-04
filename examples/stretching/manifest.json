@@ -1,0 +1,50 @@
+{
+  "frames": 2257,
+  "fps": 30,
+  "duration_s": 75.23,
+  "streams": {
+    "ego_video": "input.mp4",
+    "mesh_video": "mesh_exo.mp4",
+    "side_by_side": "side_by_side.mp4",
+    "pose_graph": "pose_graph.mp4"
+  },
+  "motion": {
+    "smplh": "smplh.npz",
+    "smplh_canonical": "smplh_canonical.npz",
+    "omniegocap_input": "omniegocap_input.npz",
+    "camera_trajectory": "trajectory_aligned.npz",
+    "pose_timeseries": "pose_timeseries.csv",
+    "kinematics": "kinematics"
+  },
+  "calibration": {
+    "floor_inlier_fraction": 0.027,
+    "floor_z_slam": -1.41,
+    "cam_height_m": 1.71,
+    "slam_cam_height_m": 1.075,
+    "scale_from_height": 1.59,
+    "wearer_height_m": 1.78,
+    "mount_pitch_down_deg": 49.6,
+    "calib_window_motion_m": 0.686,
+    "head_height_median_m": 1.42,
+    "path_length_m": 84.44,
+    "frames": 2257,
+    "wrist_visible_fraction": [
+      0.651,
+      0.56
+    ]
+  },
+  "omniegocap": {
+    "runtime_s": 12.05541706085205,
+    "load_s": 10.103212833404541,
+    "peak_gpu_mb": 1030.93701171875,
+    "optimization": false
+  },
+  "stage_wall_s": {
+    "ingest": 105.57,
+    "hawor": 1588.92,
+    "build_input": 2.73,
+    "omniegocap": 34.32,
+    "render": 236.34
+  },
+  "realtime_factor": 26.16
+}

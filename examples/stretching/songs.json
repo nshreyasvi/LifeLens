@@ -1,0 +1,285 @@
+{
+ "activity": "balance training",
+ "active": true,
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 18.8,
+   "features": {
+    "pace": 0.3771902482269503,
+    "still": 0.08687943262411348,
+    "arm": 55.152125181177986,
+    "upright": 0.6250980274822695,
+    "rhythm": {
+     "bpm": 138.46153846153845,
+     "strength": 0.6085324854946802
+    }
+   },
+   "style": "upbeat dance pop",
+   "mood": "powerful",
+   "why": "Steady 100 BPM gives one beat out and one beat in to smooth the 50% tempo swing and lift cadence from 25.1 reps per minute.",
+   "targets": {
+    "energy": 0.85,
+    "danceability": 0.8,
+    "valence": 0.8,
+    "acousticness": 0.21081560283687942,
+    "instrumentalness": 0.15,
+    "loudness": -12.856747931442081,
+    "tempo": 100,
+    "tempo_from": "Gymify"
+   },
+   "songs": [
+    {
+     "id": "03b38120-fb14-49e0-8698-944c0b5e7b6e",
+     "name": "Blood Brothers Raw",
+     "spotifyId": "3DcOHtasR5SYQC3H6oIa4r",
+     "artist": "Karmacy, Sammy Chand",
+     "tempo": 100,
+     "fit": 0.09973333333333337
+    },
+    {
+     "id": "82a42956-6c40-4246-971e-9fc5365a9c51",
+     "name": "Love Is All Around",
+     "spotifyId": "0yIskhNsBAN4wfhrJPE9DV",
+     "artist": "Extra Latino",
+     "tempo": 100,
+     "fit": 0.17819999999999994
+    },
+    {
+     "id": "7fa137a2-4d67-4e8b-8dfc-48198f868bc2",
+     "name": "A Sandy",
+     "spotifyId": "1c43Vq5ake4w4qSBr32OQl",
+     "artist": "Skah Shah #1",
+     "tempo": 101,
+     "fit": 0.18481666666666668
+    },
+    {
+     "id": "9fca94ce-0450-4e6b-bb3d-f5c2f6e5147b",
+     "name": "raha lasga",
+     "spotifyId": "4lEuxDcYZrNIEqJNTCViYb",
+     "artist": "Cheb Azzedine, Cheb Brahim Chelfi",
+     "tempo": 98,
+     "fit": 0.23875000000000005
+    },
+    {
+     "id": "1d0aa0d5-2ba8-4e81-88ce-75b0c12c5950",
+     "name": "Tjeter s'du",
+     "spotifyId": "4Xxm0Q6dhj8o57TxoHdutQ",
+     "artist": "Vellezerit Mziu",
+     "tempo": 101,
+     "fit": 0.24574999999999975
+    }
+   ],
+   "source": "Gymify"
+  },
+  {
+   "start_s": 18.8,
+   "end_s": 37.6,
+   "features": {
+    "pace": 0.2717136524822695,
+    "still": 0.18617021276595744,
+    "arm": 31.646802468914796,
+    "upright": 0.74413257535461,
+    "rhythm": null
+   },
+   "style": "upbeat dance pop",
+   "mood": "tense",
+   "why": "Steady 100 BPM gives one beat out and one beat in to smooth the 50% tempo swing and lift cadence from 25.1 reps per minute.",
+   "targets": {
+    "energy": 0.85,
+    "danceability": 0.8,
+    "valence": 0.8,
+    "acousticness": 0.28031914893617016,
+    "instrumentalness": 0.15,
+    "loudness": -13.735719562647754,
+    "tempo": 100,
+    "tempo_from": "Gymify"
+   },
+   "songs": [
+    {
+     "id": "da046193-6883-4fb0-85a7-428dc9fc98c0",
+     "name": "Georgia on My Mind",
+     "spotifyId": "38I5xJI4HLy0Mzn3uNzMZ4",
+     "artist": "Bing Crosby",
+     "tempo": 99,
+     "fit": 0.2031
+    },
+    {
+     "id": "d2e934f5-c508-47d3-bf07-d1ecdc7a99b2",
+     "name": "hidup terlalu indah",
+     "spotifyId": "5LdRpZOg2HsqQ83srhoZbP",
+     "artist": "newi forah sari",
+     "tempo": 100,
+     "fit": 0.22971666666666643
+    },
+    {
+     "id": "3bbedc26-bb6d-45b6-95cc-19b564ffe89e",
+     "name": "Al Estilo Tego y Don",
+     "spotifyId": "4dMZHVnD7694NLR5i9mZUh",
+     "artist": "MayenArt, Djmois",
+     "tempo": 100,
+     "fit": 0.3020999999999999
+    },
+    {
+     "id": "07c5e6b7-0121-4a05-bf01-3f031d6db1c5",
+     "name": "Mix Reggaeton Ozuna 2017",
+     "spotifyId": "04EdsAO41ShC9c69nJzd3D",
+     "artist": "Dj Johan",
+     "tempo": 98,
+     "fit": 0.35435000000000005
+    },
+    {
+     "id": "ce8a3ede-c102-425a-bb59-6f7f294217c6",
+     "name": "Mix Reggaeton Ozuna 2017",
+     "spotifyId": "3bRy0GexKuFWAMvrYSIrSw",
+     "artist": "Dj Johan",
+     "tempo": 98,
+     "fit": 0.35435000000000005
+    }
+   ],
+   "source": "Gymify"
+  },
+  {
+   "start_s": 37.6,
+   "end_s": 56.4,
+   "features": {
+    "pace": 0.5934530973451329,
+    "still": 0.008849557522123894,
+    "arm": 18.279603652006625,
+    "upright": 0.4224940398230088,
+    "rhythm": {
+     "bpm": 138.46153846153845,
+     "strength": 0.4403415910839834
+    }
+   },
+   "style": "upbeat dance pop",
+   "mood": "curious",
+   "why": "Steady 100 BPM gives one beat out and one beat in to smooth the 50% tempo swing and lift cadence from 25.1 reps per minute.",
+   "targets": {
+    "energy": 0.85,
+    "danceability": 0.8,
+    "valence": 0.8,
+    "acousticness": 0.1561946902654867,
+    "instrumentalness": 0.15,
+    "loudness": -11.054557522123893,
+    "tempo": 100,
+    "tempo_from": "Gymify"
+   },
+   "songs": [
+    {
+     "id": "23147475-18e8-42fe-9e8a-0fdf8ec3af13",
+     "name": "Feel Good",
+     "spotifyId": "4a6M602EUfBbBu48vZqioH",
+     "artist": "Renee Geyer",
+     "tempo": 99,
+     "fit": 0.04621666666666669
+    },
+    {
+     "id": "506877d0-78c5-4b79-a7c8-b93f00771d2f",
+     "name": "Ik Neem Je Mee",
+     "spotifyId": "3EY4hOoKbXCm6qjDwxYqWv",
+     "artist": "Ziziana de Zeemeermin",
+     "tempo": 100,
+     "fit": 0.1500999999999999
+    },
+    {
+     "id": "c162f5b4-681e-4bd1-958d-235fb6308ce8",
+     "name": "Bharat Main Hum Fir Se Bhagwa Lahrayenge",
+     "spotifyId": "0UHtiU5hIYywzndcFyOZAR",
+     "artist": "MANOJ TIWARI",
+     "tempo": 100,
+     "fit": 0.1861666666666667
+    },
+    {
+     "id": "d8740f09-2fb7-4631-9eb6-495166c05f70",
+     "name": "Quincea\u00f1era",
+     "spotifyId": "6Z3EKKpabi7Lf7p4WGrLou",
+     "artist": "Marimba Estrella De Chiapas",
+     "tempo": 103,
+     "fit": 0.19203333333333328
+    },
+    {
+     "id": "6ea787ce-158f-4cf1-ac84-8a27680aaa15",
+     "name": "Rinconcito en el Cielo (En Vivo)",
+     "spotifyId": "5TDRNUx9dhEYr1no59ePWM",
+     "artist": "Nuevos Dinamicos",
+     "tempo": 101,
+     "fit": 0.22868333333333313
+    }
+   ],
+   "source": "Gymify"
+  },
+  {
+   "start_s": 56.4,
+   "end_s": 75.2,
+   "features": {
+    "pace": 0.3411781914893617,
+    "still": 0.0,
+    "arm": 16.541868062066072,
+    "upright": 0.35490357269503536,
+    "rhythm": {
+     "bpm": 150.0,
+     "strength": 0.3676451812282059
+    }
+   },
+   "style": "upbeat dance pop",
+   "mood": "calm",
+   "why": "Steady 100 BPM gives one beat out and one beat in to smooth the 50% tempo swing and lift cadence from 25.1 reps per minute.",
+   "targets": {
+    "energy": 0.85,
+    "danceability": 0.8,
+    "valence": 0.8,
+    "acousticness": 0.15,
+    "instrumentalness": 0.15,
+    "loudness": -13.156848404255319,
+    "tempo": 100,
+    "tempo_from": "Gymify"
+   },
+   "songs": [
+    {
+     "id": "95ab7ff1-d4b6-4189-be7d-f73cb7ef1f67",
+     "name": "Achkak maladie chronique",
+     "spotifyId": "6ADaN41aR4p3LgimjUlXwv",
+     "artist": "Cheb Fay\u00e7al",
+     "tempo": 102,
+     "fit": 0.13336666666666666
+    },
+    {
+     "id": "4d8d32ae-b69b-4fb9-a694-66899f06f9c3",
+     "name": "The Moment",
+     "spotifyId": "7ixnGyv2q6I6qjmTXKCwu4",
+     "artist": "Charlie Glass",
+     "tempo": 100,
+     "fit": 0.1678166666666668
+    },
+    {
+     "id": "f8728ee3-044f-4ec9-8afe-78e33b5bcd8d",
+     "name": "\ud765\uccad\ub9dd\uccad",
+     "spotifyId": "6f50xwaLKOCN4eBCaTuBvE",
+     "artist": "\ucd5c\uacbd\uc2dd \uc545\ub2e8",
+     "tempo": 100,
+     "fit": 0.1972333333333333
+    },
+    {
+     "id": "821db388-e7d6-461d-b2b1-33a36172dd8d",
+     "name": "S\u00f3 Conversa",
+     "spotifyId": "3enGTGEgvaWOi9C3nmLr0e",
+     "artist": "Fernando Santana",
+     "tempo": 98,
+     "fit": 0.2329166666666664
+    },
+    {
+     "id": "a057b781-a69b-456d-95e2-479d2fb5cf15",
+     "name": "The Music of the Night",
+     "spotifyId": "4gnrnNxL6MppshIOZK2op3",
+     "artist": "Los Locos",
+     "tempo": 99,
+     "fit": 0.2722333333333331
+    }
+   ],
+   "source": "Gymify"
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 27.2
+}
