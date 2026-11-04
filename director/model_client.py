@@ -5,6 +5,7 @@ import json
 import os
 import re
 import ssl
+import time
 from pathlib import Path
 from urllib.parse import urlsplit
 from typing import Any
@@ -15,6 +16,12 @@ from dotenv import dotenv_values
 import certifi
 
 from .schemas import SlowSuggestion
+
+try:                                    # one line per call for the app's "Meta model calls" panel (never the key)
+    from pipeline.muse_log import log as log_call
+except ImportError:
+    def log_call(*args, **kwargs) -> None:
+        pass
 
 _MUSE_CALLS = 0
 
@@ -123,7 +130,7 @@ def _muse(prompt: str, max_calls: int, images: list[bytes] | None = None) -> str
     if images:
         request_body["input"] = [{"role": "user", "content": [{"type": "input_text", "text": prompt}] + [
             {"type": "input_image", "image_url": "data:image/jpeg;base64," + base64.b64encode(j).decode()} for j in images]}]
-    reasoning_effort = os.getenv("MUSE_REASONING")
+    reasoning_effort = os.getenv("MUSE_REASONING") or dotenv_values(Path(__file__).with_name(".env")).get("MUSE_REASONING")
     if reasoning_effort in {"low", "medium", "high"}:
         request_body["reasoning"] = {"effort": reasoning_effort}
     body = json.dumps(request_body).encode()
@@ -132,11 +139,13 @@ def _muse(prompt: str, max_calls: int, images: list[bytes] | None = None) -> str
                       method="POST")
     tls_context = ssl.create_default_context(cafile=certifi.where())
     _MUSE_CALLS += 1
+    started = time.time()
     try:
         with urlopen(request, timeout=120, context=tls_context) as response:
-            print(f"MUSE_HTTP_STATUS {response.status}", flush=True)
+            print(f"MUSE_HTTP_STATUS {response.status} model={model}", flush=True)
             payload = json.loads(response.read())
     except (OSError, json.JSONDecodeError) as exc:  # URLError, timeouts and dropped connections (RemoteDisconnected)
+        log_call(model, prompt, len(images or []), error=type(exc).__name__, started=started)
         raise RuntimeError(f"Muse request failed: {exc}") from exc
     text = payload.get("output_text")
     if not isinstance(text, str):
@@ -144,6 +153,7 @@ def _muse(prompt: str, max_calls: int, images: list[bytes] | None = None) -> str
         chunks = [part.get("text", "") for item in payload.get("output", [])
                   for part in item.get("content", []) if part.get("type") == "output_text"]
         text = "".join(chunks)
+    log_call(model, prompt, len(images or []), text or '', started=started)
     if not text:
         raise RuntimeError("Muse response had no output text")
     return text

@@ -2,9 +2,9 @@
 
 python -m director.routine_tips examples/exercising --history examples/stretching examples/eating
 
-Reads <run>/insights.json (totals and the posture log: posture bouts with Muse's caption of them),
-<run>/postures.json (posture from the rules and Muse) and <run>/narration_muse.json (Muse's captions) when
-present; for each history run, its totals and what it shows the person doing. Muse answers a JSON review, written into
+Reads <run>/insights.json (totals and the posture log: Muse's posture bouts with its caption of them) and
+<run>/narration_muse.json (Muse's captions) when present; for each history run, its totals and what it shows the person
+doing. Muse answers a JSON review, written into
 <run>/insights.json as "report" (and its first three changes as "suggestions"). The key is read only from
 director/.env, as for the slow loop.
 """
@@ -15,17 +15,16 @@ import argparse
 import csv
 import json
 import os
-from collections import Counter
 from pathlib import Path
 
 from .model_client import _extract_json, _muse
 
 KEYS = ('summary', 'what_they_did', 'posture_and_movement', 'compared_with_history', 'improvements', 'went_well',
         'caveats')
-PROMPT = """You review one recording of a person's day for them, as a movement and daily-routine coach. It was filmed
-by a camera on their head. LifeLens turned it into a 3D body estimate: a posture every second (walking, standing,
-sitting, crouching, bending, arms raised) and the walking distance. Meta Muse Spark described frames of the video every
-5 s and named a posture; it can be wrong. Other recordings follow; they may be of other people, so compare routines,
+PROMPT = """You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.
+LifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture
+for each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;
+it can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,
 not the person.
 
 Write a detailed, specific review as one JSON object with exactly these keys:
@@ -43,7 +42,6 @@ JSON object only.
 
 THIS RECORDING ({name}, {duration})
 {totals}
-Posture by source (share of the recording): {shares}
 Posture bouts and what Muse saw:
 {log}
 Muse's captions every 5 s:
@@ -66,39 +64,6 @@ def totals_line(total: dict) -> str:
             f"bent over {total.get('bent_over_min')} min.")
 
 
-def shares(run: Path) -> str:
-    path = run / 'postures.json'
-    if not path.exists():
-        return 'rules only'
-    labels = json.loads(path.read_text(encoding='utf-8'))['labels']
-    out = []
-    for src in ('rules', 'muse'):
-        if src not in labels:
-            continue
-        c = Counter(labels[src])
-        out.append(f"{src}: " + ', '.join(f'{k} {round(100 * v / len(labels[src]))}%' for k, v in c.most_common() if k != 'unknown'))
-    return '; '.join(out)
-
-
-def did(run: Path, limit: int = 8) -> str:
-    """What the narration shows, as distinct lines with their start time."""
-    seen, out = set(), []
-    for r in csv.DictReader(open(run / 'activity.csv', encoding='utf-8')):
-        text = r['narration'].strip()
-        if text and text not in seen:
-            seen.add(text)
-            out.append(f"{clock(int(r['second']))} {text}")
-    step = max(1, len(out) // limit)
-    return '; '.join(out[::step][:limit])
-
-
-def frames_of(run: Path, k: int = 8) -> list[tuple[int, bytes]]:
-    """Up to k frames of the rendered 3D body spread over the recording (pipeline/body_frames.py): (second, JPEG)."""
-    files = sorted((run / 'frames').glob('body_*.jpg'))
-    step = max(1, len(files) // k)
-    return [(int(f.stem.split('_')[1]), f.read_bytes()) for f in files[::step][:k]]
-
-
 def build_prompt(run: Path, history: list[Path]) -> str:
     report = json.loads((run / 'insights.json').read_text(encoding='utf-8'))
     total = report['total']
@@ -108,12 +73,12 @@ def build_prompt(run: Path, history: list[Path]) -> str:
     earlier = []
     for h in history:
         t = json.loads((h / 'insights.json').read_text(encoding='utf-8'))['total']
-        earlier.append(f"- {h.name}: {totals_line(t)} Posture by source: {shares(h)}. What they did: {did(h)}")
+        earlier.append(f"- {h.name}: {totals_line(t)} What they did: {did(h)}")
     seen = frames_of(run)
     frames = (f"The images are this recording's 3D body (legs estimated) at {', '.join(clock(t) for t, _ in seen)}, "
               'in order: use them for posture and movement.') if seen else ''
     return PROMPT.format(name=run.name, duration=f"{total.get('duration_min')} min", totals=totals_line(total),
-                         shares=shares(run), log=report.get('log', ''), captions=captions, frames=frames,
+                         log=report.get('log', ''), captions=captions, frames=frames,
                          history='\n'.join(earlier) or 'none')
 
 
@@ -130,7 +95,7 @@ def parse(text: str) -> dict:
 
 def main(argv: list[str] | None = None) -> dict:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument('run', help='Processed recording: insights.json, activity.csv (postures.json optional).')
+    parser.add_argument('run', help='Processed recording: insights.json and activity.csv.')
     parser.add_argument('--history', nargs='*', default=[], help='Earlier processed recordings to compare with.')
     parser.add_argument('--person', default='', help="The wearer, e.g. '178 cm, 75 kg, 30 years old': for the coaching.")
     a = parser.parse_args(argv)

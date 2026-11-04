@@ -19,8 +19,8 @@ const DEFAULT_STAGES = [
   { id: 'omniegocap', label: 'OmniEgoCap 3D full-body reconstruction', state: 'pending' },
   { id: 'render', label: '3D body mesh & kinematics stream rendering', state: 'pending' },
   { id: 'describe_muse', label: 'Meta Muse Spark egocentric scene narration', state: 'pending' },
-  { id: 'posture_muse', label: 'Biomechanical & Meta Muse Spark posture analysis', state: 'pending' },
-  { id: 'routine_tips', label: 'Meta Muse Spark routine coaching & history review', state: 'pending' },
+  { id: 'posture_muse', label: 'Meta Muse Spark posture from 3D body and POV frames', state: 'pending' },
+  { id: 'routine_tips', label: 'Meta Muse Spark routine feedback & history', state: 'pending' },
 ];
 
 function updateGreeting() {

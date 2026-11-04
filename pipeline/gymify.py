@@ -24,6 +24,8 @@ from urllib.request import Request, urlopen
 
 import numpy as np
 
+from muse_log import log as log_call
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 URL = 'https://api.meta.ai/v1/responses'
 FPS = 30
@@ -41,11 +43,12 @@ def muse_key() -> str:
     raise SystemExit('MUSE_API_KEY is missing from director/.env')
 
 
-def ask(key: str, text: str, jpegs: list, tries: int = 2) -> dict:
+def ask(key: str, text: str, jpegs: list, tries: int = 2, feature: str = 'gymify') -> dict:
     """One Muse Spark call with images; the first JSON object of its answer."""
     content = [{'type': 'input_text', 'text': text}]
     content += [{'type': 'input_image', 'image_url': 'data:image/jpeg;base64,' + base64.b64encode(j).decode()} for j in jpegs]
-    body = json.dumps({'model': os.getenv('MUSE_MODEL', 'muse-spark-1.3'), 'input': [{'role': 'user', 'content': content}]}).encode()
+    model, t0 = os.getenv('MUSE_MODEL', 'muse-spark-1.3'), time.time()
+    body = json.dumps({'model': model, 'input': [{'role': 'user', 'content': content}]}).encode()
     for attempt in range(tries):
         try:
             req = Request(URL, data=body, method='POST', headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {key}'})
@@ -53,9 +56,11 @@ def ask(key: str, text: str, jpegs: list, tries: int = 2) -> dict:
                 p = json.loads(r.read())
             out = p.get('output_text') or ''.join(c.get('text', '') for o in p.get('output', []) for c in o.get('content', [])
                                                   if c.get('type') == 'output_text')
+            log_call(model, text, len(jpegs), out, started=t0, feature=feature)
             return json.loads(out[out.index('{'):out.rindex('}') + 1])
         except (OSError, ValueError) as err:
             if attempt == tries - 1:
+                log_call(model, text, len(jpegs), error=type(err).__name__, started=t0, feature=feature)
                 raise SystemExit(f'Muse Spark did not answer: {type(err).__name__}')
             time.sleep(5)
 

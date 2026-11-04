@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { basename, extname, join } from 'node:path';
 import { output as lightsOutput, status as lightsStatus } from './server/lights.js';
@@ -137,24 +137,43 @@ function lifelensApi() {
   const env = (name) => `${process.env.CONDA_ROOT || '~/anaconda3'}/envs/${name}/bin`; // run.py reads CONDA_ROOT too
   // One Muse Spark call: [{type: 'input_text'|'input_image', ...}] -> the first JSON object in its answer.
   // effort: Muse's reasoning effort ('low' answers live requests in seconds instead of tens of seconds).
-  async function askMuse(key, content, timeoutMs = 30000, effort = 'low') {
-    const r = await fetch('https://api.meta.ai/v1/responses', {
-      method: 'POST', signal: AbortSignal.timeout(timeoutMs),
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: process.env.MUSE_MODEL || 'muse-spark-1.3', input: [{ role: 'user', content }],
-        reasoning: { effort } }),
-    });
-    if (!r.ok) throw new Error(`Muse answered ${r.status}`);
-    const p = await r.json();
-    const text = p.output_text || (p.output ?? []).flatMap((o) => o.content ?? []).map((c) => c.text ?? '').join('');
-    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+  // MUSE_REASONING in director/.env overrides it for every call (low: ~8 s instead of ~16 s, good on camera).
+  // Each call is logged to runs/muse_calls.jsonl for the "Meta model calls" panel: model, prompt, reply; never the key.
+  async function askMuse(key, content, timeoutMs = 30000, effort = 'low', feature = '') {
+    const model = process.env.MUSE_MODEL || 'muse-spark-1.3';
+    effort = museEnv('MUSE_REASONING') || effort;
+    const t0 = Date.now();
+    const log = (reply, error = '') => {
+      try {
+        mkdirSync(join(root, 'runs'), { recursive: true });
+        appendFileSync(join(root, 'runs', 'muse_calls.jsonl'), `${JSON.stringify({ t: t0, feature, model, effort,
+          prompt: content.find((c) => c.type === 'input_text')?.text.slice(0, 700) ?? '',
+          images: content.filter((c) => c.type === 'input_image').length, reply: reply.slice(0, 700), error, ms: Date.now() - t0 })}\n`);
+      } catch { /* the log only shows the calls */ }
+    };
+    try {
+      const r = await fetch('https://api.meta.ai/v1/responses', {
+        method: 'POST', signal: AbortSignal.timeout(timeoutMs),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({ model, input: [{ role: 'user', content }], reasoning: { effort } }),
+      });
+      if (!r.ok) throw new Error(`Muse answered ${r.status}`);
+      const p = await r.json();
+      const text = p.output_text || (p.output ?? []).flatMap((o) => o.content ?? []).map((c) => c.text ?? '').join('');
+      log(text);
+      return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+    } catch (err) {
+      log('', err.name === 'TimeoutError' ? 'timeout' : err.message);
+      throw err;
+    }
   }
   const museError = (err) => (err.name === 'TimeoutError' ? 'Muse did not answer in time' : `Muse: ${err.message}`);
-  const museKey = () => {
+  const museEnv = (name) => {      // one setting from director/.env (the key never leaves the server)
     const f = join(root, 'director', '.env');
-    const line = existsSync(f) ? readFileSync(f, 'utf8').split(/\r?\n/).find((l) => l.trim().startsWith('MUSE_API_KEY=')) : null;
+    const line = existsSync(f) ? readFileSync(f, 'utf8').split(/\r?\n/).find((l) => l.trim().startsWith(`${name}=`)) : null;
     return line ? line.split('=').slice(1).join('=').trim() : '';
   };
+  const museKey = () => museEnv('MUSE_API_KEY');
 
   function recordings() {
     const found = new Map();
@@ -184,7 +203,7 @@ function lifelensApi() {
           pov: url('input.mp4') ?? small(`input/${name}.mp4`) ?? prev?.pov ?? null,
           body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
           graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
-          files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json', 'postures.json',
+          files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json',
             'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4', 'gym.json', 'stage.json',
             'stage_cues.csv', 'stage_show.webm'].map((f) => [f, url(f)])),
         });
@@ -210,7 +229,7 @@ function lifelensApi() {
       ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'${camera ? ` --camera ${camera}` : ''}${profile.height ? ` --height ${profile.height}` : ''}`)],
       ['3D body frames', false, ...wsl(`${env('vlm')}/python pipeline/body_frames.py --run runs/${name}`)],   // what Muse sees
       ['Meta Muse Spark posture', false, python(), ['-m', 'director.posture_muse', `runs/${name}`]],
-      ['Posture sources', false, ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
+      ['Posture totals', false, ...wsl(`${env('vlm')}/python pipeline/insights.py runs/${name}`)],   // from Muse's labels
       ['Meta Muse Spark routine coaching', false, python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean),
       ...(profile.person ? ['--person', profile.person] : [])]],
     ];
@@ -418,7 +437,7 @@ function lifelensApi() {
         const t0 = Date.now();
         try {
           const answer = await askMuse(key, [{ type: 'input_text', text: LIVE_PROMPT },
-            ...images.map((image_url) => ({ type: 'input_image', image_url }))]);
+            ...images.map((image_url) => ({ type: 'input_image', image_url }))], 30000, 'low', 'live_caption');
           const posture = POSTURES.includes(answer.posture) ? answer.posture : '';
           send(res, 200, { caption: String(answer.caption ?? '').slice(0, 200), posture, ms: Date.now() - t0 });
         } catch (err) {
@@ -437,7 +456,7 @@ function lifelensApi() {
         const t0 = Date.now();
         try {
           const a = await askMuse(key, [{ type: 'input_text', text: SCENE_PROMPT.replace('{facts}', facts) },
-            ...(frame ? [{ type: 'input_image', image_url: frame }] : [])], 40000);
+            ...(frame ? [{ type: 'input_image', image_url: frame }] : [])], 40000, 'low', 'stage_scene');
           const palette = (Array.isArray(a.palette) ? a.palette : []).filter((c) => /^#[0-9A-Fa-f]{6}$/.test(c)).slice(0, 3);
           if (palette.length < 2 || !PATTERNS.includes(a.pattern)) return send(res, 502, { error: 'Muse gave no usable scene' });
           send(res, 200, {
@@ -490,7 +509,7 @@ function lifelensApi() {
           const prompt = PLAN_PROMPT.replaceAll('{n}', String(segments.length))
             .replace('{segments}', segments.map((g, k) => `${k + 1}. ${g}`).join('\n'));
           const a = await askMuse(key, [{ type: 'input_text', text: prompt }, ...frames.map((image_url) => ({ type: 'input_image', image_url }))],
-            180000, 'medium');
+            180000, 'medium', 'stagify_plan');
           const scenes = segments.map((_, k) => {
             const c = (a.scenes ?? [])[k] ?? (a.scenes ?? [])[(a.scenes ?? []).length - 1] ?? {};
             const palette = (Array.isArray(c.palette) ? c.palette : []).filter((x) => /^#[0-9A-Fa-f]{6}$/.test(x)).slice(0, 3);
@@ -525,6 +544,13 @@ function lifelensApi() {
           writeFileSync(join(root, known.base, file), Buffer.concat(chunks));
           send(res, 200, { ok: true, url: `/${known.base}/${file}` });
         });
+      });
+
+      // the last 40 Meta Muse Spark calls (newest first) for the "Meta model calls" panel
+      server.middlewares.use('/api/muse/log', (req, res) => {
+        const f = join(root, 'runs', 'muse_calls.jsonl');
+        const lines = existsSync(f) ? readFileSync(f, 'utf8').trim().split('\n').slice(-40).reverse() : [];
+        send(res, 200, lines.flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } }));
       });
 
       server.middlewares.use('/api/lights', async (req, res) => {

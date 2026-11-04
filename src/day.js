@@ -1,6 +1,6 @@
 // LifeLens front-end: Activity, Routine & Past Routines workspace inside the Routine view.
 // Uses the main POV + 3D body media player (extras.js) directly—no duplicate video elements—and showcases
-// the active session's posture timeline, timestamped action log, past routine comparisons, and Meta Muse Spark coaching.
+// the active session's posture timeline, timestamped action log, past routine comparisons, and Meta Muse Spark feedback.
 
 import { media } from './extras.js';
 import { fetchRecordings, openRecording, session } from './session.js';
@@ -9,11 +9,6 @@ const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arm
 const POSTURE_COLORS = {
   walking: 'var(--p-walking)', standing: 'var(--p-standing)', sitting: 'var(--p-sitting)',
   crouching: 'var(--p-crouching)', bending: 'var(--p-bending)', 'arms raised': 'var(--p-arms)',
-};
-const SOURCES = {
-  rules: { name: '3D Rules', how: '3D kinematics thresholds (speed, hip height, knee flexion & trunk lean) per second.' },
-  muse: { name: 'Muse Spark', how: 'Meta Muse Spark classifies each 5 s window from 3D kinematics + egocentric scene.' },
-  combined: { name: 'Both agree', how: 'Seconds where the rules and Meta Muse Spark name the same posture; grey where they differ.' },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -116,7 +111,7 @@ function drawRuns(box, labels) {
 // ---------- Active Recording Routine ----------
 
 const video = media.body;
-const view = { rows: [], postures: null, captions: [], source: 'rules', labels: [],
+const view = { rows: [], captions: [], labels: [],
   entries: [], items: [], current: -1, marker: null };
 
 function entriesFromMuse() {
@@ -147,13 +142,9 @@ function drawStrip() {
   strip.appendChild(view.marker);
   strip.tabIndex = 0;
   strip.setAttribute('role', 'slider');
-  strip.setAttribute('aria-label', `Posture each second, from ${SOURCES[view.source].name}`);
+  strip.setAttribute('aria-label', 'Posture each second, from Meta Muse Spark');
   strip.setAttribute('aria-valuemin', '0');
   strip.setAttribute('aria-valuemax', String(view.labels.length - 1));
-  $('strip-source-name').textContent = SOURCES[view.source].name;
-  const mocap = view.postures?.labels?.mocap;
-  $('routine-ref').closest('.strip-row').hidden = !mocap;
-  if (mocap) drawRuns($('routine-ref'), mocap);
 }
 
 // The log as a film strip: one POV thumbnail per caption (5 s), with its time and posture colour. The caption of the
@@ -202,7 +193,7 @@ function drawLog() {
   drawThumbs(view.entries, imgs).catch(() => {});
 }
 
-// Muse's coaching on the timeline: what they did as labelled spans, its changes as numbered pins at the time they cite.
+// Muse's feedback on the timeline: what they did as labelled spans, its changes as numbered pins at the time they cite.
 function drawTrack(r) {
   const track = $('routine-track');
   const n = view.labels.length || 1;
@@ -268,21 +259,11 @@ function update() {
 }
 
 function redraw() {
-  view.labels = view.postures?.labels?.[view.source] ?? view.rows.map((r) => r.label);
+  view.labels = view.rows.map((r) => r.label);      // Meta Muse Spark's posture per second (pipeline/insights.py)
   drawStrip();
   drawLog();
   update();
   renderPostures();
-}
-
-function pickSource(source) {
-  view.source = SOURCES[source] ? source : 'rules';
-  for (const b of $('posture-switch').children) b.setAttribute('aria-pressed', String(b.dataset.source === view.source));
-  const a = view.postures?.agreement;
-  // Motion capture exists for the OmniEgoDB examples only; its labels use the rules' thresholds, so it favors them.
-  const match = a && Number.isFinite(a[view.source]) ? ` · agrees with motion capture ${Math.round(a[view.source] * 100)}% of seconds` : '';
-  $('posture-how').textContent = `${SOURCES[view.source].how}${match}`;
-  redraw();
 }
 
 function renderStats(total) {
@@ -440,23 +421,20 @@ async function renderHistory(current) {
 
 async function load(rec) {
   $('day-status').textContent = 'Loading';
-  const [report, csv, postures, muse] = await Promise.all([
+  const [report, csv, muse] = await Promise.all([
     getJson(rec.files['insights.json']),
     fetch(rec.files['activity.csv'], { cache: 'no-store' }).then((r) => r.text()),
-    getJson(rec.files['postures.json']),
     getJson(rec.files['narration_muse.json']),
   ]);
-  Object.assign(view, { rows: parseCsv(csv), postures, captions: muse ?? [] });
-  $('posture-switch').closest('.posture-pick').hidden = !postures;
+  Object.assign(view, { rows: parseCsv(csv), captions: muse ?? [] });
   renderStats(report.total);
-  pickSource('rules');
+  redraw();
   renderReview(report);
   drawSpeed();
   $('day-status').textContent = [rec.name, clock(view.rows.length), rec.camera?.label].filter(Boolean).join(' · ');
   await renderHistory(rec);
 }
 
-for (const b of $('posture-switch').children) b.addEventListener('click', () => pickSource(b.dataset.source));
 video.addEventListener('timeupdate', update);
 video.addEventListener('seeked', update);
 

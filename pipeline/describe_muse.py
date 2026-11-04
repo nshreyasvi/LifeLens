@@ -19,6 +19,8 @@ from urllib.request import Request, urlopen
 
 import cv2
 
+from muse_log import log as log_call
+
 WIDTH = 448
 PROMPT = ('What is the camera wearer doing in this clip? Answer with one short sentence (under 15 words), starting '
           'with a third-person verb or "The camera wearer...". Do not describe the room or objects unless the wearer '
@@ -61,8 +63,8 @@ def caption(key: str, jpegs: list, tries: int = 3, body: bool = False) -> str:
     note = BODY_NOTE if body else ' The images are frames from one 5 s clip, in order.'
     content = [{'type': 'input_text', 'text': PROMPT + note}]
     content += [{'type': 'input_image', 'image_url': 'data:image/jpeg;base64,' + base64.b64encode(j).decode()} for j in jpegs]
-    body = json.dumps({'model': os.getenv('MUSE_MODEL', 'muse-spark-1.3'),
-                       'input': [{'role': 'user', 'content': content}]}).encode()
+    model, t0 = os.getenv('MUSE_MODEL', 'muse-spark-1.3'), time.time()
+    body = json.dumps({'model': model, 'input': [{'role': 'user', 'content': content}]}).encode()
     for attempt in range(tries):
         try:
             req = Request(URL, data=body, method='POST',
@@ -71,9 +73,11 @@ def caption(key: str, jpegs: list, tries: int = 3, body: bool = False) -> str:
                 p = json.loads(r.read())
             text = p.get('output_text') or ''.join(c.get('text', '') for o in p.get('output', [])
                                                      for c in o.get('content', []) if c.get('type') == 'output_text')
+            log_call(model, PROMPT + note, len(jpegs), text.strip(), started=t0, feature='captions')
             return text.strip()
         except (OSError, ValueError) as err:     # timeouts and HTTP errors: wait and try again
             if attempt == tries - 1:
+                log_call(model, PROMPT + note, len(jpegs), error=type(err).__name__, started=t0, feature='captions')
                 return f'[no caption: {type(err).__name__}]'
             time.sleep(5 * (attempt + 1))
 

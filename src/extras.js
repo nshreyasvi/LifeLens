@@ -15,11 +15,12 @@ const $ = (id) => document.getElementById(id);
 const SYNC_TOLERANCE_S = 0.75;
 const LIVE_IDLE_MS = 3000;
 const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body'], gym: ['body', 'graph'] };
+// Stage and Gym have their own main view (stage.js show, gym.js viewer) over the POV; the rail keeps the body and graph.
 const TAB_TEXT = {
   activity: 'First-person POV, 3D body, live kinematics & session routine.',
   music: 'Movement pace, step cadence & arm swing select the tracks.',
-  stage: 'Lights follow each body part, poses, jumps, turns and hits; Muse Spark designs the scene. Try the Show view.',
-  gym: 'Gymify: reps, sets, range of motion, tempo and symmetry from the 3D body; Muse Spark coaches the form.',
+  stage: 'Lights follow each body part, poses, jumps, turns and hits; Muse Spark designs the scene. The stage plays in the main view.',
+  gym: 'Gymify: reps, sets, range of motion, tempo and symmetry from the 3D body; Muse Spark gives form feedback.',
 };
 
 const mediaRoot = $('media');
@@ -81,6 +82,38 @@ export { media };
 
 const aiState = $('ai-state');
 const aiBadge = $('ai-badge');
+
+// Meta model calls panel: the AI badge opens it; every 2 s it shows the newest Muse Spark calls (model, request, reply)
+const FEATURE = { captions: 'Captions', posture_muse: 'Posture', routine_tips: 'Routine feedback', gymify: 'Gymify form feedback',
+  server: 'Director mood', live_caption: 'Live caption', stage_scene: 'Stage scene', stagify_plan: 'Stagify plan', songs: 'Songs' };
+let logTimer = null;
+async function showCalls() {
+  const calls = await fetch('/api/muse/log', { cache: 'no-store' }).then((r) => r.json()).catch(() => []);
+  $('muse-log-list').replaceChildren(...calls.map((c) => {
+    const li = document.createElement('li');
+    const head = document.createElement('div');
+    head.className = 'muse-call-head';
+    head.textContent = [new Date(c.t).toLocaleTimeString(), FEATURE[c.feature] ?? c.feature, c.model, c.effort && `effort ${c.effort}`,
+      c.ms != null && `${(c.ms / 1000).toFixed(1)} s`].filter(Boolean).join(' · ');
+    const ask = document.createElement('p');
+    ask.className = 'muse-call-text';
+    ask.textContent = `→ ${c.prompt}${c.images ? ` [+ ${c.images} image${c.images > 1 ? 's' : ''}]` : ''}`;
+    const reply = document.createElement('p');
+    reply.className = `muse-call-text${c.error ? ' is-error' : ''}`;
+    reply.textContent = c.error ? `✕ ${c.error}` : `← ${c.reply}`;
+    li.append(head, ask, reply);
+    return li;
+  }));
+}
+function toggleCalls(open = $('muse-log').hidden) {
+  $('muse-log').hidden = !open;
+  aiBadge.setAttribute('aria-expanded', String(open));
+  clearInterval(logTimer);
+  if (open) { showCalls(); logTimer = setInterval(showCalls, 2000); }
+}
+aiBadge.addEventListener('click', () => toggleCalls());
+aiBadge.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCalls(); } });
+$('muse-log-close').addEventListener('click', () => toggleCalls(false));
 
 function setAi(text, mode) {
   aiState.textContent = text;

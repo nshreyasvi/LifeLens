@@ -1,6 +1,6 @@
 // LifeLens Gym tab: Gymify a processed recording (pipeline/gymify.py via /api/gymify) and show its gym.json.
 // Measured from the 3D body (no model): reps, sets and rests, range of motion, down/up tempo, left-right difference.
-// Meta Muse Spark: the exercise (from 3D body and POV frames, unless picked), form coaching from frames of the
+// Meta Muse Spark: the exercise (from 3D body and POV frames, unless picked), form feedback from frames of the
 // first, middle and last rep with the numbers, and the music to train to.
 
 import { media } from './extras.js';
@@ -68,9 +68,10 @@ function repChart(g, seconds) {
 }
 
 function render(g) {
+  view.g = g;
   const box = $('gym-result');
   if (!g) {
-    box.replaceChildren(el('p', 'gym-empty', 'Gymify names the exercise from the 3D body (Muse Spark), then measures every rep: range of motion, tempo and left-right difference, sets and rests. Muse coaches the form from frames of the reps.'));
+    box.replaceChildren(el('p', 'gym-empty', 'Gymify names the exercise from the 3D body (Muse Spark), then measures every rep: range of motion, tempo and left-right difference, sets and rests. Muse gives form feedback from frames of the reps.'));
     $('gym-status').textContent = 'Not run yet';
     return;
   }
@@ -82,7 +83,7 @@ function render(g) {
   if (ex.reason) head.appendChild(el('p', 'gym-ex-why', ex.reason));
   if (!g.reps.length) {
     box.replaceChildren(head, el('p', 'gym-empty', ex.exercise === 'none'
-      ? 'This recording shows no repeated exercise, so no reps are counted. If Muse got it wrong, pick the exercise and run Gymify again.'
+      ? 'Muse Spark saw no repeated exercise in this recording, so no reps are counted.'
       : 'No clear reps on the main joint: the movement is too small or too irregular to count.'));
     return;
   }
@@ -144,7 +145,7 @@ async function gymify() {
   btn.disabled = true;
   $('gym-status').textContent = 'Running…';
   const res = await fetch('/api/gymify', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ run: session.rec.base, exercise: $('gym-exercise').value, ...profile() }) });
+    body: JSON.stringify({ run: session.rec.base, ...profile() }) });      // Muse Spark recognises the exercise
   const body = await res.json().catch(() => ({}));
   if (!res.ok) { $('gym-status').textContent = body.error || `Error ${res.status}`; btn.disabled = false; return; }
   const poll = setInterval(async () => {
@@ -161,4 +162,60 @@ async function gymify() {
 }
 
 $('gym-btn').addEventListener('click', gymify);
+
+// The Gym viewer (main view while the Gym tab is open): the 3D body large, the head camera small, and the reps as they
+// happen: which rep, going down or up, its range, and a dot per rep. Drawn from the videos the page already plays.
+const view = { g: null, open: false };
+const canvas = $('gym-view');
+const gg = canvas.getContext('2d');
+function drawGym() {
+  if (!view.open) return;
+  requestAnimationFrame(drawGym);
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.round(canvas.clientWidth * dpr), H = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== W || canvas.height !== H) Object.assign(canvas, { width: W, height: H });
+  gg.fillStyle = '#0B0D12';
+  gg.fillRect(0, 0, W, H);
+  const body = media.body;
+  if (body?.readyState >= 2 && body.videoWidth) {
+    const k = Math.min(W / body.videoWidth, H / body.videoHeight);
+    gg.drawImage(body, (W - body.videoWidth * k) / 2, (H - body.videoHeight * k) / 2, body.videoWidth * k, body.videoHeight * k);
+  }
+  const pov = document.querySelector('#media [data-pane="pov"] video');
+  if (pov?.readyState >= 2 && pov.videoWidth) {
+    const w = W * 0.28, h = (w * pov.videoHeight) / pov.videoWidth, x = W - w - 16 * dpr, y = H - h - 16 * dpr;
+    gg.drawImage(pov, x, y, w, h);
+    gg.strokeStyle = '#FFFFFF88'; gg.lineWidth = 2 * dpr; gg.strokeRect(x, y, w, h);
+    gg.fillStyle = '#FFFFFFDD'; gg.font = `600 ${12 * dpr}px Geist, sans-serif`; gg.fillText('Head camera', x + 8 * dpr, y + 18 * dpr);
+  }
+  const g = view.g, t = body?.currentTime ?? 0, pad = 18 * dpr;
+  gg.fillStyle = '#0B0D12CC';
+  gg.fillRect(pad - 8 * dpr, pad - 8 * dpr, 330 * dpr, (g?.reps?.length ? 92 : 44) * dpr);
+  gg.fillStyle = '#FFFFFF';
+  gg.font = `650 ${18 * dpr}px Geist, sans-serif`;
+  if (!g) { gg.fillText('Run Gymify to count the reps', pad, pad + 20 * dpr); return; }
+  const reps = g.reps ?? [];
+  if (!reps.length) { gg.fillText(g.exercise.exercise === 'none' ? 'No exercise in this recording' : 'No clear reps', pad, pad + 20 * dpr); return; }
+  const cur = reps.findIndex((r) => t >= r.start_s && t <= r.end_s);
+  const done = reps.filter((r) => r.end_s < t).length;
+  const r = reps[cur];
+  gg.fillText(`${cap(g.exercise.exercise)} · rep ${cur >= 0 ? cur + 1 : done} of ${reps.length}`, pad, pad + 20 * dpr);
+  gg.font = `${14 * dpr}px Geist, sans-serif`;
+  gg.fillStyle = '#FFFFFFCC';
+  gg.fillText(r ? `${t < r.bottom_s ? 'Going down' : 'Coming up'} · ${Math.round(r.rom_deg)}° ${g.joint} range · ${r.asym_deg}° left-right`
+    : done === reps.length ? 'All reps done' : 'Between reps', pad, pad + 44 * dpr);
+  reps.forEach((rep, k) => {                 // a dot per rep: filled when done, ringed while it happens
+    const x = pad + 6 * dpr + k * 18 * dpr, y = pad + 68 * dpr;
+    gg.beginPath(); gg.arc(x, y, 6 * dpr, 0, Math.PI * 2);
+    gg.fillStyle = k < done ? (rep.asym_deg < 6 ? '#3FB27F' : rep.asym_deg < 12 ? '#F0A33A' : '#E5534B') : '#FFFFFF33';   // even, uneven, lopsided
+    gg.fill();
+    if (k === cur) { gg.strokeStyle = '#FFFFFF'; gg.lineWidth = 2 * dpr; gg.stroke(); }
+  });
+}
+document.addEventListener('lifelens:tab', (e) => {
+  view.open = e.detail.tab === 'gym';
+  canvas.hidden = !view.open;
+  if (view.open) requestAnimationFrame(drawGym);
+});
+canvas.addEventListener('click', () => $('play-btn').click());
 document.addEventListener('lifelens:session', () => { if (session.rec) load(); else render(null); });

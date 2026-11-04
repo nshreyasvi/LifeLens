@@ -68,7 +68,7 @@
         </div>
 
         <p class="start-lead">
-          Turn a single head-mounted camera into articulated <strong>3D body motion</strong>, <strong>Meta Muse Spark</strong> routine coaching, and body-driven <strong>stage music</strong>.
+          Turn a single head-mounted camera into articulated <strong>3D body motion</strong>, body-driven <strong>stage shows and music</strong>, and <strong>Meta Muse Spark</strong> movement feedback.
         </p>
 
         <!-- Custom vector graphic diagram: Head POV -> 3D body -> Routine & Stage -->
@@ -152,7 +152,7 @@
             <strong>OmniEgoCap + HaWoR</strong>
           </div>
           <div class="start-pillar">
-            <span class="start-pillar-kicker">Vision &amp; Coaching</span>
+            <span class="start-pillar-kicker">Vision &amp; Feedback</span>
             <strong>Meta Muse Spark</strong>
           </div>
           <div class="start-pillar">
@@ -190,7 +190,7 @@
               <input id="user-age" type="number" min="5" max="110" step="1" inputmode="numeric" placeholder="optional"></label>
           </div>
           <p class="field-hint">Your height sets the real size of your 3D body, so stand upright for the first 3&nbsp;s of a
-            recording. Weight and age only reach Meta Muse Spark's coaching; the 3D body doesn't use them.</p>
+            recording. Weight and age only reach Meta Muse Spark's feedback; the 3D body doesn't use them.</p>
 
           <div class="choices">
             <button class="choice" id="choose-live" type="button">
@@ -330,7 +330,8 @@
         <button class="chip-btn" id="change-btn" type="button">Switch session</button>
       </div>
       <div class="brand-telemetry">
-        <span class="ai-badge" id="ai-badge" data-mode="idle" title="Meta Muse Spark drives scene narration, posture classification, routine coaching, and live director cues.">
+        <span class="ai-badge" id="ai-badge" data-mode="idle" role="button" tabindex="0" aria-controls="muse-log" aria-expanded="false"
+          title="Meta Muse Spark (muse-spark-1.3): captions, posture, feedback, stage scenes and director cues. Click to see the calls live.">
           <span class="ai-dot" aria-hidden="true"></span>
           <span class="ai-name">Meta Muse Spark</span>
           <span class="ai-state" id="ai-state">Ready</span>
@@ -407,6 +408,7 @@
           </div>
         </div>
         <div class="media-stage">
+          <canvas class="gym-view" id="gym-view" hidden aria-label="Gymify viewer: the 3D body with the head camera and the rep count"></canvas>
           <div class="media-pane media-base" data-pane="pov">
             <video muted playsinline loop preload="auto" aria-label="Head-camera video"></video>
             <div class="live-overlay" id="live-overlay" aria-live="polite" hidden>
@@ -508,8 +510,8 @@
             <div class="stage-scene-row">
               <p class="stage-scene" id="stage-scene" aria-live="polite">Rules only until Muse Spark designs the first scene.</p>
               <div class="stage-actions">
-                <button class="btn btn-small-text" id="show-btn" type="button">Show view</button>
-                <button class="btn btn-small-text btn-primary" id="stagify-btn" type="button" title="Muse Spark plans the whole show, picks songs per section, then records the show video and the lighting cues">Stagify</button>
+                <button class="btn btn-cta" id="stagify-btn" type="button" title="Muse Spark plans the whole show, picks songs per section, then records the show video and the lighting cues">Stagify this recording</button>
+                <button class="btn btn-small-text" id="show-btn" type="button">Full-screen show</button>
                 <button class="toggle" id="stage-fx" type="button" aria-pressed="true">Sound FX</button>
               </div>
               <p class="stage-out" id="stage-out">Lights out: simulator (no hardware set)</p>
@@ -519,27 +521,16 @@
           </section>
         </section>
 
-        <!-- Gymify (gym.js, pipeline/gymify.py): the exercise, reps, sets, range, tempo, symmetry; Muse Spark's coaching. -->
+        <!-- Gymify (gym.js, pipeline/gymify.py): the exercise, reps, sets, range, tempo, symmetry; Muse Spark's form feedback. -->
         <section class="view view-gym" id="view-gym" data-view="gym" role="tabpanel" aria-labelledby="tab-btn-gym" hidden>
           <section class="panel panel-gym" aria-labelledby="gym-title">
             <div class="panel-head">
               <h2 id="gym-title">Gymify</h2>
               <span class="chip" id="gym-status">Not run yet</span>
             </div>
-            <div class="gym-run">
-              <label class="gym-pick">
-                <span>Exercise</span>
-                <select id="gym-exercise">
-                  <option value="">Muse Spark recognises it</option>
-                  <option>squat</option><option>lunge</option><option>jump squat</option><option>step-up</option>
-                  <option>deadlift</option><option>good morning</option><option>hip hinge</option><option>sit-up</option>
-                  <option>push-up</option><option>bicep curl</option><option>shoulder press</option><option>tricep dip</option>
-                  <option>jumping jacks</option><option>arm raise</option>
-                </select>
-              </label>
-              <button class="btn btn-small-text btn-primary" id="gym-btn" type="button">Gymify</button>
-            </div>
-            <div class="gym-result" id="gym-result"></div>
+            <p class="panel-sub">Meta Muse Spark recognises the exercise from frames of the 3D body and the head camera;
+              the reps are measured on the 3D joints. The report appears below the video.</p>
+            <button class="btn btn-cta" id="gym-btn" type="button">Run Gymify</button>
           </section>
         </section>
 
@@ -549,13 +540,29 @@
             <h2 id="player-title">Now playing</h2>
             <span class="chip" id="player-beat">No song yet</span>
           </div>
+          <div class="player-bar">
+            <button class="pbtn" id="p-prev" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM19 5L9.5 12 19 19z"/></svg></button>
+            <button class="pbtn pbtn-main" id="p-toggle" type="button" aria-label="Play" data-state="play"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
+            <button class="pbtn" id="p-next" type="button" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM5 5l9.5 7L5 19z"/></svg></button>
+            <div class="p-now">
+              <strong id="p-title">No song yet</strong>
+              <span id="p-artist">Press play for the first pick</span>
+              <div class="p-progress" aria-hidden="true"><span id="p-fill"></span></div>
+            </div>
+            <span class="p-time" id="p-time"></span>
+          </div>
           <div class="player-embed"><div id="player-embed"></div></div>
           <p class="panel-sub" id="player-note">Press Play to start the top ReccoBeats track.</p>
         </section>
       </aside>
     </div>
 
-    <!-- Integrated inside Routine tab: Activity breakdown, Interactive Scrubber, Past Routines & Muse Spark Coaching -->
+    <!-- Gymify report (gym.js): below the videos while the Gym tab is open -->
+    <section class="gym-deck" id="gym-deck" aria-label="Gymify report" hidden>
+      <div class="gym-result" id="gym-result"></div>
+    </section>
+
+    <!-- Integrated inside Routine tab: Activity breakdown, Interactive Scrubber, Past Routines & Muse Spark feedback -->
     <section class="routine-deck" id="view-day" aria-label="Session activity and past routines">
       <div class="routine-grid-top">
         <section class="panel panel-routine-summary" id="routine-current-summary" aria-labelledby="day-title">
@@ -582,24 +589,14 @@
             </div>
             <span class="chip is-active" id="did-captions">Meta Muse Spark</span>
           </div>
-          <div class="posture-pick">
-            <span class="posture-pick-name" id="posture-pick-name">Classifier</span>
-            <div class="toggles" id="posture-switch" role="group" aria-labelledby="posture-pick-name">
-              <button class="toggle" type="button" data-source="rules" aria-pressed="true">3D Rules</button>
-              <button class="toggle" type="button" data-source="muse" aria-pressed="false">Muse Spark</button>
-              <button class="toggle" type="button" data-source="combined" aria-pressed="false">Both agree</button>
-            </div>
-            <p class="posture-how" id="posture-how" aria-live="polite"></p>
-          </div>
           <div class="scrubber-box">
             <div class="scrubber-meta">
               <span class="media-clock" id="routine-clock">0:00</span>
               <p class="day-caption" id="routine-caption" aria-live="polite"></p>
             </div>
             <div class="strip-row"><span class="strip-name">Muse Spark</span><div class="day-track" id="routine-track"></div></div>
-            <div class="strip-row"><span class="strip-name" id="strip-source-name">3D Rules</span><div class="day-strip" id="routine-strip"></div></div>
+            <div class="strip-row"><span class="strip-name">Posture</span><div class="day-strip" id="routine-strip"></div></div>
             <div class="strip-row"><span class="strip-name">Speed</span><svg class="day-speed" id="routine-speed" viewBox="0 0 600 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-            <div class="strip-row" hidden><span class="strip-name">Motion capture</span><div class="day-strip day-strip-ref" id="routine-ref" aria-hidden="true"></div></div>
           </div>
           <ol class="film" id="routine-log" aria-label="What the head camera saw every 5 s"></ol>
         </section>
@@ -621,7 +618,7 @@
         <section class="panel panel-routine-review" id="routine-current-review" aria-labelledby="review-title">
           <div class="panel-head">
             <div>
-              <h2 id="review-title">Muse Spark coaching</h2>
+              <h2 id="review-title">Muse Spark feedback</h2>
               <p class="panel-sub">Structured ergonomic takeaways &amp; habit adjustments.</p>
             </div>
             <span class="chip is-active" id="review-source">Meta Muse Spark</span>
@@ -641,7 +638,8 @@
       <span class="show-brand">LifeLens · Stage show</span>
       <span class="show-chip" id="show-tempo">No beat yet</span>
       <button class="show-btn" id="show-fx" type="button" aria-pressed="true">Sound FX</button>
-      <button class="show-btn" id="show-close" type="button">Close (Esc)</button>
+      <button class="show-btn show-play" id="show-play" type="button" data-state="play"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg><span>Play</span></button>
+      <button class="show-btn" id="show-full" type="button">Full screen</button>
     </div>
     <div class="show-box show-scene-box">
       <span class="show-label">Muse Spark scene</span>
@@ -664,5 +662,14 @@
   <script type="module" src="/src/day.js"></script>
   <script type="module" src="/src/gym.js"></script>
   <script type="module" src="/src/stagify.js"></script>
+  <!-- Meta model calls (extras.js): every Meta Muse Spark request and reply as it happens; opened from the AI badge -->
+  <aside class="muse-log" id="muse-log" hidden aria-label="Meta model calls">
+    <header class="muse-log-head">
+      <strong>Meta model calls</strong>
+      <span class="muse-log-sub">live · offline fallback: Llama 3.2 (Ollama)</span>
+      <button class="chip-btn" id="muse-log-close" type="button">Close</button>
+    </header>
+    <ol class="muse-log-list" id="muse-log-list"></ol>
+  </aside>
 </body>
 </html>

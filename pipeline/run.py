@@ -221,6 +221,13 @@ def main():
     run_stage('insights', 'insights.json',
               [get_python('vlm'), os.path.join(PIPELINE, 'insights.py'), run_dir], run_dir)
 
+    # 8. Songs for the Music and Stage tabs, picked now so they are ready before Play (songs.json)
+    if 'none' not in args.describe and os.path.exists(muse_env):
+        try:
+            run_stage('songs', 'songs.json', [get_python('vlm'), os.path.join(PIPELINE, 'songs.py'), '--run', run_dir], run_dir)
+        except subprocess.CalledProcessError as exc:
+            print(f"== songs warning: {exc}", flush=True)
+
     print(f"Done: {run_dir}", flush=True)
 
 

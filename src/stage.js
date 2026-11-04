@@ -325,8 +325,14 @@ function keyRegion(v, sx, sy, sw, sh, scale) {
   }
   if (x1 - x0 < 6 || y1 - y0 < 12) return null;
   kg.putImageData(img, 0, 0);
+  // the pelvis column: the middle of the body's pixels at hip height (45-62% down the box), so arms don't move it
+  let hs = 0, hn = 0;
+  for (let y = Math.round(y0 + 0.45 * (y1 - y0)); y <= Math.round(y0 + 0.62 * (y1 - y0)); y++) {
+    for (let x = x0; x <= x1; x++) if (d[(y * key.width + x) * 4 + 3] > 160) { hs += x; hn += 1; }
+  }
   // the body's box in video pixels, and in key-canvas pixels for drawing
-  return { vx0: sx + x0 / scale, vy0: sy + y0 / scale, vx1: sx + x1 / scale, vy1: sy + y1 / scale, x0, y0, x1, y1 };
+  return { vx0: sx + x0 / scale, vy0: sy + y0 / scale, vx1: sx + x1 / scale, vy1: sy + y1 / scale, x0, y0, x1, y1,
+    hip: hn ? hs / hn : (x0 + x1) / 2 };
 }
 // The original render (mesh_exo.mp4, ~2 Mbit/s) keys far cleaner than the page's compressed copy: a hidden copy of it
 // follows the page's 3D body clock while the Show view is open.
@@ -385,14 +391,12 @@ function draw() {
     g.fillStyle = `${pal[Math.floor(p.c * pal.length)]}${Math.round(60 + 140 * stage.energy).toString(16).padStart(2, '0')}`;
     g.fillRect(p.x * W, p.y * H * 0.7, 2 * dpr, 2 * dpr);
   }
-  // floor: a trapezoid; the performer's spot follows the pelvis across the clip's floor area
+  // floor: a trapezoid; the performer stays on one spot centre stage, pelvis fixed (the limbs and the height move)
   const fy0 = H * 0.58, fy1 = H * 0.98, inset = W * 0.18;
   g.globalCompositeOperation = 'source-over';
   g.fillStyle = '#0E1018';
   g.beginPath(); g.moveTo(inset, fy0); g.lineTo(W - inset, fy0); g.lineTo(W, fy1); g.lineTo(0, fy1); g.closePath(); g.fill();
-  const sy = fy0 + (fy1 - fy0) * (1 - stage.spot.y);
-  const half = (y) => (W / 2 - inset) + (inset * (y - fy0)) / (fy1 - fy0);
-  const sx = W / 2 + (Math.min(0.85, Math.max(0.15, stage.spot.x)) - 0.5) * 2 * half(sy) * 0.8;   // stay on stage
+  const sx = W / 2, sy = fy0 + (fy1 - fy0) * 0.62;
   g.globalCompositeOperation = 'lighter';
   // beams: from 6 heads on the truss down to the performer, width from the arm spread, colour and level per fixture
   stage.fixtures.forEach((fx, i) => {
@@ -424,7 +428,7 @@ function draw() {
     g.globalCompositeOperation = 'source-over';
     g.filter = 'blur(0.6px)';
     g.shadowColor = lead.color; g.shadowBlur = (14 + 30 * lead.level) * dpr;
-    g.drawImage(key, av.x0, av.y0, av.x1 - av.x0, av.y1 - av.y0, sx - w / 2, sy - h, w, h);
+    g.drawImage(key, av.x0, av.y0, av.x1 - av.x0, av.y1 - av.y0, sx - (av.hip - av.x0) * (w / Math.max(1, av.x1 - av.x0)), sy - h, w, h);
     g.shadowBlur = 0;
     g.filter = 'none';
   }
@@ -440,13 +444,27 @@ function draw() {
   pip(videoOf('pov'), 20 * dpr, H - 20 * dpr - W * 0.27 * 9 / 16, W * 0.27, 'POV');
 }
 
-export function openShow(on) {
+// The show is the Stage tab's main view (over the POV, which it shows as an inset); Full screen takes the whole window.
+const show = $('show');
+document.querySelector('#media .media-stage')?.append(show);
+show.classList.add('is-inline');
+export function openShow(on, full = false) {
+  const was = stage.open;
   stage.open = on;
-  $('show').hidden = !on;
+  show.hidden = !on;
+  show.classList.toggle('is-inline', !full);
+  document.body.classList.toggle('show-open', on && full);
+  $('show-full').textContent = full ? 'Exit full screen (Esc)' : 'Full screen';
   if (!on) hq.pause();
-  document.body.classList.toggle('show-open', on);
-  if (on) { renderScene(); renderCues(); renderOut(); requestAnimationFrame(draw); $('show-close').focus(); }
+  if (on) { renderScene(); renderCues(); renderOut(); if (!was) requestAnimationFrame(draw); }
 }
+const syncPlay = (playing) => {
+  $('show-play').dataset.state = playing ? 'pause' : 'play';
+  $('show-play').querySelector('span').textContent = playing ? 'Pause' : 'Play';
+};
+document.addEventListener('lifelens:state', (e) => syncPlay(e.detail.playing));
+document.addEventListener('lifelens:tab', (e) => openShow(e.detail.tab === 'stage'));
+$('show-play')?.addEventListener('click', () => $('play-btn').click());
 
 export function setFx(on) {
   stage.fx = on;
@@ -459,7 +477,7 @@ export function resetStage() {
   renderScene(); renderCues();
 }
 
-$('show-btn')?.addEventListener('click', () => openShow(true));
-$('show-close')?.addEventListener('click', () => openShow(false));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && stage.open) openShow(false); });
+$('show-btn')?.addEventListener('click', () => openShow(true, true));
+$('show-full')?.addEventListener('click', () => openShow(true, show.classList.contains('is-inline')));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && stage.open && !show.classList.contains('is-inline')) openShow(true); });
 for (const id of ['show-fx', 'stage-fx']) $(id)?.addEventListener('click', () => setFx(!stage.fx));

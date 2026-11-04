@@ -1,80 +1,41 @@
 """
-Daily-activity insights from one or more runs (one clip each, in the order given): what the wearer's body did each
-second, how the time splits, posture and breaks, and a short summary with schedule suggestions by a local LLM.
+Daily-activity insights from one or more processed recordings (one clip each, in the order given): the posture each
+second, how the time splits, sit-downs and walking distance.
 
 python pipeline/insights.py runs/x                                   # one clip: writes into runs/x
 python pipeline/insights.py runs/a runs/b runs/c --out runs/day       # a day of clips: one report
 
-Each second gets one label from the body pose (pose_timeseries.csv, kinematics/joints_world.npy), relative to the
-wearer's own leg length:
-    walking      pelvis moving faster than 0.5 m/s
-    sitting      pelvis below 75% of its standing height, knees bent less than 110 deg
-    crouching    pelvis below 75% of its standing height, knees bent more than 110 deg, for less than 8 s
-                 (longer low bouts are sitting: OmniEgoCap often tucks a seated wearer's legs past 110 deg)
-    bending      standing, trunk leaning more than 35 deg
-    arms raised  standing, a wrist above the shoulders
-    standing     anything else
-plus the Qwen narration of that second (narration.json, if the run has it).
+The posture is Meta Muse Spark's: director/posture_muse.py labels each 5 s window from a frame of the 3D body and a
+frame of the head camera (posture_muse.json), and every second of the window takes that label; 'unknown' where Muse
+gave none. Walking distance comes from the 3D body's pelvis speed.
 
-Writes activity.csv (second, clip, label, narration), insights.json (minutes per label, transitions, longest sitting
-bout, walking distance, time bent over, summary, and the log the summary model read), insights.md and activity.png (a
-timeline band per clip). Meta Muse Spark suggestions are added afterwards by `python -m director.routine_tips <out>`.
+Writes activity.csv (second, clip, label, Muse caption), insights.json (minutes per label, sit-downs, longest sitting
+bout, walking distance, time bent over, and the log Muse's review reads), insights.md and activity.png (a timeline band
+per clip). Meta Muse Spark's review is added afterwards by `python -m director.routine_tips <out>`.
 """
 
 import argparse
 import json
 import os
 import time
-from itertools import groupby
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 FPS = 30
-LABELS = ('walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised')
-COLORS = ((44, 160, 44), (180, 180, 180), (31, 119, 180), (148, 103, 189), (214, 39, 40), (255, 127, 14))
-SMOOTH_S = 5        # a label must hold for most of a 5 s window: drops 1-2 s flicker
-SIT_S = 8           # a low bout this long is sitting. On the demos all 22 s labelled crouching were sitting (20) or
-                    # bending (2) in the motion capture; any limit from 5 to 10 s fixes the 20
-PROMPT = ('You are a health coach. Below is a log of one person\'s day, measured from a head-mounted camera: how long '
-          'they spent in each body posture and what they were doing. In under 150 words, write two short paragraphs. '
-          'First: what they did, in time order. Second: three concrete suggestions to improve their schedule, breaks '
-          'or posture. Only state numbers that appear in the log.\n\n{log}')
+LABELS = ('walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised', 'unknown')
+COLORS = ((44, 160, 44), (180, 180, 180), (31, 119, 180), (148, 103, 189), (214, 39, 40), (255, 127, 14), (235, 235, 235))
 
 
 def label_seconds(run: str) -> list:
-    """One posture label per second of the clip."""
-    ts = np.genfromtxt(f'{run}/pose_timeseries.csv', delimiter=',', names=True)
-    joints = np.load(f'{run}/kinematics/joints_world.npy')
-    leg = np.median(np.linalg.norm(joints[:, 4] - joints[:, 1], axis=1) + np.linalg.norm(joints[:, 7] - joints[:, 4], axis=1))
-    stand_h = leg + 0.08                    # pelvis height standing: leg length plus ankle height
-    wrist_up = (joints[:, (20, 21), 2] > joints[:, (16, 17), 2].max(1, keepdims=True)).any(1)
-    labels = []
-    for s in range(len(ts) // FPS):
-        f = slice(s * FPS, (s + 1) * FPS)
-        knee = np.median((ts['knee_l'][f] + ts['knee_r'][f]) / 2)
-        low = np.median(ts['pelvis_height_m'][f]) < 0.75 * stand_h
-        if np.median(ts['speed_m_s'][f]) > 0.5:
-            labels.append('walking')
-        elif low:
-            labels.append('crouching' if knee > 110 else 'sitting')
-        elif np.median(ts['trunk_lean'][f]) > 35:
-            labels.append('bending')
-        elif wrist_up[f].mean() > 0.5:
-            labels.append('arms raised')
-        else:
-            labels.append('standing')
-    labels = long_low_is_sitting(labels)
-    h = SMOOTH_S // 2
-    return [max(LABELS, key=labels[max(0, i - h):i + h + 1].count) for i in range(len(labels))]
-
-
-def long_low_is_sitting(labels: list) -> list:
-    out = []
-    for low, run in groupby(labels, key=lambda x: x in ('sitting', 'crouching')):
-        run = list(run)
-        out += ['sitting'] * len(run) if low and len(run) >= SIT_S else run
-    return out
+    """One posture label per second: Meta Muse Spark's label for the 5 s window the second falls in."""
+    n = len(np.genfromtxt(f'{run}/pose_timeseries.csv', delimiter=',', names=True)) // FPS
+    labels = ['unknown'] * n
+    path = f'{run}/posture_muse.json'
+    for w in json.load(open(path, encoding='utf-8')) if os.path.exists(path) else []:
+        for s in range(int(w['start_s']), min(int(round(w['end_s'])), n)):
+            labels[s] = w['label'] if w['label'] in LABELS else 'unknown'
+    return labels
 
 
 def narration_at(run: str, seconds: int) -> list:
@@ -129,19 +90,6 @@ def timeline_png(path: str, clips: list):
     img.save(path)
 
 
-def summarize(log: str, model_id: str) -> str:
-    import torch
-    from transformers import AutoModelForImageTextToText, AutoProcessor
-    from device import best
-    processor = AutoProcessor.from_pretrained(model_id)
-    model = AutoModelForImageTextToText.from_pretrained(model_id, dtype=torch.bfloat16, device_map=best())
-    prompt = processor.apply_chat_template([{'role': 'user', 'content': [{'type': 'text', 'text': PROMPT.format(log=log)}]}],
-                                           add_generation_prompt=True)
-    inputs = processor(text=[prompt], return_tensors='pt').to(model.device)
-    ids = model.generate(**inputs, max_new_tokens=400, do_sample=False, repetition_penalty=1.1)   # greedy 2B loops without it
-    return processor.batch_decode(ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True)[0].strip()
-
-
 def main(a):
     t0 = time.time()
     out = a.out or a.runs[0]
@@ -175,13 +123,11 @@ def main(a):
             while e < len(c['labels']) and c['labels'][e] == c['labels'][s]:
                 e += 1
             said = ' '.join(dict.fromkeys(t for t in c['text'][s:e] if t))
-            # durations, not clock times: the 2B model copied clock times into the wrong bouts
             lines.append(f"  {c['labels'][s]} {e - s} s. {said}".rstrip())
             s = e
-    log = '\n'.join(lines[:150])     # shortcut: a 2B model reads ~150 lines well; summarize per clip for longer days
-    summary = summarize(log, a.model) if a.model else ''
+    log = '\n'.join(lines[:150])     # shortcut: the first 150 bouts; split longer days into clips
 
-    report = {'clips': {c['name']: c['stats'] for c in clips}, 'total': day, 'summary': summary, 'model': a.model,
+    report = {'clips': {c['name']: c['stats'] for c in clips}, 'total': day, 'posture_from': 'Meta Muse Spark',
               'log': log, 'runtime_s': round(time.time() - t0, 1)}     # log: also read by director/routine_tips.py
     json.dump(report, open(f'{out}/insights.json', 'w'), indent=2)
     with open(f'{out}/insights.md', 'w') as f:
@@ -191,14 +137,12 @@ def main(a):
             cells = [f'{s["minutes"][k]:.1f} min' for k in LABELS] + [str(s['sit_stand_transitions']),
                      f'{s["longest_sitting_min"]:.1f} min', f'{s["walking_distance_m"]:.0f} m']
             f.write(f"| {name} | {' | '.join(cells)} |\n")
-        f.write(f'\n{summary}\n\n<details><summary>Log given to the model</summary>\n\n```\n{log}\n```\n</details>\n')
+        f.write(f'\n<details><summary>Posture log</summary>\n\n```\n{log}\n```\n</details>\n')
     print(json.dumps({k: report[k] for k in ('total', 'runtime_s')}, indent=1))
-    print(summary)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('runs', nargs='+', help='Run folders, one clip each, in time order.')
     parser.add_argument('--out', default=None, help='Report folder (default: the first run).')
-    parser.add_argument('--model', default='', help="Optional local summary LLM; default '' uses Meta Muse Spark via routine_tips.")
     main(parser.parse_args())

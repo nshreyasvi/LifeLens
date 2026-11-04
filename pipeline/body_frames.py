@@ -24,7 +24,7 @@ def save(video: str, prefix: str, out: str, window: float) -> int:
     fps, total = cap.get(cv2.CAP_PROP_FPS) or 30, int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     n = 0
     for start in range(0, int(total / fps), int(window)):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, int((start + window / 2) * fps))
+        cap.set(cv2.CAP_PROP_POS_FRAMES, int((start + min(start + window, total / fps)) / 2 * fps))   # short last window: its middle
         ok, img = cap.read()
         if not ok:
             continue

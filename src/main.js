@@ -70,6 +70,7 @@ function selectTab(name, { focus = false } = {}) {
   for (const view of els.views) view.hidden = view.dataset.view !== name;
   const routineDeck = $('view-day');
   if (routineDeck) routineDeck.hidden = name !== 'activity';
+  $('gym-deck').hidden = name !== 'gym';
   els.player.hidden = !['music', 'stage', 'gym'].includes(name);
   emit('tab', { tab: name });
 }
@@ -247,6 +248,7 @@ function frame() {
   renderFeatures(f, targets);
   els.chainWindow.textContent = `The 3D body from ${clock(Math.max(0, t - f.window))} to ${clock(t)}.`;
   maybeAskSongs(targets);
+  preSection(t);
 }
 
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -256,7 +258,8 @@ const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStar
 const RECCO = 'https://api.reccobeats.com/v1';
 const RECCO_TIMEOUT_MS = 6000;
 const ASK_EVERY_MS = 15000;    // at most one request per 15 s, and only when the body changed
-const songs = { asked: null, at: 0, request: 0, seeds: {}, profile: null };   // profile: Gymify's music, while it is on
+const songs = { asked: null, at: 0, request: 0, seeds: {}, profile: null,     // profile: Gymify's music, while it is on
+  pre: null, preAt: -1 };     // pre: songs.json sections picked when the recording was processed (pipeline/songs.py)
 
 async function reccoGet(path) {
   const ctrl = new AbortController();
@@ -289,8 +292,36 @@ async function seedFor(words) {
 const changed = (a, b) => !b || a.mood !== b.mood || Math.abs(a.tempo - b.tempo) > 8
   || ['energy', 'danceability', 'valence', 'acousticness'].some((k) => Math.abs(a[k] - b[k]) > 0.12);
 
+// The section of songs.json under time t: its songs become the list (and the next song when one ends).
+function preSection(t) {
+  if (!songs.pre || songs.profile) return;
+  const k = songs.pre.findIndex((s) => t >= s.start_s && t < s.end_s);
+  const i = k < 0 ? songs.pre.length - 1 : k;
+  if (i === songs.preAt) return;
+  songs.preAt = i;
+  const sec = songs.pre[i];
+  player.queue = sec.songs;
+  drawSongs(sec.songs);
+  els.songsMood.textContent = `${clock(sec.start_s)}-${clock(sec.end_s)}: ${sec.style}, ${sec.mood} (Muse Spark, picked when processed)`;
+  els.songsNote.hidden = true;
+  renderBar();
+  if (state.phase === 'live' && (!player.song || player.song.ended)) playSong(sec.songs[0]);
+}
+
+async function loadPreSongs() {
+  Object.assign(songs, { pre: null, preAt: -1 });
+  const base = session.rec?.base;
+  if (!base) return;
+  const data = await fetch(`/${base}/songs.json`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!data || session.rec?.base !== base) return;
+  const pre = (data.sections ?? []).filter((s) => s.songs?.length);
+  for (const sec of pre) for (const s of sec.songs) s.why = `${sec.style} (${sec.mood}): ${sec.why}`;
+  songs.pre = pre.length ? pre : null;
+  preSection(els.body.currentTime || 0);
+}
+
 function maybeAskSongs(t) {
-  if (songs.profile || !t.mood || performance.now() - songs.at < ASK_EVERY_MS || !changed(t, songs.asked)) return;
+  if (songs.pre || songs.profile || !t.mood || performance.now() - songs.at < ASK_EVERY_MS || !changed(t, songs.asked)) return;
   songs.asked = t;
   songs.at = performance.now();
   const request = ++songs.request;
@@ -359,7 +390,33 @@ function drawSongs(list) {
 // Spotify plays a 30 s preview, or the whole song when this browser is logged in to Spotify. When a song ends, the
 // newest list's first other song plays, so the music follows the body at song boundaries, not mid-song.
 
-const player = { api: null, ctrl: null, song: null, queue: [], paused: true, pos: 0, at: 0 };
+const player = { api: null, ctrl: null, song: null, queue: [], paused: true, pos: 0, at: 0, dur: 0 };
+
+// The player bar: the song, play/pause, previous/next in the list, and where the song is.
+function renderBar() {
+  const s = player.song;
+  const playing = Boolean(s) && !player.paused;
+  $('p-title').textContent = s?.name ?? 'No song yet';
+  $('p-artist').textContent = s ? [s.artist, s.tempo && `${s.tempo} BPM`].filter(Boolean).join(' · ') : 'Press play for the first pick';
+  $('p-toggle').dataset.state = playing ? 'pause' : 'play';
+  $('p-toggle').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  const pos = player.pos + (playing ? performance.now() - player.at : 0);
+  $('p-fill').style.width = player.dur ? `${Math.min(100, (100 * pos) / player.dur)}%` : '0%';
+  $('p-time').textContent = player.dur ? `${clock(pos / 1000)} / ${clock(player.dur / 1000)}` : '';
+}
+const stepSong = (d) => {
+  const q = player.queue.filter((s) => !s.unplayable);
+  if (!q.length) return;
+  const i = q.findIndex((s) => s.spotifyId === player.song?.spotifyId);
+  playSong(q[(i + d + q.length) % q.length]);
+};
+$('p-toggle').addEventListener('click', () => {
+  if (!player.song || !player.ctrl) playSong(player.queue[0]);
+  else player.ctrl.togglePlay();
+});
+$('p-prev').addEventListener('click', () => stepSong(-1));
+$('p-next').addEventListener('click', () => stepSong(1));
+setInterval(() => { if (player.song && !player.paused) renderBar(); }, 500);
 
 function spotifyApi() {
   player.api ??= new Promise((resolve, reject) => {
@@ -388,6 +445,7 @@ async function playSong(song) {
   els.playerBeat.textContent = song.tempo ? `${song.tempo} BPM` : 'BPM unknown';
   els.playerNote.textContent = song.why ?? '';
   markPlaying();
+  renderBar();
   const uri = `spotify:track:${song.spotifyId}`;
   if (player.ctrl) {
     player.ctrl.loadUri(uri);
@@ -406,7 +464,8 @@ async function playSong(song) {
       player.creating = false;
       ctrl.addListener('ready', () => ctrl.play());
       ctrl.addListener('playback_update', ({ data }) => {
-        Object.assign(player, { paused: data.isPaused, pos: data.position, at: performance.now() });
+        Object.assign(player, { paused: data.isPaused, pos: data.position, at: performance.now(), dur: data.duration || player.dur });
+        renderBar();
         const song = player.song;
         if (!song || !data.duration) return;
         // Right after loadUri the embed still reports the old song's end: count an end only after this one played.
@@ -578,6 +637,7 @@ document.addEventListener('lifelens:session', () => {
   if (state.phase === 'live') fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
   reset();
   renderControls();
+  loadPreSongs();
 });
 // Stagify's song plan: a planned section's song plays, and the body-based picks pause while the plan runs.
 document.addEventListener('lifelens:play-song', (e) => {
