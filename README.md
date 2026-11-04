@@ -25,12 +25,13 @@ could change, and it drives music and stage lights from your movement.
 
 [![LifeLens demo: the head-camera POV with the 3D body window beside it, then the Routine, Music and Stage tabs](docs/demo.gif)](docs/demo.mp4)
 
-*The demo at 2× speed ([full video, 90 s](docs/demo.mp4)), on the `office` recording.*
+*The demo at 2× speed ([full video, 94 s](docs/demo.mp4)), on the `office` recording.*
 - *The head-camera POV fills the main window, with the 3D body window beside it (closed and reopened) and the
-  kinematics underneath.*
-- *Play starts the director live. The Routine tab shows the posture timeline and Muse Spark's review.*
-- *The Music tab picks songs from the body's rhythm, and the Stage tab lights each body part.*
-- *The Show view puts the 3D body on a virtual stage under Muse Spark's lighting scene.*
+  kinematics underneath. Play starts the director live.*
+- *Routine: icon tiles and a posture donut, the timeline (Muse's activities, numbered changes, posture, walking
+  speed), the film strip, the Muse review, past routines and "vs. past" bars.*
+- *Music picks songs from the body; Stage plays the Stagify plan and the Show view (the 3D body on a virtual stage).*
+- *Gym: Gymify on office, where Muse Spark sees no exercise, so it counts no reps.*
 
 > **POV footage:** [OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB), sequence `S03_office_1`,
 > CC BY-NC 4.0, shown here for non-commercial research. The person in it can ask for removal

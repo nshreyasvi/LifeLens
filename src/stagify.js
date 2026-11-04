@@ -127,7 +127,7 @@ async function stagify() {
       // ReccoBeats' search can find nothing for a long phrase: try Muse's words, then its first two, then its first
       const words = m.search.split(/\s+/);
       for (const search of [m.search, words.slice(0, 2).join(' '), words[0]]) {
-        const list = await askSongs({ ...m, search, at: m.start_s }).catch(() => null);
+        const list = await askSongs({ ...m, search, at: m.start_s, from: `Stagify, from ${clock(m.start_s)} (Muse Spark)` }).catch(() => null);
         m.track = list?.songs?.[0] ?? null;
         if (m.track) { m.seed_search = search; break; }
       }

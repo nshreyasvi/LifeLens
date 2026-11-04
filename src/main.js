@@ -330,7 +330,7 @@ async function askSongs(t) {
     const x = by.get(s.spotifyId);
     s.tempo = x ? Math.round(x.tempo) : null;
     s.fit = x ? Math.abs(x.tempo - t.tempo) / 60 + Math.abs(x.energy - t.energy) + Math.abs(x.valence - t.valence) : 9;
-    s.why = t.search ? `Gym music from Muse Spark: ${t.search}, ${Math.round(t.tempo)} BPM, energy ${t.energy.toFixed(2)}.`
+    s.why = t.search ? `${t.from ?? 'Muse Spark'}: ${t.search}, ${Math.round(t.tempo)} BPM, energy ${t.energy.toFixed(2)}.`
       : `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo} BPM, ${t.mood} mood.`;
   }
   list.sort((a, b) => a.fit - b.fit);
@@ -378,6 +378,13 @@ function markPlaying() {
 async function playSong(song) {
   if (!song || player.creating) return;
   player.song = { ...song, ended: false };
+  // Some recommended tracks can't play in Spotify's embed (region or rights): if it hasn't started in 6 s, the next one
+  setTimeout(() => {
+    if (player.song?.spotifyId !== song.spotifyId || player.song.started || state.phase !== 'live') return;
+    song.unplayable = true;
+    const next = player.queue.find((s) => s.spotifyId !== song.spotifyId && !s.unplayable);
+    if (next) playSong(next);
+  }, 6000);
   els.playerBeat.textContent = song.tempo ? `${song.tempo} BPM` : 'BPM unknown';
   els.playerNote.textContent = song.why ?? '';
   markPlaying();
@@ -575,6 +582,10 @@ document.addEventListener('lifelens:session', () => {
 // Stagify's song plan: a planned section's song plays, and the body-based picks pause while the plan runs.
 document.addEventListener('lifelens:play-song', (e) => {
   songs.profile = e.detail;
+  player.queue = [e.detail];
+  drawSongs([e.detail]);                            // the Music tab shows the planned song
+  els.songsMood.textContent = 'Stagify plan';
+  els.songsNote.hidden = true;
   if (state.phase === 'live') playSong(e.detail);
 });
 export { askSongs };
@@ -585,7 +596,7 @@ document.addEventListener('lifelens:music-profile', async (e) => {
   els.songsMood.textContent = 'Gym music (Muse Spark)';
   try {
     const list = await askSongs({ search: m.search, tempo: m.tempo, energy: m.energy, valence: m.valence,
-      danceability: m.danceability, instrumentalness: m.instrumentalness, at: els.body.currentTime });
+      danceability: m.danceability, instrumentalness: m.instrumentalness, at: els.body.currentTime, from: 'Gym music (Muse Spark)' });
     player.queue = list.songs;
     drawSongs(list.songs);
     els.songsNote.hidden = true;

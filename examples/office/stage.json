@@ -1,6 +1,6 @@
 {
  "segment_s": 10,
- "made": "2026-11-04T12:52:58.734Z",
+ "made": "2026-11-04T13:42:09.185Z",
  "segments": [
   "0:00-0:10: pace 0.63 m/s, still 16%, body rhythm 100 BPM, 12 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 0%, arm spread 0.44 m.",
   "0:10-0:20: pace 0.69 m/s, still 7%, body rhythm 106 BPM, 11 sudden arm moves, 0 jumps, 1 crouches, 2 fast turns, hands up 0%, arm spread 0.50 m.",
@@ -14,7 +14,7 @@
  ],
  "scenes": [
   {
-   "name": "Opening Stride Chase",
+   "name": "Opening Stride Drive",
    "palette": [
     "#00AAFF",
     "#0044FF"
@@ -23,168 +23,188 @@
    "focus": "legs",
    "strobe_on_hits": true,
    "intensity": 0.8,
-   "reason": "Matches pace 0.63 m/s, still 16%, rhythm 100 BPM and 12 arm moves."
+   "reason": "Pace 0.63 m/s with 12 sudden arm moves drives leg chase."
   },
   {
-   "name": "Peak Turn Drive",
+   "name": "Spin Peak Rush",
    "palette": [
-    "#00FFCC",
-    "#0066FF"
+    "#FF3366",
+    "#FFCC00"
    ],
-   "pattern": "chase",
+   "pattern": "strobe",
    "focus": "all",
    "strobe_on_hits": true,
-   "intensity": 0.9,
-   "reason": "Matches pace 0.69 m/s, still 7%, rhythm 106 BPM, 11 arm moves and 2 fast turns."
+   "intensity": 0.95,
+   "reason": "Pace 0.69 m/s with 11 hits and 2 fast turns peaks."
   },
   {
-   "name": "Breath Gesture Fall",
+   "name": "Tight Gesture Pulse",
    "palette": [
-    "#6644AA",
-    "#223366"
+    "#9933FF",
+    "#33FFFF"
    ],
    "pattern": "pulse",
    "focus": "arms",
    "strobe_on_hits": false,
-   "intensity": 0.5,
-   "reason": "Eases with pace 0.27 m/s, still 42%, rhythm 138 BPM and 4 arm moves."
+   "intensity": 0.6,
+   "reason": "Still 42% and spread 0.28 m focuses pulse on arms."
   },
   {
-   "name": "Still Low Hold",
+   "name": "Quiet Breath Hold",
    "palette": [
-    "#111133",
-    "#222244"
-   ],
-   "pattern": "still",
-   "focus": "torso",
-   "strobe_on_hits": false,
-   "intensity": 0.3,
-   "reason": "Holds pace 0.07 m/s, still 70%, no rhythm and spread 0.26 m."
-  },
-  {
-   "name": "Return Stride Lift",
-   "palette": [
-    "#FFAA00",
-    "#FF5500"
-   ],
-   "pattern": "chase",
-   "focus": "legs",
-   "strobe_on_hits": true,
-   "intensity": 0.75,
-   "reason": "Lifts with pace 0.52 m/s, still 11%, rhythm 106 BPM and spread 0.53 m."
-  },
-  {
-   "name": "Quiet Talk Pause",
-   "palette": [
-    "#AA8866",
-    "#444455"
-   ],
-   "pattern": "still",
-   "focus": "arms",
-   "strobe_on_hits": false,
-   "intensity": 0.5,
-   "reason": "Breathes with pace 0.21 m/s, still 25%, no rhythm and 2 arm moves."
-  },
-  {
-   "name": "Calm Facing Drift",
-   "palette": [
-    "#778899",
+    "#1A2A4A",
     "#334455"
    ],
    "pattern": "still",
    "focus": "torso",
    "strobe_on_hits": false,
-   "intensity": 0.45,
-   "reason": "Stays low with pace 0.20 m/s, still 26%, no rhythm and 3 arm moves."
+   "intensity": 0.3,
+   "reason": "Pace 0.07 m/s and still 70% with no rhythm rests."
   },
   {
-   "name": "Final Stride Surge",
+   "name": "Return Stride Lift",
    "palette": [
-    "#FF3366",
-    "#FFAA00"
+    "#00FF88",
+    "#0088FF"
+   ],
+   "pattern": "chase",
+   "focus": "legs",
+   "strobe_on_hits": true,
+   "intensity": 0.75,
+   "reason": "Pace 0.52 m/s and 106 BPM with spread 0.53 m rebounds."
+  },
+  {
+   "name": "Drift Turn Ease",
+   "palette": [
+    "#FFAA33",
+    "#884411"
+   ],
+   "pattern": "still",
+   "focus": "arms",
+   "strobe_on_hits": false,
+   "intensity": 0.5,
+   "reason": "Pace 0.21 m/s and still 25% with no rhythm eases."
+  },
+  {
+   "name": "Centered Calm Wait",
+   "palette": [
+    "#445566",
+    "#88AABB"
+   ],
+   "pattern": "still",
+   "focus": "torso",
+   "strobe_on_hits": false,
+   "intensity": 0.45,
+   "reason": "Pace 0.20 m/s and still 26% with no rhythm holds."
+  },
+  {
+   "name": "Full Stride Surge",
+   "palette": [
+    "#00DDFF",
+    "#FF0088"
    ],
    "pattern": "chase",
    "focus": "legs",
    "strobe_on_hits": true,
    "intensity": 0.85,
-   "reason": "Surges with pace 0.61 m/s, still 0%, rhythm 100 BPM and 8 arm moves."
+   "reason": "Pace 0.61 m/s and still 0% at 100 BPM surges."
   },
   {
-   "name": "Hands Up Glow",
+   "name": "Hands Up Finale",
    "palette": [
-    "#FFEEAA",
-    "#FF88CC",
-    "#FFFFFF"
+    "#FFFFFF",
+    "#FFD700",
+    "#FF6600"
    ],
    "pattern": "still",
    "focus": "arms",
    "strobe_on_hits": false,
    "intensity": 0.7,
-   "reason": "Glows for still 62%, pace 0.13 m/s and hands up 71% finale."
+   "reason": "Still 62% with hands up 71% holds final pose."
   }
  ],
  "music": [
   {
    "start_s": 0,
-   "search": "upbeat indie rock",
-   "energy": 0.8,
+   "search": "funky walking groove",
+   "energy": 0.85,
    "tempo": 103,
    "valence": 0.7,
-   "danceability": 0.75,
+   "danceability": 0.85,
    "instrumentalness": 0.2,
-   "reason": "Covers pace 0.63-0.69 m/s and rhythm 100-106 BPM with 11-12 arm moves.",
+   "reason": "Matches pace 0.63-0.69 m/s and 100-106 BPM with 11-12 hits.",
    "track": {
-    "id": "e1d6a1c2-7413-4168-aff2-356c0f4cc6c7",
-    "name": "Grundilo",
-    "spotifyId": "5Vz3nEu7FhN0u5uRsI6SIh",
-    "artist": "Koldunov",
-    "tempo": 105,
-    "fit": 0.08313333333333314,
-    "why": "Gym music from Muse Spark: upbeat indie rock, 103 BPM, energy 0.80."
-   }
+    "id": "ef2dbea8-6756-4602-a979-dc4495e36a60",
+    "name": "Fipangusule",
+    "spotifyId": "5Zhc4cnRBVEV2Y9pRnYoT6",
+    "artist": "Jemax, Yo Maps",
+    "tempo": 103,
+    "fit": 0.027166666666666776,
+    "why": "Stagify, from 0:00 (Muse Spark): funky walking, 103 BPM, energy 0.85."
+   },
+   "seed_search": "funky walking"
   },
   {
    "start_s": 20,
-   "search": "ambient minimal piano",
+   "search": "sparse ambient drone",
    "energy": 0.3,
    "tempo": 70,
-   "valence": 0.35,
-   "danceability": 0.2,
+   "valence": 0.4,
+   "danceability": 0.3,
    "instrumentalness": 0.8,
-   "reason": "Supports drop to pace 0.27-0.07 m/s, still 42-70% and lost rhythm.",
+   "reason": "Breathes with still 42-70% and pace drop to 0.07 m/s.",
    "track": {
-    "id": "c6d5e71c-418f-4757-9403-317466e4b4d7",
-    "name": "Can't Believe",
-    "spotifyId": "49G8cBA4Yh3iIw5QKGiQs8",
-    "artist": "Home",
-    "tempo": 70,
-    "fit": 0.06561666666666677,
-    "why": "Gym music from Muse Spark: ambient minimal piano, 70 BPM, energy 0.30."
-   }
+    "id": "7b9982ad-4898-428e-856d-6ea2d7fd48b6",
+    "name": "Fantasie Alpestri: Scherzino da Capo",
+    "spotifyId": "1FNoVUfMhYvumWO6rt9ARS",
+    "artist": "Francesco Caramiello, Pasquale Russo",
+    "tempo": 71,
+    "fit": 0.25591666666666657,
+    "why": "Stagify, from 0:20 (Muse Spark): sparse, 70 BPM, energy 0.30."
+   },
+   "seed_search": "sparse"
   },
   {
    "start_s": 40,
-   "search": "midtempo groove pop",
-   "energy": 0.6,
+   "search": "upbeat pop return",
+   "energy": 0.7,
    "tempo": 106,
-   "valence": 0.6,
-   "danceability": 0.6,
+   "valence": 0.65,
+   "danceability": 0.75,
    "instrumentalness": 0.3,
-   "reason": "Rebuilds with pace 0.52 m/s rhythm 106 BPM then eases to no rhythm.",
-   "track": null
+   "reason": "Rebounds with pace 0.52 m/s and 106 BPM return.",
+   "track": {
+    "id": "0c5ab4a6-ccfd-4996-9942-41cde22c0224",
+    "name": "Over Now",
+    "spotifyId": "0BBrO724uNllj7ggWahxkJ",
+    "artist": "Cold Engines",
+    "tempo": 106,
+    "fit": 0.08041666666666683,
+    "why": "Stagify, from 0:40 (Muse Spark): upbeat pop, 106 BPM, energy 0.70."
+   },
+   "seed_search": "upbeat pop"
   },
   {
-   "start_s": 70,
-   "search": "anthemic celebratory dance",
-   "energy": 0.85,
+   "start_s": 60,
+   "search": "anthemic finale build",
+   "energy": 0.8,
    "tempo": 100,
-   "valence": 0.9,
-   "danceability": 0.8,
+   "valence": 0.8,
+   "danceability": 0.7,
    "instrumentalness": 0.1,
-   "reason": "Drives pace 0.61 m/s still 0% rhythm 100 BPM into hands-up 71% finale.",
-   "track": null
+   "reason": "Builds from still 26% to 0% surge then 71% hands-up hold.",
+   "track": {
+    "id": "dd180677-8fd6-49ec-a17f-363481c470c4",
+    "name": "Shoore Asheghaneh",
+    "spotifyId": "6TUozWYekRacrLZYE210Zu",
+    "artist": "Fereydoun Asraei",
+    "tempo": 100,
+    "fit": 0.05904999999999998,
+    "why": "Stagify, from 1:00 (Muse Spark): anthemic, 100 BPM, energy 0.80."
+   },
+   "seed_search": "anthemic"
   }
  ],
  "prompt": "You are the lighting designer and music supervisor of a stage show made from one recording. The\nperformer wore a head camera and LifeLens turned it into a 3D body. The show has 9 segments of about 10 s; for each\nyou get the body's numbers, and image k shows the 3D body in the middle of segment k (legs estimated):\n1. 0:00-0:10: pace 0.63 m/s, still 16%, body rhythm 100 BPM, 12 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 0%, arm spread 0.44 m.\n2. 0:10-0:20: pace 0.69 m/s, still 7%, body rhythm 106 BPM, 11 sudden arm moves, 0 jumps, 1 crouches, 2 fast turns, hands up 0%, arm spread 0.50 m.\n3. 0:20-0:30: pace 0.27 m/s, still 42%, body rhythm 138 BPM, 4 sudden arm moves, 0 jumps, 1 crouches, 0 fast turns, hands up 2%, arm spread 0.28 m.\n4. 0:30-0:40: pace 0.07 m/s, still 70%, no steady rhythm, 2 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 2%, arm spread 0.26 m.\n5. 0:40-0:50: pace 0.52 m/s, still 11%, body rhythm 106 BPM, 6 sudden arm moves, 0 jumps, 0 crouches, 1 fast turns, hands up 0%, arm spread 0.53 m.\n6. 0:50-1:00: pace 0.21 m/s, still 25%, no steady rhythm, 2 sudden arm moves, 0 jumps, 0 crouches, 1 fast turns, hands up 2%, arm spread 0.46 m.\n7. 1:00-1:10: pace 0.20 m/s, still 26%, no steady rhythm, 3 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 3%, arm spread 0.41 m.\n8. 1:10-1:20: pace 0.61 m/s, still 0%, body rhythm 100 BPM, 8 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 1%, arm spread 0.45 m.\n9. 1:20-1:23: pace 0.13 m/s, still 62%, no steady rhythm, 1 sudden arm moves, 0 jumps, 0 crouches, 0 fast turns, hands up 71%, arm spread 0.48 m.\nPlan the whole show so it builds and breathes with the movement. Answer with one JSON object only:\n{\"scenes\": exactly 9 objects, one per segment in order: {\"name\": 2-4 words, \"palette\": 2 or 3 hex colors like\n\"#FF3366\", \"pattern\": \"pulse\", \"chase\", \"strobe\" or \"still\", \"focus\": \"arms\", \"legs\", \"torso\" or \"all\",\n\"strobe_on_hits\": true or false, \"intensity\": 0.3 to 1, \"reason\": one short sentence naming the numbers},\n\"music\": 2 to 4 sections in order covering the show: {\"start_s\": seconds, \"search\": 2-4 words of genre or style for\na seed song, \"energy\": 0-1, \"tempo\": BPM, \"valence\": 0-1, \"danceability\": 0-1, \"instrumentalness\": 0-1, \"reason\":\none sentence}}.",
- "ms": 30397
+ "ms": 21885
 }
