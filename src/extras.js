@@ -18,7 +18,7 @@ const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage
 const TAB_TEXT = {
   activity: 'First-person POV, 3D SMPL-H body, live kinematics & session routine.',
   music: 'Movement pace, step cadence & arm swing select the tracks.',
-  stage: '6 body-coupled stage fixtures driven by limb velocity & mood.',
+  stage: 'Lights follow each body part, poses, jumps, turns and hits; Muse Spark designs the scene. Try the Show view.',
 };
 
 const mediaRoot = $('media');

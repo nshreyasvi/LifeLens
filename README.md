@@ -25,11 +25,12 @@ could change, and it drives music and stage lights from your movement.
 
 [![LifeLens demo: the head-camera POV with the 3D body window beside it, then the Routine, Music and Stage tabs](docs/demo.gif)](docs/demo.mp4)
 
-*The demo at 2× speed ([full video, 68 s](docs/demo.mp4)), on the `office` recording.*
+*The demo at 2× speed ([full video, 90 s](docs/demo.mp4)), on the `office` recording.*
 - *The head-camera POV fills the main window, with the 3D body window beside it (closed and reopened) and the
   kinematics underneath.*
 - *Play starts the director live. The Routine tab shows the posture timeline and Muse Spark's review.*
-- *The Music tab picks songs from the body, and the Stage tab lights each body part.*
+- *The Music tab picks songs from the body's rhythm, and the Stage tab lights each body part.*
+- *The Show view puts the 3D body on a virtual stage under Muse Spark's lighting scene.*
 
 > **POV footage:** [OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB), sequence `S03_office_1`,
 > CC BY-NC 4.0, shown here for non-commercial research. The person in it can ask for removal
@@ -45,8 +46,10 @@ could change, and it drives music and stage lights from your movement.
 | The body's numbers + the captions, every 5 s | A second posture label | Meta Muse Spark |
 | The 3D body, every second | Posture: walking, standing, sitting, crouching, bending, arms raised | Fixed rules on the body (below) |
 | All of the above | A review: what you did, what to change and why, compared with other recordings | Meta Muse Spark |
-| The 3D body, live | Mood and tempo (every ~6 s), light cues (every frame) | Director: Muse Spark + speed rules |
-| The last 10 s of the body | 5 songs that fit your pace, steps and arm swing; lights per body part, pulsing to the song's beat | ReccoBeats, Spotify |
+| The 3D body, live | Mood (every ~6 s), light level and flashes (every frame) | Director: Muse Spark + speed rules |
+| The body's own rhythm (last 8 s) | The tempo the songs and lights follow | Autocorrelation of all four limbs' speeds |
+| The last 10 s of the body | 5 songs that fit your pace, rhythm and arm swing | ReccoBeats, Spotify |
+| The body, every frame + Muse every 20–30 s | A stage show: 6 lights per body part, a scene (palette, beat pattern, focus) with Muse's reason, sound effects on hits, jumps and turns, the 3D body on a virtual stage, output to real lights | Rules + Muse Spark as lighting designer |
 
 ## Run the app
 
@@ -127,8 +130,11 @@ fixed formula, as listed here.
 | Posture "Both agree" | The seconds where the rules and Muse name the same posture | Grey where they differ |
 | Agreement % (examples only) | Against the same rules run on OmniEgoDB's motion capture | It shares the rules' thresholds, so it favors the rules: agreement, not accuracy |
 | Review | Muse Spark, from the posture log, captions and totals | Other recordings may be other people (the two examples are different OmniEgoDB wearers) |
-| Mood, tempo | Muse Spark every ~6 s | Tempo moves toward the mood's BPM range by at most 10 BPM per update ([`music_map.py`](director/music_map.py)) |
-| Light brightness, flashes, freeze | Speed rules ([`fast_loop.py`](director/fast_loop.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s. The freeze "predictor" is a stand-in with a fixed score |
+| Mood | Muse Spark every ~6 s | |
+| Tempo | The body's rhythm: the lag (60–180 BPM) at which all four limbs' speeds over the last 8 s best repeat ([`session.js`](src/session.js) `rhythmBpm`) | Used when the match is 0.3 or more. Otherwise Muse's tempo for the mood, which moves toward the mood's range by at most 10 BPM per update ([`music_map.py`](director/music_map.py)) |
+| Overall light level, flashes, freeze | Speed rules ([`fast_loop.py`](director/fast_loop.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s. The freeze "predictor" is a stand-in with a fixed score |
+| Each light | Its body part plus poses, jumps, crouches, turns and arm hits ([`stage.js`](src/stage.js)) | Fixed scales and thresholds, listed under [Music and stage](#music-and-stage) |
+| Scene (palette, beat pattern, focus, strobe) | Muse Spark, 10 s after its last answer, from the body's numbers and the song, with its reason ([`vite.config.js`](vite.config.js) `/api/stage/scene`) | Until the first answer, the rules run with the director's colour |
 | Energy (low/medium/high) | Pelvis speed divided by the clip's own 95th percentile | Relative to the clip, not absolute |
 | Song targets | The last 10 s of the body | Fixed formulas in [`main.js`](src/main.js) (`musicTargets`) |
 | Songs, BPM | ReccoBeats recommendations, seeded by its top search result for the mood; BPM is each song's measured tempo | Spotify plays a 30 s preview unless you are logged in |
@@ -136,16 +142,54 @@ fixed formula, as listed here.
 
 ## Music and stage
 
+**Tempo** comes from the body's own rhythm. For the last 8 s, the speeds of both wrists and both ankles are summed,
+and LifeLens finds the repeat time (60–180 BPM) at which that signal best matches itself. While walking in `office`
+this reads 106–120 steps/min; standing still gives no rhythm, and then Muse's tempo for the mood is used.
+
 | Body (last 10 s) | Song target |
 |---|---|
 | Pace (m/s), arm swing (°) | Energy |
-| Step cadence, or arm swing when standing | Danceability, and the tempo when you walk (60 steps/min or more) |
+| How clear the rhythm is | Danceability |
+| The rhythm, else Muse's tempo | Tempo |
 | How upright, plus the mood | Valence |
 | Share of time still | Acousticness |
 
 ReccoBeats gets new targets at most every 15 s, and only when they changed. The player finishes the current song and
-then plays the first song of the newest list. Each light follows one body part: left/right arm, left/right leg, torso,
-pace. The director sets the color and flashes, and every light pulses on the beat of the song playing.
+then plays the first song of the newest list.
+
+**Stage lights** mix several movements. Every frame, by rule ([`stage.js`](src/stage.js)):
+
+| Movement (from the 3D joints) | What the lights do |
+|---|---|
+| Each body part's speed: elbows, knees, trunk lean + turning, pace | Its own light (left/right arm, left/right leg, torso, pace) |
+| Hands above the shoulders, arms spread wide | Open the arm lights and widen the beams |
+| A jump (pelvis 6% above standing height) | Lifts every light, with a rising sound |
+| A crouch (pelvis 12% or more below standing) | Dims every light toward a blackout |
+| Turning (degrees per second) | Shifts the colours, up to 40°, with a whoosh above 120°/s |
+| A sudden arm move (wrist 0.7 m/s above its last second) | A white strobe and an impact sound |
+| Where you are on the floor | Steers the spotlight |
+| The beat: the song's measured BPM, else the body's rhythm | The scene's pattern: pulse, chase (one light after another), strobe or still |
+
+Every body part has its own colour. With Muse's palette, arms, legs and torso each take one of its colours, with left
+and right shifted apart. 10 s after each answer (it takes Muse 10–20 s to answer), **Muse Spark, as lighting designer**, gets those numbers: pace, rhythm, how often
+the hands are up, spread, turning, hits, jumps and crouches in the last 30 s, the mood and the playing song. It returns
+the next scene with its reason. On top of that, the director sets the overall level and flashes from speed.
+
+**Show view** (Stage tab → *Show view*):
+- **Stage:** a full-screen stage where the 3D body, keyed out of its render, performs under six beams that follow it
+  around the floor. A backdrop and particles take the scene's colours and pulse to the beat.
+- **Panels:** Muse's scene and reason, the cue timeline (hits, jumps, turns, scene changes) and the POV. **Sound FX**
+  switches the effects (generated in the browser, no audio files).
+
+**Real lights:** the same six fixtures go to the dev server five times a second ([`server/lights.js`](server/lights.js)).
+
+| `LIGHTS_OUTPUT` | Sends to | Settings |
+|---|---|---|
+| `sim` (default) | nothing; the Show view shows what would go out | |
+| `artnet` | DMX over Art-Net (UDP 6454), 4 channels per fixture: dimmer, red, green, blue | `ARTNET_HOST`, `ARTNET_UNIVERSE`, `ARTNET_START` |
+| `hue` | A Philips Hue bridge, changed lights only, 2× a second (the bridge's limit) | `HUE_BRIDGE`, `HUE_KEY`, `HUE_LIGHTS` (ids in fixture order) |
+
+Art-Net and Hue are written to their specs but not yet tested on hardware.
 
 ## Platforms
 
@@ -253,7 +297,8 @@ Muse's captions (about 7 s per reply) and builds the body after you stop.
 `ws://127.0.0.1:8765`. The fast loop (every frame) sets brightness, zone color and flashes from speed. The slow loop
 (about every 6 s) asks Muse Spark for mood and tempo. The app starts and stops it with **Play** and **Pause**. More
 in [director/README.md](director/README.md) and [director/TESTING.md](director/TESTING.md):
-`python -m pytest director/tests -q`, 70 passed.
+`python -m pytest director/tests -q`, 70 passed. The stage mode's rhythm, Art-Net and Hue code:
+`node bench/test_stage.mjs`.
 
 ## Licenses
 

@@ -7,6 +7,7 @@
 //   Stage: each light follows one part of the body; the director sets the color, the master level and the flashes.
 
 import { bodyFeatures, clamp01, session } from './session.js';
+import { FIXTURES, resetStage, updateStage } from './stage.js';
 
 const LIVE_URL = 'ws://127.0.0.1:8765';
 const LIVE_RETRY_MS = 5000;
@@ -19,16 +20,6 @@ const ACTION_LABELS = { flash_light: 'Flash light', dim: 'Dim', change_color: 'C
 const MOOD_RANGES = { calm: [60, 80], curious: [80, 110], joyful: [110, 140], tense: [90, 120], powerful: [120, 160] };
 // How each mood shifts the songs' valence (director/music_map.py moods).
 const MOOD_VALENCE = { calm: 0, curious: 0.05, joyful: 0.25, tense: -0.2, powerful: 0.15 };
-// The stage's lights and the body part each follows; scale: the value at which the light is fully on.
-const FIXTURES = [
-  { name: 'Left arm', read: (n) => n.armL, scale: 90 },
-  { name: 'Right arm', read: (n) => n.armR, scale: 90 },
-  { name: 'Left leg', read: (n) => n.legL, scale: 120 },
-  { name: 'Right leg', read: (n) => n.legR, scale: 120 },
-  { name: 'Torso', read: (n) => n.trunk, scale: 45 },
-  { name: 'Pace', read: (n) => n.speed, scale: 1.2 },
-];
-
 const COLOR_NAMES = [
   ['White', '#FFFFFF'], ['Warm white', '#FFF1D6'], ['Red', '#E53935'], ['Coral', '#FF6F59'], ['Orange', '#FB8C00'],
   ['Amber', '#F59E0B'], ['Yellow', '#FDD835'], ['Lime', '#9CCC65'], ['Green', '#43A047'], ['Teal', '#14B8A6'],
@@ -185,48 +176,53 @@ function buildBulbs() {
   }));
 }
 
-// 0.65-1, peaking on each beat of the song playing (its BPM from ReccoBeats); 1 when nothing plays.
-function beatPulse() {
+// The song's beat count (its measured BPM from ReccoBeats, on the player's clock), or null when nothing plays.
+function songBeats() {
   const bpm = player.song?.tempo;
-  if (!bpm || player.paused) return 1;
-  const beats = ((player.pos + performance.now() - player.at) / 60000) * bpm;
-  return 0.65 + 0.35 * (1 - (beats % 1)) ** 3;
+  return bpm && !player.paused ? ((player.pos + performance.now() - player.at) / 60000) * bpm : null;
 }
 
+// The lights: stage.js mixes each body part, poses, jumps, turns and hits with the director and Muse's scene.
 function renderLights(f) {
+  const s = updateStage(f, {
+    t: els.body.currentTime, master: state.master, color: state.color, live: state.phase === 'live',
+    songBpm: songBeats() != null ? player.song.tempo : 0, songBeats: songBeats(), song: player.song,
+    mood: state.modelMood ? word(state.last?.mood) : '',
+  });
   const lights = els.bulbs.children;
-  const pulse = beatPulse();
-  FIXTURES.forEach((fx, i) => {
-    const v = clamp01(fx.read(f.now) / fx.scale);
-    const level = state.master * (0.12 + 0.88 * v) * pulse; // 0 only in a director blackout
+  s.fixtures.forEach(({ level, color, own }, i) => {
     const bulb = lights[i].firstChild;
-    bulb.style.backgroundColor = state.color;
+    bulb.style.backgroundColor = color;
     bulb.style.opacity = (level ? 0.2 + 0.8 * level : 0).toFixed(2);
-    bulb.style.boxShadow = `0 0 ${Math.round(12 + 44 * level)}px ${Math.round(2 + 9 * level)}px ${state.color}${Math.round(150 * level).toString(16).padStart(2, '0')}`;
-    lights[i].lastChild.textContent = `${Math.round(v * 100)}%`;
+    bulb.style.boxShadow = `0 0 ${Math.round(12 + 44 * level)}px ${Math.round(2 + 9 * level)}px ${color}${Math.round(150 * level).toString(16).padStart(2, '0')}`;
+    lights[i].lastChild.textContent = `${Math.round(own * 100)}%`;
   });
   els.ambient.style.opacity = (0.3 * state.master).toFixed(2);
 }
 
-// ReccoBeats' targets (0-1, tempo in BPM) from the body and the director's mood.
+// ReccoBeats' targets (0-1, tempo in BPM) from the body and the director's mood. The tempo is the body's own rhythm
+// (all four limbs, session.js rhythmBpm) when it has a clear one; otherwise Muse's tempo for the mood.
 function musicTargets(f, msg) {
   const mood = state.modelMood ? word(msg?.mood) : '';
+  const rhythm = f.rhythm?.strength > 0.3 ? f.rhythm : null;
   return {
     energy: clamp01(0.1 + 0.55 * Math.min(f.pace / 1.2, 1) + 0.35 * Math.min(f.arm / 20, 1)),
-    danceability: clamp01(f.steps ? f.steps / 130 : 0.25 + 0.35 * Math.min(f.arm / 20, 1)),
+    danceability: clamp01(0.2 + 0.7 * (rhythm?.strength ?? 0) + 0.1 * Math.min(f.arm / 20, 1)),
     valence: clamp01(0.25 + 0.45 * f.upright + (MOOD_VALENCE[mood] ?? 0)),
     acousticness: clamp01(0.15 + 0.7 * f.still),
-    tempo: f.steps >= 60 ? Math.round(f.steps) : mood ? msg.music_tempo : null, // a walking pace sets the beat
+    tempo: rhythm ? Math.round(rhythm.bpm) : mood ? msg.music_tempo : null,
+    tempoFrom: rhythm ? 'body rhythm' : mood ? 'Muse Spark' : '',
     mood,
   };
 }
 
 function renderFeatures(f, t) {
   const rows = [
-    ['Pace', `${f.pace.toFixed(2)} m/s`], ['Steps', f.steps ? `${Math.round(f.steps)}/min` : 'standing'],
+    ['Pace', `${f.pace.toFixed(2)} m/s`],
+    ['Rhythm', f.rhythm?.strength > 0.3 ? `${Math.round(f.rhythm.bpm)}/min · ${Math.round(f.rhythm.strength * 100)}%` : 'none'],
     ['Arm swing', `${Math.round(f.arm)}°`], ['Upright', `${Math.round(f.upright * 100)}%`],
     ['Still', `${Math.round(f.still * 100)}%`], ['Energy', t.energy.toFixed(2)], ['Dance', t.danceability.toFixed(2)],
-    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? `${t.tempo} BPM` : '-'],
+    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? `${t.tempo} BPM · ${t.tempoFrom}` : '-'],
   ];
   els.features.replaceChildren(...rows.map(([k, v], i) => {
     const row = Object.assign(document.createElement('div'), { className: i < 5 ? 'feat feat-in' : 'feat feat-out' });
@@ -447,6 +443,7 @@ function showNotice(text) {
 
 function reset() {
   Object.assign(state, { phase: 'idle', cues: [], liveCount: 0, last: null, master: 1, modelMood: false });
+  resetStage();
   els.timeline.replaceChildren();
   els.timelineCount.textContent = '0 cues';
   els.energyValue.textContent = '-';

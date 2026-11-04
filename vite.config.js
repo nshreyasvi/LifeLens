@@ -3,6 +3,7 @@ import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { basename, extname, join } from 'node:path';
+import { output as lightsOutput, status as lightsStatus } from './server/lights.js';
 
 // Dev-server endpoints behind the page (npm run dev only), local requests only:
 //   GET  /api/hardware            live GPU (nvidia-smi) and CPU processor telemetry
@@ -13,11 +14,24 @@ import { basename, extname, join } from 'node:path';
 //   POST /api/live/start {run, start}   the director replays that recording from `start` s with Meta Muse Spark captions
 //   POST /api/live/stop           stop the director
 //   POST /api/live/caption {images}   live session: Meta Muse Spark captions 1-2 camera frames and names the posture
+//   POST /api/stage/scene {body, song, mood}   Meta Muse Spark as lighting designer: the next scene for the 6 fixtures
+//   GET|POST /api/lights          the fixtures to real lights (server/lights.js: simulator, Art-Net or Hue)
 const MAX_RECORDING_BYTES = 500 * 2 ** 20;
 const VIDEO = /\.(mp4|mov|webm|mkv)$/i;
 const SKIP = new Set(['day', '_smoke']);
 const NAME = /^[A-Za-z0-9_-]{1,64}$/;
 const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised'];
+const PATTERNS = ['pulse', 'chase', 'strobe', 'still'];
+const FOCUS = ['arms', 'legs', 'torso', 'all'];
+const SCENE_PROMPT = `You are the lighting designer of a live stage show. The performer wears a head camera and LifeLens
+turns it into a 3D body; these are that body's numbers and the music now:
+{facts}
+Design the next lighting scene for 6 fixtures (left arm, right arm, left leg, right leg, torso, pace); each fixture
+already follows its body part, jumps lift all lights and crouches dim them. Answer with one JSON object only:
+{"name": a 2-4 word scene name, "palette": 2 or 3 hex colors like "#FF3366", "pattern": "pulse" (all lights on the
+beat), "chase" (one light after another on the beat), "strobe" (hard flashes on hits) or "still" (no beat), "focus":
+"arms", "legs", "torso" or "all", "strobe_on_hits": true or false, "intensity": 0.3 to 1, "reason": one sentence that
+names the numbers behind the choice}.`;
 const LIVE_PROMPT = 'These are frames, 1 s apart, from a camera on a person\'s head. Answer with one JSON object only: '
   + '{"caption": what the person is doing, one short sentence starting with a verb, "posture": one of '
   + `${POSTURES.join(', ')}}.`;
@@ -99,6 +113,21 @@ function lifelensApi() {
     ? ['wsl', ['-e', 'bash', '-lc', `cd '/mnt/${root[0].toLowerCase()}${root.slice(2).replace(/\\/g, '/')}' && ${cmd}`]]
     : ['bash', ['-lc', `cd '${root}' && ${cmd}`]]);
   const env = (name) => `${process.env.CONDA_ROOT || '~/anaconda3'}/envs/${name}/bin`; // run.py reads CONDA_ROOT too
+  // One Muse Spark call: [{type: 'input_text'|'input_image', ...}] -> the first JSON object in its answer.
+  // effort: Muse's reasoning effort ('low' answers live requests in seconds instead of tens of seconds).
+  async function askMuse(key, content, timeoutMs = 30000, effort = 'low') {
+    const r = await fetch('https://api.meta.ai/v1/responses', {
+      method: 'POST', signal: AbortSignal.timeout(timeoutMs),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ model: process.env.MUSE_MODEL || 'muse-spark-1.3', input: [{ role: 'user', content }],
+        reasoning: { effort } }),
+    });
+    if (!r.ok) throw new Error(`Muse answered ${r.status}`);
+    const p = await r.json();
+    const text = p.output_text || (p.output ?? []).flatMap((o) => o.content ?? []).map((c) => c.text ?? '').join('');
+    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+  }
+  const museError = (err) => (err.name === 'TimeoutError' ? 'Muse did not answer in time' : `Muse: ${err.message}`);
   const museKey = () => {
     const f = join(root, 'director', '.env');
     const line = existsSync(f) ? readFileSync(f, 'utf8').split(/\r?\n/).find((l) => l.trim().startsWith('MUSE_API_KEY=')) : null;
@@ -133,7 +162,7 @@ function lifelensApi() {
           body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
           graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
           files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json', 'postures.json',
-            'narration_muse.json'].map((f) => [f, url(f)])),
+            'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4'].map((f) => [f, url(f)])),
         });
       }
     }
@@ -332,21 +361,43 @@ function lifelensApi() {
         if (!ok) return send(res, 400, { error: 'Send 1-2 JPEG frames.' });
         const t0 = Date.now();
         try {
-          const r = await fetch('https://api.meta.ai/v1/responses', {
-            method: 'POST', signal: AbortSignal.timeout(30000),
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-            body: JSON.stringify({ model: process.env.MUSE_MODEL || 'muse-spark-1.3', input: [{ role: 'user', content: [
-              { type: 'input_text', text: LIVE_PROMPT }, ...images.map((image_url) => ({ type: 'input_image', image_url }))] }] }),
-          });
-          if (!r.ok) return send(res, 502, { error: `Muse answered ${r.status}` });
-          const p = await r.json();
-          const text = p.output_text || (p.output ?? []).flatMap((o) => o.content ?? []).map((c) => c.text ?? '').join('');
-          const answer = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+          const answer = await askMuse(key, [{ type: 'input_text', text: LIVE_PROMPT },
+            ...images.map((image_url) => ({ type: 'input_image', image_url }))]);
           const posture = POSTURES.includes(answer.posture) ? answer.posture : '';
           send(res, 200, { caption: String(answer.caption ?? '').slice(0, 200), posture, ms: Date.now() - t0 });
         } catch (err) {
-          send(res, 502, { error: err.name === 'TimeoutError' ? 'Muse did not answer in 30 s' : `Muse: ${err.message}` });
+          send(res, 502, { error: museError(err) });
         }
+      });
+
+      // Muse Spark as lighting designer. The page sends numbers only (the body's last 8 s, the song, the mood).
+      server.middlewares.use('/api/stage/scene', async (req, res) => {
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
+        const key = museKey();
+        if (!key) return send(res, 503, { error: 'scenes need a Muse key (MUSE_API_KEY in director/.env)' });
+        const { facts } = await readBody(req);
+        if (typeof facts !== 'string' || !facts.trim() || facts.length > 1500) return send(res, 400, { error: 'Send facts.' });
+        const t0 = Date.now();
+        try {
+          const a = await askMuse(key, [{ type: 'input_text', text: SCENE_PROMPT.replace('{facts}', facts) }], 40000);
+          const palette = (Array.isArray(a.palette) ? a.palette : []).filter((c) => /^#[0-9A-Fa-f]{6}$/.test(c)).slice(0, 3);
+          if (palette.length < 2 || !PATTERNS.includes(a.pattern)) return send(res, 502, { error: 'Muse gave no usable scene' });
+          send(res, 200, {
+            name: String(a.name ?? 'Scene').slice(0, 40), palette, pattern: a.pattern,
+            focus: FOCUS.includes(a.focus) ? a.focus : 'all', strobe_on_hits: a.strobe_on_hits !== false,
+            intensity: Math.min(1, Math.max(0.3, Number(a.intensity) || 0.8)), reason: String(a.reason ?? '').slice(0, 240),
+            ms: Date.now() - t0,
+          });
+        } catch (err) {
+          send(res, 502, { error: museError(err) });
+        }
+      });
+
+      server.middlewares.use('/api/lights', async (req, res) => {
+        if (req.method === 'GET') return send(res, 200, lightsStatus());
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use GET or POST.' });
+        const { fixtures } = await readBody(req);
+        send(res, 200, lightsOutput(fixtures));
       });
     },
   };

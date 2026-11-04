@@ -474,7 +474,7 @@
               <h2 id="lights-title">Stage rig</h2>
               <span class="chip" id="lights-action">Waiting</span>
             </div>
-            <p class="panel-sub">6 body-coupled fixtures driven by limb velocity &amp; Muse Spark mood.</p>
+            <p class="panel-sub">Each light follows its body part; poses, jumps, crouches, turns and arm hits shape all six. Meta Muse Spark designs the scene.</p>
             <div class="bulbs" id="bulbs"></div>
             <dl class="stats">
               <div><dt>Energy</dt><dd id="lights-energy">-</dd></div>
@@ -482,6 +482,14 @@
               <div><dt>Color</dt><dd><span class="swatch" id="lights-swatch"></span><span id="lights-color">-</span></dd></div>
             </dl>
             <p class="lights-reason" id="lights-reason" aria-live="polite" hidden></p>
+            <div class="stage-scene-row">
+              <p class="stage-scene" id="stage-scene" aria-live="polite">Rules only until Muse Spark designs the first scene.</p>
+              <div class="stage-actions">
+                <button class="btn btn-small-text" id="show-btn" type="button">Show view</button>
+                <button class="toggle" id="stage-fx" type="button" aria-pressed="true">Sound FX</button>
+              </div>
+              <p class="stage-out" id="stage-out">Lights out: simulator (no hardware set)</p>
+            </div>
           </section>
         </section>
 
@@ -574,6 +582,30 @@
   </main>
 
   <footer class="foot">© 2026 LifeLens team</footer>
+
+  <!-- Stage show (stage.js): a full-screen virtual stage driven by the body, the song and Muse Spark's scene. -->
+  <section class="show" id="show" aria-label="Stage show" hidden>
+    <canvas class="show-canvas" id="show-canvas" aria-hidden="true"></canvas>
+    <div class="show-top">
+      <span class="show-brand">LifeLens · Stage show</span>
+      <span class="show-chip" id="show-tempo">No beat yet</span>
+      <button class="show-btn" id="show-fx" type="button" aria-pressed="true">Sound FX</button>
+      <button class="show-btn" id="show-close" type="button">Close (Esc)</button>
+    </div>
+    <div class="show-box show-scene-box">
+      <span class="show-label">Muse Spark scene</span>
+      <div class="show-palette" id="show-palette"></div>
+      <p id="show-scene" aria-live="polite"></p>
+    </div>
+    <div class="show-box show-cues-box">
+      <span class="show-label">Cues</span>
+      <ol class="show-cues" id="show-cues"></ol>
+    </div>
+    <div class="show-box show-out" id="show-out">
+      <span class="show-out-mode">Lights out: simulator (no hardware set)</span>
+      <div class="show-out-strip"></div>
+    </div>
+  </section>
 
   <script type="module" src="/src/start.js"></script>
   <script type="module" src="/src/main.js"></script>
