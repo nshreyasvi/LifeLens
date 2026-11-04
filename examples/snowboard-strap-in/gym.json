@@ -1,0 +1,23 @@
+{
+ "exercise": {
+  "exercise": "none",
+  "main_joint": "none",
+  "confidence": 0.95,
+  "reason": "Head camera shows the person sitting in snow strapping into a snowboard then standing, not performing repetitions.",
+  "source": "Meta Muse Spark",
+  "frames_at_s": [
+   24.7,
+   28.0,
+   31.3,
+   34.7,
+   38.0,
+   41.3
+  ]
+ },
+ "joint": "knee",
+ "reps": [],
+ "sets": [],
+ "summary": {},
+ "review": null,
+ "runtime_s": 13.9
+}

@@ -4,7 +4,7 @@
 // A recording without a POV file on this machine (OmniEgoDB footage is never committed) plays the 3D body in the main
 // window instead, and the note says why.
 
-const DRIFT_S = 0.25; // re-align a follower that drifts further than this
+const DRIFT_S = 0.65; // re-align a follower during playback only if it drifts further than this
 
 export function mediaSet(root) {
   const video = (name) => root.querySelector(`[data-pane="${name}"] video`);
@@ -17,6 +17,7 @@ export function mediaSet(root) {
   let open = new Set((root.dataset.open || '').split(' ').filter(Boolean));
   let povMissing = false;
   let live = false;
+  let pendingSeek = null;
 
   const render = () => {
     root.classList.toggle('pov-missing', povMissing);
@@ -40,10 +41,10 @@ export function mediaSet(root) {
     render();
   };
 
-  const align = () => {
+  const align = (tol = DRIFT_S) => {
     for (const v of followers) {
-      if (v.srcObject || !v.currentSrc) continue;
-      if (v.readyState >= 1 && Math.abs(v.currentTime - body.currentTime) > DRIFT_S) v.currentTime = body.currentTime;
+      if (v.srcObject || !v.currentSrc || v.seeking) continue;
+      if (v.readyState >= 1 && Math.abs(v.currentTime - body.currentTime) > tol) v.currentTime = body.currentTime;
     }
   };
 
@@ -52,7 +53,7 @@ export function mediaSet(root) {
       const name = t.dataset.toggle;
       if (!open.delete(name)) open.add(name);
       render();
-      align();
+      align(0.08);
     });
   }
   pov.addEventListener('error', () => { if (!pov.dataset.standIn && !pov.srcObject && pov.getAttribute('src')) standIn(); });
@@ -61,20 +62,46 @@ export function mediaSet(root) {
     povMissing = false;
     render();
   });
+  for (const v of followers) {
+    v.addEventListener('loadedmetadata', () => {
+      if (!v.srcObject && v.currentSrc) {
+        const target = Number.isFinite(body.currentTime) && body.currentTime > 0 ? body.currentTime : 0.001;
+        try { v.currentTime = target; } catch { /* ignore */ }
+      }
+    });
+  }
+  body.addEventListener('loadedmetadata', () => {
+    const target = pendingSeek !== null ? pendingSeek : 0.001;
+    pendingSeek = null;
+    if (Number.isFinite(body.duration) && body.duration > 0) {
+      body.currentTime = Math.min(Math.max(0, target), Math.max(0, body.duration - 0.05));
+      align(0.05);
+    }
+  });
   const play = (v) => v.play().catch(() => {});
   body.addEventListener('play', () => followers.forEach((v) => { if (!v.srcObject) play(v); }));
   body.addEventListener('pause', () => followers.forEach((v) => { if (!v.srcObject) v.pause(); }));
-  body.addEventListener('seeked', align);
-  body.addEventListener('timeupdate', align);
+  body.addEventListener('seeked', () => align(0.08));
+  body.addEventListener('timeupdate', () => align(DRIFT_S));
   render();
 
   return {
     body,
     pov,
-    play() { play(body); },
-    pause() { body.pause(); },
-    seek(t) { if (Number.isFinite(body.duration) && t >= 0 && t < body.duration) body.currentTime = t; },
-    show(names) { open = new Set(names); render(); align(); },
+    play() { play(body); followers.forEach((v) => { if (!v.srcObject && v.paused) play(v); }); },
+    pause() { body.pause(); followers.forEach((v) => { if (!v.srcObject) v.pause(); }); },
+    seek(t) {
+      const target = Math.max(0, Number(t) || 0);
+      if (Number.isFinite(body.duration) && body.duration > 0) {
+        pendingSeek = null;
+        body.currentTime = Math.min(target, Math.max(0, body.duration - 0.05));
+        align(0.05);
+      } else {
+        pendingSeek = target;
+        try { body.currentTime = target; } catch { /* metadata loading */ }
+      }
+    },
+    show(names) { open = new Set(names); render(); align(0.08); },
     shown() { return [...open]; },
     // Wipe any previously loaded video sources so old sessions never linger when switching to Live mode.
     clear() {

@@ -1,0 +1,17 @@
+{
+  "floor_inlier_fraction": 0.075,
+  "floor_z_slam": -1.833,
+  "cam_height_m": 1.71,
+  "slam_cam_height_m": 1.379,
+  "scale_from_height": 1.24,
+  "wearer_height_m": 1.78,
+  "mount_pitch_down_deg": 46.1,
+  "calib_window_motion_m": 0.784,
+  "head_height_median_m": 0.982,
+  "path_length_m": 91.14,
+  "frames": 1050,
+  "wrist_visible_fraction": [
+    0.034,
+    0.061
+  ]
+}

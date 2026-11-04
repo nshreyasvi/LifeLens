@@ -1,0 +1,9 @@
+{
+ "camera": "gopro-wide",
+ "lens": "GoPro, Wide lens, fisheye corrected",
+ "focal_px": 599.9,
+ "focal_from": "the gopro-wide preset",
+ "horizontal_fov_deg": 116.0,
+ "gopro_diagonal_fov_deg": null,
+ "label": "GoPro, Wide lens, fisheye corrected \u00b7 116\u00b0 across \u00b7 focal from the gopro-wide preset"
+}

@@ -1,0 +1,66 @@
+{
+ "activity": "snowboarding",
+ "active": true,
+ "too_short": false,
+ "duration_s": 35.0,
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 35.0,
+   "features": {
+    "pace": 0.2842405714285714,
+    "still": 0.01904761904761905,
+    "arm": 23.623718056767352,
+    "upright": 0.23733140000000008,
+    "rhythm": {
+     "bpm": 105.88235294117646,
+     "strength": 0.36572718075631855
+    }
+   },
+   "what_happens": "Sitting on snow strapping snowboard bindings",
+   "style": "mellow indie folk",
+   "mood": "calm",
+   "why": "Mellow acoustic folk suits the calm focused moment of sitting in snow fastening bindings before riding.",
+   "targets": {
+    "energy": 0.5802769285714285,
+    "danceability": 0.556009026529423,
+    "valence": 0.35679913,
+    "acousticness": 0.16333333333333333,
+    "instrumentalness": 0.11142857142857143,
+    "loudness": -13.631328571428572,
+    "tempo": 106,
+    "tempo_from": "body rhythm"
+   },
+   "songs": [
+    {
+     "id": "e06ab1e7-ed58-46c9-923c-25785916bdc1",
+     "name": "Riptide",
+     "spotifyId": "2uXlHCUbq9OMUwx3hrk06o",
+     "artist": "Vance Joy, FlicFlac",
+     "tempo": 102,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "87cf455b-03fc-428b-87fa-f9c63913ed5b",
+     "name": "Ho Hey",
+     "spotifyId": "0DwClY2t9YAWHBROMIgrXb",
+     "artist": "The Lumineers",
+     "tempo": 80,
+     "fit": 0.152
+    },
+    {
+     "id": "059da574-12e9-404a-92ad-fd84f673a89a",
+     "name": "Better Together",
+     "spotifyId": "2iXdwVdzA0KrI2Q0iZNJbX",
+     "artist": "Jack Johnson, Paula Fuga",
+     "tempo": 110,
+     "fit": 0.204
+    }
+   ]
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 20.1
+}

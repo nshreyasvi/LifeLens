@@ -550,13 +550,18 @@
             <span class="chip" id="player-beat">No song yet</span>
           </div>
           <div class="player-bar">
-            <button class="pbtn" id="p-prev" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM19 5L9.5 12 19 19z"/></svg></button>
+            <button class="pbtn" id="p-prev" type="button" aria-label="Previous clip part &amp; song" title="Previous clip part &amp; song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM19 5L9.5 12 19 19z"/></svg></button>
             <button class="pbtn pbtn-main" id="p-toggle" type="button" aria-label="Play" data-state="play"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
-            <button class="pbtn" id="p-next" type="button" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM5 5l9.5 7L5 19z"/></svg></button>
+            <button class="pbtn" id="p-next" type="button" aria-label="Next clip part &amp; song" title="Next clip part &amp; song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM5 5l9.5 7L5 19z"/></svg></button>
             <div class="p-now">
               <strong id="p-title">No song yet</strong>
-              <span id="p-artist">Press Play to start video &amp; music together</span>
-              <div class="p-progress" aria-hidden="true"><span id="p-fill"></span></div>
+              <span id="p-artist">Press Play or click any part of the clip below</span>
+              <div class="p-progress" id="p-progress" role="slider" tabindex="0" aria-label="Scrub clip and play matched song" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Click or drag to select any part of the clip and play its song">
+                <span id="p-fill"></span>
+                <div class="p-windows" id="p-windows" aria-hidden="true"></div>
+                <span class="p-thumb" id="p-thumb" aria-hidden="true"></span>
+              </div>
+              <div class="p-segments" id="p-segments" aria-label="Clip parts and matched songs"></div>
             </div>
             <span class="p-time" id="p-time"></span>
           </div>

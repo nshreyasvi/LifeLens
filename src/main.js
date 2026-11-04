@@ -66,7 +66,7 @@ function selectTab(name, { focus = false } = {}) {
   const routineDeck = $('view-day');
   if (routineDeck) routineDeck.hidden = name !== 'activity';
   $('gym-deck').hidden = name !== 'gym';
-  els.player.hidden = !['music', 'stage', 'gym'].includes(name);
+  els.player.hidden = !['activity', 'music', 'stage', 'gym'].includes(name);
   const dock = $('music-dock'), bar = els.player.querySelector('.player-bar') ?? dock.querySelector('.player-bar');
   if (name === 'music') dock.append(bar, $('song-queue'));
   else { els.player.querySelector('.player-embed').before(bar); $('song-queue-home').append($('song-queue')); }
@@ -271,17 +271,18 @@ function preSection(t, { forcePlay = false } = {}) {
   const totalSec = songs.pre.length;
   els.songsMood.textContent = totalSec === 1
     ? `1 song matched for this ${Math.round(songs.durationS || sec.end_s)}s clip · synced with video`
-    : `Window ${k + 1} of ${totalSec} (${clock(sec.start_s)}–${clock(sec.end_s)}) · synced with video`;
+    : `Part ${k + 1} of ${totalSec} (${clock(sec.start_s)}–${clock(sec.end_s)}) · synced with video`;
   els.songsNote.hidden = true;
   if (!state.modelMood && primary?.tempo) {
     els.tempoValue.textContent = primary.tempo;
     els.tempoLabel.textContent = `${capitalize(sec.mood || 'matched')} mood · ${sec.style}`;
   }
-  if (primary && !player.song) {
+  if (primary && (sectionChanged || !player.song)) {
     player.song = { ...primary, ended: false };
     els.playerBeat.textContent = primary.tempo ? `${primary.tempo} BPM · Synced` : 'Synced';
     els.playerNote.textContent = `${clock(sec.start_s)}–${clock(sec.end_s)} · ${sec.what_happens || sec.style}: ${sec.why}`;
   }
+  renderPlayerSegments();
   renderBar();
   const isPlaying = state.videoPlaying || state.phase === 'live' || !els.body.paused || forcePlay;
   if (isPlaying && primary && (sectionChanged || forcePlay || player.song?.spotifyId !== primary.spotifyId || player.paused)) {
@@ -608,7 +609,49 @@ function drawSongs(list) {
 
 // ---------- Unified Video + Spotify Player ----------
 
-const player = { api: null, ctrl: null, song: null, queue: [], paused: true, pos: 0, at: 0, dur: 0 };
+const player = { api: null, ctrl: null, song: null, pendingSong: null, queue: [], paused: true, pos: 0, at: 0, dur: 0 };
+
+function clipTotalDuration() {
+  return els.body?.duration || songs.durationS || (session.pose ? session.pose.n / 30 : 0) || (songs.pre?.length ? songs.pre[songs.pre.length - 1].end_s : 0);
+}
+
+function renderPlayerSegments() {
+  const winBox = $('p-windows');
+  const segBox = $('p-segments');
+  if (!winBox || !segBox) return;
+  if (!songs.pre?.length || songs.tooShort || songs.previewShort) {
+    winBox.replaceChildren();
+    segBox.replaceChildren();
+    return;
+  }
+  const total = Math.max(1, clipTotalDuration());
+  // Divider ticks on the progress bar where each ~20s window starts
+  winBox.replaceChildren(...songs.pre.slice(1).map((sec) => {
+    const tick = document.createElement('span');
+    tick.className = 'p-win-tick';
+    tick.style.left = `${Math.min(99, Math.max(1, (100 * sec.start_s) / total))}%`;
+    return tick;
+  }));
+
+  // Clickable clip-part pills so user can select any part of the clip and play its matched song
+  segBox.replaceChildren(...songs.pre.map((sec, k) => {
+    const top = sec.songs?.[0];
+    const isCur = k === songs.preAt;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `p-seg-btn${isCur ? ' is-active' : ''}`;
+    const timeText = songs.pre.length === 1
+      ? `${clock(sec.start_s)}–${clock(sec.end_s)}`
+      : `Part ${k + 1} (${clock(sec.start_s)}–${clock(sec.end_s)})`;
+    btn.innerHTML = `<span class="p-seg-time">${timeText}</span><strong class="p-seg-song">${top?.name || sec.style}</strong>`;
+    btn.title = `Select ${timeText} and play "${top?.name || sec.style}"`;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      jumpToSection(k);
+    });
+    return btn;
+  }));
+}
 
 function renderBar() {
   const s = player.song;
@@ -616,24 +659,71 @@ function renderBar() {
   const sec = songs.pre?.[songs.preAt];
   $('p-title').textContent = s?.name ?? 'No song yet';
   const winTag = sec
-    ? (songs.pre.length === 1 ? `Full clip (${clock(sec.start_s)}–${clock(sec.end_s)})` : `Window ${songs.preAt + 1}/${songs.pre.length} (${clock(sec.start_s)}–${clock(sec.end_s)})`)
+    ? (songs.pre.length === 1 ? `Full clip (${clock(sec.start_s)}–${clock(sec.end_s)})` : `Part ${songs.preAt + 1}/${songs.pre.length} (${clock(sec.start_s)}–${clock(sec.end_s)})`)
     : '';
   $('p-artist').textContent = s
     ? [s.artist, s.tempo && `${s.tempo} BPM`, winTag].filter(Boolean).join(' · ')
-    : 'Press Play to start video & music in sync';
+    : 'Press Play or click any part of the clip below';
   $('p-toggle').dataset.state = videoRunning ? 'pause' : 'play';
   $('p-toggle').setAttribute('aria-label', videoRunning ? 'Pause video & music' : 'Play video & music in sync');
 
-  const vidDur = els.body?.duration || songs.durationS || (session.pose ? session.pose.n / 30 : 0);
+  const vidDur = clipTotalDuration();
   const vidCur = els.body?.currentTime || 0;
+  const thumb = $('p-thumb');
+  const prog = $('p-progress');
   if (vidDur > 0) {
-    $('p-fill').style.width = `${Math.min(100, (100 * vidCur) / vidDur)}%`;
+    const pct = Math.min(100, Math.max(0, (100 * vidCur) / vidDur));
+    $('p-fill').style.width = `${pct}%`;
+    if (thumb) thumb.style.left = `${pct}%`;
+    if (prog) prog.setAttribute('aria-valuenow', String(Math.round(pct)));
     $('p-time').textContent = `${clock(vidCur)} / ${clock(vidDur)}`;
   } else {
     const pos = player.pos + (!player.paused ? performance.now() - player.at : 0);
-    $('p-fill').style.width = player.dur ? `${Math.min(100, (100 * pos) / player.dur)}%` : '0%';
+    const pct = player.dur ? Math.min(100, (100 * pos) / player.dur) : 0;
+    $('p-fill').style.width = `${pct}%`;
+    if (thumb) thumb.style.left = `${pct}%`;
     $('p-time').textContent = player.dur ? `${clock(pos / 1000)} / ${clock(player.dur / 1000)}` : '';
   }
+}
+
+function seekClipAndPlaySong(targetSec) {
+  const dur = clipTotalDuration();
+  if (!(dur > 0)) return;
+  const t = Math.min(Math.max(0, targetSec), Math.max(0, dur - 0.08));
+  media.seek(t);
+  state.videoPlaying = true;
+  media.play();
+  preSection(t, { forcePlay: true });
+  renderControls();
+}
+
+const pProgress = $('p-progress');
+if (pProgress) {
+  const scrubAt = (clientX) => {
+    const rect = pProgress.getBoundingClientRect();
+    const frac = Math.min(1, Math.max(0, (clientX - rect.left) / Math.max(1, rect.width)));
+    seekClipAndPlaySong(frac * clipTotalDuration());
+  };
+  let dragging = false;
+  pProgress.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    pProgress.setPointerCapture?.(e.pointerId);
+    scrubAt(e.clientX);
+  });
+  pProgress.addEventListener('pointermove', (e) => {
+    if (dragging) scrubAt(e.clientX);
+  });
+  pProgress.addEventListener('pointerup', () => { dragging = false; });
+  pProgress.addEventListener('pointercancel', () => { dragging = false; });
+  pProgress.addEventListener('keydown', (e) => {
+    const dur = clipTotalDuration();
+    if (!(dur > 0)) return;
+    const cur = els.body?.currentTime || 0;
+    const next = { ArrowRight: cur + 5, ArrowUp: cur + 5, ArrowLeft: cur - 5, ArrowDown: cur - 5, Home: 0, End: dur - 0.2 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    seekClipAndPlaySong(next);
+  });
 }
 
 const stepWindowOrSong = (d) => {
@@ -655,7 +745,7 @@ const stepWindowOrSong = (d) => {
 $('p-toggle').addEventListener('click', () => onPlay());
 $('p-prev').addEventListener('click', () => stepWindowOrSong(-1));
 $('p-next').addEventListener('click', () => stepWindowOrSong(1));
-setInterval(() => { if (player.song || state.videoPlaying) renderBar(); }, 300);
+setInterval(() => { if (player.song || state.videoPlaying) renderBar(); }, 250);
 
 function spotifyApi() {
   player.api ??= new Promise((resolve, reject) => {
@@ -668,14 +758,19 @@ function spotifyApi() {
 }
 
 function markPlaying() {
-  for (const li of els.songList.querySelectorAll('.song')) {
+  for (const li of document.querySelectorAll('.song')) {
     li.classList.toggle('is-playing', li.dataset.id === player.song?.spotifyId);
   }
 }
 
 async function playSong(song) {
-  if (!song || player.creating) return;
+  if (!song) return;
   player.song = { ...song, ended: false };
+  if (player.creating) {
+    player.pendingSong = song;
+    renderBar();
+    return;
+  }
   setTimeout(() => {
     if (player.song?.spotifyId !== song.spotifyId || player.song.started) return;
     song.unplayable = true;
@@ -689,12 +784,13 @@ async function playSong(song) {
     : (song.why ?? '');
   markPlaying();
   if (songs.pre && !songs.profile) drawQueue();
+  renderPlayerSegments();
   renderBar();
   const uri = `spotify:track:${song.spotifyId}`;
   if (player.ctrl) {
     player.ctrl.loadUri(uri);
     player.ctrl.play();
-    for (const ms of [800, 1800, 3500]) {
+    for (const ms of [600, 1500, 3000]) {
       setTimeout(() => {
         if (player.paused && player.song?.spotifyId === song.spotifyId && (state.phase === 'live' || state.videoPlaying)) {
           player.ctrl.resume();
@@ -710,6 +806,13 @@ async function playSong(song) {
       player.ctrl = ctrl;
       player.creating = false;
       ctrl.addListener('ready', () => {
+        if (player.pendingSong && player.pendingSong.spotifyId !== song.spotifyId) {
+          const next = player.pendingSong;
+          player.pendingSong = null;
+          playSong(next);
+          return;
+        }
+        player.pendingSong = null;
         if (state.videoPlaying || state.phase === 'live') ctrl.play();
       });
       ctrl.addListener('playback_update', ({ data }) => {
@@ -837,6 +940,28 @@ function onPlay() {
 els.body?.addEventListener('seeked', () => {
   preSection(els.body.currentTime || 0, { forcePlay: state.videoPlaying || state.phase === 'live' });
   renderBar();
+});
+
+els.body?.addEventListener('play', () => {
+  if (!state.videoPlaying && state.phase !== 'live') {
+    state.videoPlaying = true;
+    if (state.phase === 'idle' || state.phase === 'ended' || state.phase === 'paused') {
+      state.phase = 'playing';
+    }
+    preSection(els.body.currentTime || 0, { forcePlay: true });
+    if (player.song && player.ctrl) player.ctrl.resume();
+    else if (player.queue.length) playSong(player.queue[0]);
+    renderControls();
+  }
+});
+
+// Allow clicking POV or 3D body video directly to toggle play/pause
+[document.querySelector('#media [data-pane="pov"] video'), els.body].forEach((vid) => {
+  if (!vid) return;
+  vid.style.cursor = 'pointer';
+  vid.addEventListener('click', () => {
+    if (session.rec && !session.live) onPlay();
+  });
 });
 
 // ---------- Live connection ----------

@@ -257,10 +257,10 @@ body.show-open { overflow: hidden; }
 .media-action[data-state="done"] .btn-cta { min-height: 34px; padding: 6px 14px; font-size: 0.85rem; background: var(--surface-2);
   color: var(--text); border: 1px solid var(--border-strong); box-shadow: none; }
 
-/* Right rail order: 3D body mesh first, Kinematics plot second (above What Muse Spark sees now), Spotify player third on Stage/Gym, active tab panels fourth */
+/* Right rail order: 3D body mesh first, Kinematics plot second (above What Muse Spark sees now), Spotify player third on Routine/Stage/Gym, active tab panels fourth */
 .shell-rail > .media-side { order: 0; }
 .shell-rail > .media-graph { order: 1; }
-#media[data-tab="stage"] #player, #media[data-tab="gym"] #player { order: 2; }
+#media[data-tab="activity"] #player, #media[data-tab="stage"] #player, #media[data-tab="gym"] #player { order: 2; }
 .shell-rail > * { order: 3; }
 .music-dock { display: grid; gap: 12px; margin-top: 12px; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
 .music-dock .player-bar { margin: 0; }
@@ -308,9 +308,95 @@ body.show-open { overflow: hidden; }
 .pbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .p-now { min-width: 0; display: grid; gap: 2px; }
 .p-now strong { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-now span { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-progress { height: 4px; border-radius: 999px; background: var(--border); overflow: hidden; margin-top: 4px; }
-.p-progress span { display: block; height: 100%; width: 0; background: var(--accent); }
+.p-now > span { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-progress {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  margin-top: 6px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.p-progress:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.p-progress > #p-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.p-windows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.p-win-tick {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--border-strong);
+  border-radius: 2px;
+}
+.p-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 120ms ease;
+}
+.p-progress:hover .p-thumb { transform: translate(-50%, -50%) scale(1.18); }
+.p-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.p-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  max-width: 100%;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.p-seg-btn:hover { border-color: var(--accent); color: var(--text); }
+.p-seg-btn.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 650;
+}
+.p-seg-time {
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.p-seg-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
 .p-time { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Meta model calls panel (extras.js): fixed bottom-right, newest call first */

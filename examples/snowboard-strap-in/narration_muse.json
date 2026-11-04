@@ -1,0 +1,37 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "text": "The camera wearer sits on the snow and adjusts their snowboard boot."
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "text": "The camera wearer straps into a snowboard."
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "text": "The camera wearer straps into a snowboard."
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "text": "The camera wearer puts on a snowboard."
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 25.0,
+  "text": "The camera wearer straps boots onto a snowboard."
+ },
+ {
+  "start_s": 25.0,
+  "end_s": 30.0,
+  "text": "The camera wearer fastens their snowboard binding."
+ },
+ {
+  "start_s": 30.0,
+  "end_s": 35.0,
+  "text": "The camera wearer straps into a snowboard."
+ }
+]

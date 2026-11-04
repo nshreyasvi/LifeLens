@@ -1,0 +1,133 @@
+{
+  "clips": {
+    "snowboard-strap-in": {
+      "duration_min": 0.58,
+      "minutes": {
+        "walking": 0.0,
+        "standing": 0.08,
+        "sitting": 0.42,
+        "crouching": 0.0,
+        "bending": 0.08,
+        "arms raised": 0.0,
+        "unknown": 0.0
+      },
+      "share": {
+        "walking": 0.0,
+        "standing": 0.143,
+        "sitting": 0.714,
+        "crouching": 0.0,
+        "bending": 0.143,
+        "arms raised": 0.0,
+        "unknown": 0.0
+      },
+      "sit_stand_transitions": 2,
+      "longest_sitting_min": 0.33,
+      "walking_distance_m": 9.9,
+      "bent_over_min": 0.08
+    }
+  },
+  "total": {
+    "duration_min": 0.58,
+    "minutes": {
+      "walking": 0.0,
+      "standing": 0.08,
+      "sitting": 0.42,
+      "crouching": 0.0,
+      "bending": 0.08,
+      "arms raised": 0.0,
+      "unknown": 0.0
+    },
+    "share": {
+      "walking": 0.0,
+      "standing": 0.143,
+      "sitting": 0.714,
+      "crouching": 0.0,
+      "bending": 0.143,
+      "arms raised": 0.0,
+      "unknown": 0.0
+    },
+    "sit_stand_transitions": 2,
+    "longest_sitting_min": 0.33,
+    "walking_distance_m": 9.9,
+    "bent_over_min": 0.08
+  },
+  "posture_from": "Meta Muse Spark",
+  "log": "Total 0.58 min: standing 0.08 min, sitting 0.42 min, bending 0.08 min\n2 times sat or crouched down, longest sitting 0.33 min, walked 9.9 m, bent over 0.08 min.\nClip snowboard-strap-in:\n  sitting 5 s. The camera wearer sits on the snow and adjusts their snowboard boot.\n  bending 5 s. The camera wearer straps into a snowboard.\n  standing 5 s. The camera wearer straps into a snowboard.\n  sitting 20 s. The camera wearer puts on a snowboard. The camera wearer straps boots onto a snowboard. The camera wearer fastens their snowboard binding. The camera wearer straps into a snowboard.",
+  "runtime_s": 0.2,
+  "report": {
+    "summary": "This 0.58 min recording shows the camera wearer getting ready to snowboard. They sit on the snow for most of the clip to adjust a boot and fasten bindings, with brief bending and standing to strap in.",
+    "what_they_did": [
+      "0:00-0:05: sits on the snow and adjusts snowboard boot (sitting)",
+      "0:05-0:10: crouches to strap into snowboard (bending)",
+      "0:10-0:15: stands while strapping into snowboard (standing)",
+      "0:15-0:20: sits to put on snowboard (sitting)",
+      "0:20-0:25: sits and straps boots onto snowboard (sitting)",
+      "0:25-0:30: sits and fastens snowboard binding (sitting)",
+      "0:30-0:35: sits and straps into snowboard (sitting)"
+    ],
+    "posture_and_movement": [
+      "Most of the 0.58 min was sitting: 0.42 min sitting, with 0.08 min standing and 0.08 min bending.",
+      "Sat down 2 times with longest sit 0.33 min, which covers the final 20 s sitting to put on and fasten the snowboard.",
+      "Walked only 9.9 m in the whole clip, showing almost no travel between sitting and strap-in steps.",
+      "Bent over for 0.08 min around 0:05 while strapping into the snowboard."
+    ],
+    "compared_with_history": [
+      "Compared with eating, sitting is similar: longest sit 0.33 min here vs 0.32 min in eating, and both have 0.08 min bent over.",
+      "Compared with exercising, much less movement: walked 9.9 m here vs 27.6 m in exercising, and 0.42 min sitting here vs 0.0 min sitting in exercising.",
+      "Compared with exercising, this clip has 2 sit-downs vs 0 sit-downs in exercising, reflecting strap-in on the snow vs continuous walking, standing and bending."
+    ],
+    "improvements": [
+      {
+        "change": "Stand up between strap steps",
+        "why": "sat 0.42 min of 0.58 min with longest sit 0.33 min during 0:15-0:30 fastening",
+        "how": "after fastening one boot at 0:20, stand for a few seconds like the 0:10 standing bout before starting the other binding at 0:25"
+      },
+      {
+        "change": "Shift sitting position while fastening",
+        "why": "stayed sitting for the continuous 20 s from 0:15 to 0:35 putting on and strapping boots",
+        "how": "while fastening the binding at 0:25-0:30, lean to the other side or straighten one leg on the snow instead of staying curled"
+      },
+      {
+        "change": "Keep back tall when bending to strap",
+        "why": "bent over 0.08 min at 0:05 to strap into the snowboard",
+        "how": "when reaching down to the binding at 0:05, bend knees more as in the 0:05 3D frame and keep chest up rather than rounding over"
+      },
+      {
+        "change": "Add a short walk after strapping",
+        "why": "walked only 9.9 m in 0.58 min with 2 sit-downs",
+        "how": "after the final strap at 0:30, stand and take a few steps on the snowboard to the start point instead of staying seated"
+      },
+      {
+        "change": "Avoid sitting flat on snow for the whole task",
+        "why": "started 0:00 sitting on the snow to adjust boot and stayed sitting for binding work",
+        "how": "use the 0:05 crouch or 0:10 standing wide stance to do the first strap check before sitting for the final 0:25 fastening"
+      }
+    ],
+    "went_well": [
+      "Completed all strap-in steps in a short 0.58 min clip without long idle time.",
+      "Used a brief 0.08 min standing bout at 0:10 to adjust position between sits instead of staying on the snow the whole time."
+    ],
+    "caveats": [
+      "Muse posture labels can be wrong: 0:05 bending and 0:10 standing are both captioned as straps into a snowboard, so the split between bending and standing is uncertain.",
+      "Leg positions are 3D estimates the head camera never sees, especially while sitting on the snow to fasten bindings at 0:20-0:30."
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "history": [
+      "eating",
+      "exercising"
+    ],
+    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (snowboard-strap-in, 0.58 min)\nRecorded 0.58 min: standing 0.08 min, sitting 0.42 min, bending 0.08 min. Walked 9.9 m, 2 sit-downs, longest sit 0.33 min, bent over 0.08 min.\nPosture bouts and what Muse saw:\nTotal 0.58 min: standing 0.08 min, sitting 0.42 min, bending 0.08 min\n2 times sat or crouched down, longest sitting 0.33 min, walked 9.9 m, bent over 0.08 min.\nClip snowboard-strap-in:\n  sitting 5 s. The camera wearer sits on the snow and adjusts their snowboard boot.\n  bending 5 s. The camera wearer straps into a snowboard.\n  standing 5 s. The camera wearer straps into a snowboard.\n  sitting 20 s. The camera wearer puts on a snowboard. The camera wearer straps boots onto a snowboard. The camera wearer fastens their snowboard binding. The camera wearer straps into a snowboard.\nMuse's captions every 5 s:\n0:00 The camera wearer sits on the snow and adjusts their snowboard boot.\n0:05 The camera wearer straps into a snowboard.\n0:10 The camera wearer straps into a snowboard.\n0:15 The camera wearer puts on a snowboard.\n0:20 The camera wearer straps boots onto a snowboard.\n0:25 The camera wearer fastens their snowboard binding.\n0:30 The camera wearer straps into a snowboard.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, 0:25, 0:30, in order: use them for posture and movement.\n\nOTHER RECORDINGS\n- eating: Recorded 0.4 min: sitting 0.32 min, bending 0.08 min. Walked 3.3 m, 1 sit-downs, longest sit 0.32 min, bent over 0.08 min. What they did: 0:00 The camera wearer sits down.; 0:05 The camera wearer stirs noodles in a bowl with a spoon.; 0:10 The camera wearer eats food from a bowl.; 0:15 The camera wearer stirs noodles in a bowl.; 0:20 Stirs noodles in a bowl with a spoon.\n- exercising: Recorded 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min. Walked 27.6 m, 0 sit-downs, longest sit 0.0 min, bent over 0.17 min. What they did: 0:00 The camera wearer walks forward.; 0:05 The camera wearer is walking forward.; 0:20 The camera wearer walks then squats down.; 0:25 The camera wearer stands and clasps hands together.; 0:30 The camera wearer unclasps their hands.; 0:35 The camera wearer stands up.; 0:40 The camera wearer spins in place.; 0:45 The camera wearer bends to touch their shoes.\n\nAbout the person: 178 cm."
+  },
+  "suggestions": {
+    "lines": [
+      "Stand up between strap steps",
+      "Shift sitting position while fastening",
+      "Keep back tall when bending to strap"
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "earlier_days": 2,
+    "sample_days": 0
+  }
+}

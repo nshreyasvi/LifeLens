@@ -18,6 +18,7 @@ import argparse
 import gc
 import json
 import os
+import shutil
 import sys
 from argparse import Namespace
 
@@ -28,7 +29,7 @@ from scipy.spatial.transform import Rotation
 
 HAWOR = os.path.abspath(os.environ.get('HAWOR_ROOT', os.path.join(os.path.dirname(__file__), '..', 'third_party', 'HaWoR')))
 FPS = 30    # HaWoR extracts frames with ffmpeg at 30 fps
-SLAM_PIECE, SLAM_OVERLAP = 900, 90      # frames
+SLAM_PIECE, SLAM_OVERLAP = 1200, 90     # frames (40 s piece, well below DROID-SLAM's ~1400-frame keyframe cap)
 HAWOR_DEFAULT_FOCAL = 600.0             # HaWoR's own default without --img_focal (scripts_test_video/hawor_video.py)
 
 
@@ -83,6 +84,14 @@ def align(A, B):
 def main(a):
     video, out_dir = os.path.abspath(a.video), os.path.abspath(a.out_dir)
     focal = a.focal or HAWOR_DEFAULT_FOCAL
+    work_dir = None
+    if video.startswith('/mnt/') and os.path.isdir('/tmp'):
+        work_dir = f"/tmp/lifelens_hawor_{os.path.basename(out_dir)}"
+        os.makedirs(work_dir, exist_ok=True)
+        staged = os.path.join(work_dir, os.path.basename(video))
+        if not os.path.exists(staged) or os.path.getsize(staged) != os.path.getsize(video):
+            shutil.copy2(video, staged)
+        video = staged
     if not torch.cuda.is_available():
         if not a.hands_only:     # fail before minutes of hand tracking, with the reason
             raise SystemExit('DROID-SLAM (the camera path for your own video) needs an NVIDIA GPU with CUDA; this '
@@ -157,6 +166,8 @@ def main(a):
                 offset = 0 if hand == 0 else 45
                 hand_pose[frames, offset:offset + 45] = rotvec.astype(np.float32)
     np.savez(f'{out_dir}/wrist.npz', wrist=wrist, visible=visible, hand_pose=hand_pose, time_s=time_s)
+    if work_dir and os.path.isdir(work_dir):
+        shutil.rmtree(work_dir, ignore_errors=True)
     print(f'{N} frames, SLAM in {0 if a.hands_only else len(scales) + 1} pieces (scale corrections {scales}), '
           f'wrists visible {visible.mean(0).round(3).tolist()} (left, right)')
 

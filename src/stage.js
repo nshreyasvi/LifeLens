@@ -266,55 +266,57 @@ function keyRegion(v, sx, sy, sw, sh, scale) {
   return { vx0: sx + x0 / scale, vy0: sy + y0 / scale, vx1: sx + x1 / scale, vy1: sy + y1 / scale, x0, y0, x1, y1,
     hip: hn ? hs / hn : (x0 + x1) / 2 };
 }
-// The original render (mesh_exo.mp4, ~2 Mbit/s) keys far cleaner than the page's compressed copy: a hidden copy of it
-// follows the page's 3D body clock while the Show view is open.
-const hq = Object.assign(document.createElement('video'), { muted: true, playsInline: true, preload: 'auto' });
+// Use the active 3D body video directly (no duplicate background decoder or resolution switching).
 function bodySource() {
-  const v = videoOf('body');
-  const url = session.rec?.files?.['mesh_exo.mp4'];
-  if (!url || !v) return v;
-  if (hq.dataset.src !== url) { hq.dataset.src = url; hq.src = url; }
-  if (hq.readyState >= 1 && Math.abs(hq.currentTime - v.currentTime) > 0.3) hq.currentTime = v.currentTime;
-  if (v.paused && !hq.paused) hq.pause();
-  if (!v.paused && hq.paused) hq.play().catch(() => {});
-  return hq.readyState >= 2 ? hq : v;
+  return videoOf('body');
 }
 export { key as bodyKey };      // the cut-out body, for the Gym viewer (gym.js) too
 export function keyedBody(retry = true) {
   const v = bodySource();
   // no new frame yet (a seek or a busy decoder): keep the last cut-out rather than an empty stage
-  if (!v || v.readyState < 2 || !v.videoWidth) { stage.keyStale = (stage.keyStale ?? 0) + 1; return stage.vbox && { ...stage.vbox, fresh: false }; }
+  if (!v || v.readyState < 2 || !v.videoWidth || v.seeking) {
+    stage.keyStale = (stage.keyStale ?? 0) + 1;
+    return stage.vbox && { ...stage.vbox, fresh: false };
+  }
   const frameKey = `${v.currentSrc || ''}:${Math.round((v.currentTime || 0) * 30)}`;
   if (retry && stage.keyFrame === frameKey && stage.vbox) {
     return { ...stage.vbox, fresh: false };
   }
   const W = v.videoWidth, H = v.videoHeight, b = stage.vbox;
   let found = null;
-  if (b) {                                             // track: the last box, 40% bigger, capped to 260 px height for 60 fps
-    const mw = (b.vx1 - b.vx0) * 0.4 + 12, mh = (b.vy1 - b.vy0) * 0.4 + 12;
+  if (b && b.srcW === W && b.srcH === H) {             // track: the last box, 45% bigger, capped to 220 px height for 60 fps
+    const mw = (b.vx1 - b.vx0) * 0.45 + 16, mh = (b.vy1 - b.vy0) * 0.45 + 16;
     const sx = Math.max(0, b.vx0 - mw), sy = Math.max(0, b.vy0 - mh);
     const sw = Math.min(W, b.vx1 + mw) - sx, sh = Math.min(H, b.vy1 + mh) - sy;
-    const scale = Math.min(1, 260 / Math.max(1, sh));
+    const scale = Math.min(1, 220 / Math.max(1, sh));
     found = keyRegion(v, sx, sy, sw, sh, scale);
   }
   if (!found && retry) {                               // lost (or first frame): find it on a small full frame, then key it
-    const whole = keyRegion(v, 0, 0, W, H, 280 / W);
-    if (whole) { stage.vbox = whole; return keyedBody(false); }
+    const whole = keyRegion(v, 0, 0, W, H, 240 / W);
+    if (whole) {
+      stage.vbox = { ...whole, srcW: W, srcH: H };
+      return keyedBody(false);
+    }
     stage.keyLost = (stage.keyLost ?? 0) + 1;
-    return null;
+    return stage.vbox && { ...stage.vbox, fresh: false };
   }
   if (found) {
-    stage.vbox = found;
+    stage.vbox = { ...found, srcW: W, srcH: H };
     stage.keyFrame = frameKey;
     stage.keyFresh = (stage.keyFresh ?? 0) + 1;
   }
-  return found && { ...found, fresh: true };
+  return found ? { ...stage.vbox, fresh: true } : (stage.vbox && { ...stage.vbox, fresh: false });
 }
+
+// Offscreen cache for the POV picture-in-picture inset so it never blinks or disappears during a video seek.
+const povCache = Object.assign(document.createElement('canvas'), { width: 320, height: 180 });
+const povCtx = povCache.getContext('2d');
+let povCacheValid = false;
 
 function draw() {
   if (!stage.open) return;
   requestAnimationFrame(draw);
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   const W = Math.round(canvas.clientWidth * dpr), H = Math.round(canvas.clientHeight * dpr);
   if (canvas.width !== W || canvas.height !== H) Object.assign(canvas, { width: W, height: H });
   const pal = stage.scene?.palette ?? [stage.fixtures[0]?.color ?? '#3977FF'];
@@ -363,8 +365,11 @@ function draw() {
   const box = keyedBody();
   if (box) {
     const av = box;
-    const prevH = stage.avH ?? (box.vy1 - box.vy0);
-    stage.avH = prevH + 0.2 * ((box.vy1 - box.vy0) - prevH);   // smooth the size, not the position
+    const rawH = Math.max(12, av.vy1 - av.vy0);
+    const rawW = Math.max(8, av.vx1 - av.vx0);
+    const rawHipFrac = (av.hip - av.x0) / Math.max(1, av.x1 - av.x0);
+    stage.avH = stage.avH == null ? rawH : stage.avH + 0.05 * (rawH - stage.avH);
+    stage.avHip = stage.avHip == null ? rawHipFrac : stage.avHip + 0.16 * (rawHipFrac - stage.avHip);
     const lead = stage.fixtures.reduce((m, f) => (f.level > m.level ? f : m), stage.fixtures[0]);
     if (av.fresh) {                                  // tint a new cut-out once; a kept one is already tinted
       kg.globalCompositeOperation = 'source-atop';
@@ -372,9 +377,11 @@ function draw() {
       kg.fillRect(0, 0, key.width, key.height);
       kg.globalCompositeOperation = 'source-over';
     }
-    const h = H * 0.36 * ((av.vy1 - av.vy0) / Math.max(1, stage.avH)), w = (h * (av.x1 - av.x0)) / Math.max(1, av.y1 - av.y0);
-    const ax = sx - (av.hip - av.x0) * (w / Math.max(1, av.x1 - av.x0)), ay = sy - h;
-    // Fast GPU radial aura behind performer instead of slow CPU canvas filter + shadowBlur convolution
+    const stageScale = (H * 0.37) / Math.max(24, stage.avH);
+    const h = Math.max(H * 0.18, Math.min(H * 0.52, rawH * stageScale));
+    const w = rawW * (h / rawH);
+    const ax = sx - stage.avHip * w, ay = sy - h;
+    // Fast GPU radial aura behind performer
     g.globalCompositeOperation = 'lighter';
     const aura = g.createRadialGradient(sx, ay + h * 0.5, 0, sx, ay + h * 0.5, Math.max(w, h) * 0.65);
     const auraAlpha = Math.round(55 + 95 * lead.level).toString(16).padStart(2, '0');
@@ -385,16 +392,24 @@ function draw() {
     g.globalCompositeOperation = 'source-over';
     g.drawImage(key, av.x0, av.y0, av.x1 - av.x0, av.y1 - av.y0, ax, ay, w, h);
   }
-  // the head camera, picture in picture
+  // the head camera, picture in picture (buffered in povCache so it never disappears during seeks)
   g.globalCompositeOperation = 'source-over';
-  const pip = (v, x, y, w, label) => {
-    if (!v || v.readyState < 2 || !v.videoWidth) return;
-    const h = (w * v.videoHeight) / v.videoWidth;
-    g.drawImage(v, x, y, w, h);
-    g.strokeStyle = '#FFFFFF55'; g.lineWidth = 1 * dpr; g.strokeRect(x, y, w, h);
-    g.fillStyle = '#FFFFFFCC'; g.font = `${12 * dpr}px Geist, sans-serif`; g.fillText(label, x + 8 * dpr, y + h - 8 * dpr);
-  };
-  pip(videoOf('pov'), 20 * dpr, H - 20 * dpr - W * 0.27 * 9 / 16, W * 0.27, 'POV');
+  const v = videoOf('pov');
+  if (v && v.readyState >= 2 && v.videoWidth && !v.seeking) {
+    const targetH = Math.round((320 * v.videoHeight) / v.videoWidth);
+    if (povCache.height !== targetH) povCache.height = targetH;
+    povCtx.drawImage(v, 0, 0, povCache.width, povCache.height);
+    povCacheValid = true;
+  }
+  if (povCacheValid) {
+    const pw = W * 0.27;
+    const ph = (pw * povCache.height) / povCache.width;
+    const px = 20 * dpr;
+    const py = H - 20 * dpr - ph;
+    g.drawImage(povCache, px, py, pw, ph);
+    g.strokeStyle = '#FFFFFF55'; g.lineWidth = 1 * dpr; g.strokeRect(px, py, pw, ph);
+    g.fillStyle = '#FFFFFFCC'; g.font = `${12 * dpr}px Geist, sans-serif`; g.fillText('Your View', px + 8 * dpr, py + ph - 8 * dpr);
+  }
 }
 
 // The show is the Stage tab's main view (over the POV, which it shows as an inset).
@@ -406,8 +421,7 @@ export function openShow(on) {
   const was = stage.open;
   stage.open = allowed;
   show.hidden = !allowed;
-  if (!allowed) hq.pause();
-  if (allowed) { renderScene(); renderCues(); renderOut(); if (!was) requestAnimationFrame(draw); }
+  if (allowed) { renderScene(); renderOut(); if (!was) requestAnimationFrame(draw); }
 }
 document.addEventListener('lifelens:tab', (e) => openShow(e.detail.tab === 'stage'));
 document.addEventListener('lifelens:activity', () => {
@@ -420,6 +434,10 @@ export function setFx() {
 }
 
 export function resetStage() {
-  Object.assign(stage, { scene: null, cues: [], flashUntil: 0, last: {}, beats: 0, askedAt: 0, lightsOut: null, plan: null });
-  renderScene(); renderCues();
+  povCacheValid = false;
+  Object.assign(stage, {
+    scene: null, cues: [], flashUntil: 0, last: {}, beats: 0, askedAt: 0, lightsOut: null, plan: null,
+    vbox: null, keyFrame: '', avH: null, avAspect: null, avHip: null,
+  });
+  renderScene();
 }
