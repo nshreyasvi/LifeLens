@@ -1271,7 +1271,7 @@ body.is-starting .start {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 20px;
-  align-items: stretch;
+  align-items: start; /* each card wraps its own content, not the taller one's height */
 }
 
 @media (min-width: 900px) {
