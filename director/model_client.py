@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import re
@@ -101,7 +102,8 @@ def _ollama(prompt: str, model: str) -> str:
     return response_text
 
 
-def _muse(prompt: str, max_calls: int) -> str:
+def _muse(prompt: str, max_calls: int, images: list[bytes] | None = None) -> str:
+    """One Muse Spark call; images (JPEG bytes) go with the prompt, in order, so Muse sees them."""
     global _MUSE_CALLS
     if _MUSE_CALLS >= max_calls:
         raise RuntimeError(f"Muse call limit reached ({max_calls})")
@@ -118,6 +120,9 @@ def _muse(prompt: str, max_calls: int) -> str:
             or parsed.query or parsed.fragment):
         raise RuntimeError("Muse requests are restricted to HTTPS api.meta.ai")
     request_body: dict[str, Any] = {"model": model, "input": prompt}
+    if images:
+        request_body["input"] = [{"role": "user", "content": [{"type": "input_text", "text": prompt}] + [
+            {"type": "input_image", "image_url": "data:image/jpeg;base64," + base64.b64encode(j).decode()} for j in images]}]
     reasoning_effort = os.getenv("MUSE_REASONING")
     if reasoning_effort in {"low", "medium", "high"}:
         request_body["reasoning"] = {"effort": reasoning_effort}

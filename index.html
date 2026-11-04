@@ -564,7 +564,7 @@
           <div class="panel-head">
             <div>
               <h2 id="did-title">Activity timeline &amp; log</h2>
-              <p class="panel-sub">Click any second or action card to scrub the POV &amp; 3D body above.</p>
+              <p class="panel-sub">Click the timeline, a span, a numbered change or a picture to jump the POV and 3D body there.</p>
             </div>
             <span class="chip is-active" id="did-captions">Meta Muse Spark</span>
           </div>
@@ -582,10 +582,12 @@
               <span class="media-clock" id="routine-clock">0:00</span>
               <p class="day-caption" id="routine-caption" aria-live="polite"></p>
             </div>
+            <div class="strip-row"><span class="strip-name">Muse Spark</span><div class="day-track" id="routine-track"></div></div>
             <div class="strip-row"><span class="strip-name" id="strip-source-name">3D Rules</span><div class="day-strip" id="routine-strip"></div></div>
+            <div class="strip-row"><span class="strip-name">Speed</span><svg class="day-speed" id="routine-speed" viewBox="0 0 600 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
             <div class="strip-row" hidden><span class="strip-name">Motion capture</span><div class="day-strip day-strip-ref" id="routine-ref" aria-hidden="true"></div></div>
           </div>
-          <ol class="log" id="routine-log" aria-label="Session actions in time order"></ol>
+          <ol class="film" id="routine-log" aria-label="What the head camera saw every 5 s"></ol>
         </section>
       </div>
 
@@ -599,8 +601,7 @@
             <span class="chip" id="past-count">0 sessions</span>
           </div>
           <div class="past-summary" id="past-summary"></div>
-          <div class="past-cards" id="past-cards"></div>
-          <div class="days-wrap"><table class="days" id="days-table"></table></div>
+          <div class="past-chart" id="past-cards"></div>
         </section>
 
         <section class="panel panel-routine-review" id="routine-current-review" aria-labelledby="review-title">

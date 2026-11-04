@@ -48,6 +48,7 @@ Posture bouts and what Muse saw:
 {log}
 Muse's captions every 5 s:
 {captions}
+{frames}
 
 OTHER RECORDINGS
 {history}"""
@@ -91,6 +92,13 @@ def did(run: Path, limit: int = 8) -> str:
     return '; '.join(out[::step][:limit])
 
 
+def frames_of(run: Path, k: int = 8) -> list[tuple[int, bytes]]:
+    """Up to k frames of the rendered 3D body spread over the recording (pipeline/body_frames.py): (second, JPEG)."""
+    files = sorted((run / 'frames').glob('body_*.jpg'))
+    step = max(1, len(files) // k)
+    return [(int(f.stem.split('_')[1]), f.read_bytes()) for f in files[::step][:k]]
+
+
 def build_prompt(run: Path, history: list[Path]) -> str:
     report = json.loads((run / 'insights.json').read_text(encoding='utf-8'))
     total = report['total']
@@ -101,8 +109,11 @@ def build_prompt(run: Path, history: list[Path]) -> str:
     for h in history:
         t = json.loads((h / 'insights.json').read_text(encoding='utf-8'))['total']
         earlier.append(f"- {h.name}: {totals_line(t)} Posture by source: {shares(h)}. What they did: {did(h)}")
+    seen = frames_of(run)
+    frames = (f"The images are this recording's 3D body (legs estimated) at {', '.join(clock(t) for t, _ in seen)}, "
+              'in order: use them for posture and movement.') if seen else ''
     return PROMPT.format(name=run.name, duration=f"{total.get('duration_min')} min", totals=totals_line(total),
-                         shares=shares(run), log=report.get('log', ''), captions=captions,
+                         shares=shares(run), log=report.get('log', ''), captions=captions, frames=frames,
                          history='\n'.join(earlier) or 'none')
 
 
@@ -124,7 +135,7 @@ def main(argv: list[str] | None = None) -> dict:
     a = parser.parse_args(argv)
     run, history = Path(a.run), [Path(h) for h in a.history]
     prompt = build_prompt(run, history)
-    review = parse(_muse(prompt, max_calls=1))
+    review = parse(_muse(prompt, max_calls=1, images=[j for _, j in frames_of(run)] or None))
     review.update(provider='Meta Muse Spark', model=os.getenv('MUSE_MODEL', 'muse-spark-1.3'),
                   history=[h.name for h in history], prompt=prompt)  # the page shows what Muse read
     path = run / 'insights.json'

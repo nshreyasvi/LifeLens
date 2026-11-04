@@ -216,13 +216,22 @@ function facts(f, ctx) {
   ].filter(Boolean).join('\n');
 }
 
+// The 3D body now, as a 320 px JPEG, so Muse sees the pose and not only its numbers.
+function bodyFrame() {
+  const v = bodySource();
+  if (!v || v.readyState < 2 || !v.videoWidth) return null;
+  const c = Object.assign(document.createElement('canvas'), { width: 320, height: Math.round((320 * v.videoHeight) / v.videoWidth) });
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.8);
+}
+
 async function askScene(f, ctx) {
   stage.asking = true;
   stage.askedAt = performance.now();
   renderScene();
   try {
     const res = await fetch('/api/stage/scene', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ facts: facts(f, ctx) }) });
+      body: JSON.stringify({ facts: facts(f, ctx), image: bodyFrame() }) });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.error || `the dev server answered ${res.status}`);
     const changed = body.name !== stage.scene?.name;

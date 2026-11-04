@@ -19,10 +19,12 @@ def test_main_writes_one_label_per_window(tmp_path, monkeypatch):
     clip.mkdir()
     for name in ('pose_timeseries.csv', 'narration_muse.json'):
         shutil.copy(OFFICE / name, clip / name)
-    sent = {}
+    shutil.copytree(OFFICE / 'frames', clip / 'frames')       # office's real 3D body frames (pipeline/body_frames.py)
+    sent = {'images': []}
 
-    def fake_muse(prompt, max_calls):
-        sent['prompt'] = prompt
+    def fake_muse(prompt, max_calls, images=None):
+        sent.setdefault('prompt', prompt)
+        sent['images'].append(len(images))
         return '\n'.join(f'{i}: standing' for i in range(1, 100))
 
     monkeypatch.setattr(posture_muse, '_muse', fake_muse)
@@ -30,4 +32,5 @@ def test_main_writes_one_label_per_window(tmp_path, monkeypatch):
     out = json.loads((clip / 'posture_muse.json').read_text())
     assert len(out) == 17 and {w['label'] for w in out} == {'standing'}          # 83 s of office
     assert out[0]['start_s'] == 0 and out[-1]['start_s'] == 80
-    assert '1. speed' in sent['prompt'] and 'video: Walk away' in sent['prompt']
+    assert '1. 0:00-0:05 · camera: Walk away' in sent['prompt'] and 'speed' not in sent['prompt']
+    assert sent['images'] == [6, 6, 5]                        # one 3D body frame per window, 6 windows per call

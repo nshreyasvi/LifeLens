@@ -31,6 +31,26 @@ const brief = (t, max = 108) => {
   return `${s.slice(0, max - 1).replace(/[,;:\s]+$/, '')}…`;
 };
 const getJson = async (url) => (url ? (await fetch(url, { cache: 'no-store' })).json() : null);
+const NS = 'http://www.w3.org/2000/svg';
+const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+const ICONS = {
+  time: 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18', walk: 'M13 4a1.5 1.5 0 1 0 0 .1M10 21l2-6l3 3v3M9 12l3-4l3 3l3 1M12 8l-3 1l-2 3',
+  active: 'M3 12h4l3-7l4 14l3-7h4', sit: 'M6 3v9h10v9M6 12v9M16 12V7', sun: 'M12 4v2M12 18v2M4 12h2M18 12h2M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8',
+};
+function iconTile(icon, value, label) {
+  const tile = el('div', 'day-stat');
+  const i = svgEl('svg', { viewBox: '0 0 24 24', width: 20, height: 20, 'aria-hidden': 'true', class: 'day-stat-icon' });
+  i.appendChild(svgEl('path', { d: ICONS[icon], fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  tile.append(i, el('span', 'day-stat-value', value), el('span', 'day-stat-name', label));
+  return tile;
+}
+// "1:05" or "1:05-1:20" at the start of Muse's text -> seconds
+const secondsOf = (m, s) => Number(m) * 60 + Number(s);
+function spanOf(text) {
+  const m = String(text).match(/^\s*(\d+):(\d{2})\s*[-–]\s*(\d+):(\d{2})\s*:?\s*(.*)$/);
+  return m ? { start: secondsOf(m[1], m[2]), end: secondsOf(m[3], m[4]), text: m[5] } : null;
+}
+const firstTime = (text) => { const m = String(text).match(/(\d+):(\d{2})/); return m ? secondsOf(m[1], m[2]) : null; };
 
 function parseCsv(text) {
   const rows = [];
@@ -136,27 +156,95 @@ function drawStrip() {
   if (mocap) drawRuns($('routine-ref'), mocap);
 }
 
+// The log as a film strip: one POV thumbnail per caption (5 s), with its time and posture colour. The caption of the
+// selected moment is the one line of text (routine-caption). Thumbnails are drawn from the POV by a hidden video.
+const thumbs = { video: Object.assign(document.createElement('video'), { muted: true, playsInline: true, preload: 'auto' }), run: 0 };
+async function drawThumbs(entries, imgs) {
+  const run = ++thumbs.run;
+  const v = thumbs.video;
+  const src = session.rec?.pov || session.rec?.body;
+  if (!src) return;
+  if (v.dataset.src !== src) { v.dataset.src = src; v.src = src; }
+  if (v.readyState < 1) await new Promise((r) => v.addEventListener('loadedmetadata', r, { once: true }));
+  const c = Object.assign(document.createElement('canvas'), { width: 192, height: 108 });
+  for (let k = 0; k < entries.length; k++) {
+    if (run !== thumbs.run) return;
+    v.currentTime = Math.min(v.duration - 0.1, (entries[k].start + entries[k].end) / 2);
+    await new Promise((r) => v.addEventListener('seeked', r, { once: true }));
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    imgs[k].src = c.toDataURL('image/jpeg', 0.75);
+  }
+}
+
 function drawLog() {
   view.entries = entriesFromMuse();
+  const imgs = [];
   view.items = view.entries.map((e) => {
-    const li = el('li', 'log-item');
-    const btn = el('button', 'log-btn');
+    const li = el('li', 'film-item');
+    const btn = el('button', 'film-btn');
     btn.type = 'button';
     const label = majorityOf(view.labels.slice(e.start, e.end));
+    const img = el('img', 'film-img');
+    img.alt = e.text;
+    imgs.push(img);
+    const meta = el('span', 'film-meta');
     const dot = el('span', 'day-dot');
     dot.style.background = POSTURE_COLORS[label] ?? 'var(--faint)';
-    const posture = el('span', 'log-posture');
-    posture.append(dot, capitalize(label));
-    btn.append(el('time', 'log-time', clock(e.start)), el('span', 'log-text', e.text), posture);
-    btn.addEventListener('click', () => {
-      media.seek(e.start + 0.05);
-      media.play();
-    });
+    meta.append(dot, el('time', '', clock(e.start)));
+    btn.title = `${clock(e.start)} · ${capitalize(label)} · ${e.text}`;
+    btn.append(img, meta);
+    btn.addEventListener('click', () => { media.seek(e.start + 0.05); media.play(); });
     li.appendChild(btn);
     return li;
   });
   $('routine-log').replaceChildren(...view.items);
   view.current = -1;
+  drawThumbs(view.entries, imgs).catch(() => {});
+}
+
+// Muse's coaching on the timeline: what they did as labelled spans, its changes as numbered pins at the time they cite.
+function drawTrack(r) {
+  const track = $('routine-track');
+  const n = view.labels.length || 1;
+  const pct = (t) => `${Math.min(100, Math.max(0, (100 * t) / n))}%`;
+  const parts = [];
+  for (const item of r?.what_they_did ?? []) {
+    const sp = spanOf(item);
+    if (!sp) continue;
+    const text = sp.text.replace(/\s*\([^)]*\)\s*$/, '');
+    const b = el('button', 'track-span', text.split(/\s+/).slice(0, 4).join(' '));
+    b.type = 'button';
+    b.style.left = pct(sp.start);
+    b.style.width = `calc(${pct(Math.max(1, sp.end - sp.start))} - 2px)`;
+    b.title = `${clock(sp.start)}-${clock(sp.end)} · ${text}`;
+    b.addEventListener('click', () => { media.seek(sp.start + 0.05); $('routine-caption').textContent = b.title; });
+    parts.push(b);
+  }
+  (r?.improvements ?? []).forEach((c, k) => {
+    const t = firstTime(c.why) ?? firstTime(c.how);
+    if (t === null) return;
+    const pin = el('button', 'track-pin', String(k + 1));
+    pin.type = 'button';
+    pin.style.left = pct(t);
+    pin.title = `${k + 1}. ${c.change}: ${c.how ?? ''}`;
+    pin.addEventListener('click', () => { media.seek(t + 0.05); $('routine-caption').textContent = pin.title; });
+    parts.push(pin);
+  });
+  track.replaceChildren(...parts);
+  track.closest('.strip-row').hidden = !parts.length;
+}
+
+// Walking speed each second (mean of the 3D body's pelvis speed), as a line under the posture strip.
+function drawSpeed() {
+  const p = session.pose;
+  const box = $('routine-speed');
+  if (!p) { box.replaceChildren(); return; }
+  const secs = Math.floor(p.n / 30), v = [];
+  for (let s = 0; s < secs; s++) { let m = 0; for (let i = s * 30; i < s * 30 + 30; i++) m += p.speed_m_s[i]; v.push(m / 30); }
+  const top = Math.max(1.2, ...v);
+  const pts = v.map((y, s) => `${(600 * (s + 0.5)) / secs},${38 - (34 * y) / top}`).join(' ');
+  box.replaceChildren(svgEl('polyline', { points: pts, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke' }),
+    Object.assign(svgEl('title'), { textContent: `Walking speed, 0 to ${top.toFixed(1)} m/s` }));
 }
 
 function update() {
@@ -176,7 +264,7 @@ function update() {
   if (!item) return;
   item.classList.add('is-current');
   const log = $('routine-log');
-  if (!log.closest('[hidden]')) log.scrollTo({ top: item.offsetTop - log.clientHeight / 2 + item.offsetHeight / 2, behavior: 'smooth' });
+  if (!log.closest('[hidden]')) log.scrollTo({ left: item.offsetLeft - log.clientWidth / 2 + item.offsetWidth / 2, behavior: 'smooth' });
 }
 
 function redraw() {
@@ -198,25 +286,33 @@ function pickSource(source) {
 }
 
 function renderStats(total) {
-  const walkShare = Math.round(((total.share?.walking ?? 0) + (total.share?.['arms raised'] ?? 0)) * 100);
-  const stats = [
-    ['Duration', minutes(total.duration_min)],
-    ['Distance', `${Math.round(total.walking_distance_m)} m`],
-    ['Active ratio', `${walkShare}%`],
-    ['Sit transitions', `${total.sit_stand_transitions} · max ${minutes(total.longest_sitting_min)}`],
-  ];
-  $('day-stats').replaceChildren(...stats.map(([name, value]) => {
-    const tile = el('div', 'day-stat');
-    tile.append(el('span', 'day-stat-value', value), el('span', 'day-stat-name', name));
-    return tile;
-  }));
+  const active = Math.round(((total.share?.walking ?? 0) + (total.share?.['arms raised'] ?? 0)) * 100);
+  $('day-stats').replaceChildren(iconTile('time', minutes(total.duration_min), 'recorded'),
+    iconTile('walk', `${Math.round(total.walking_distance_m)} m`, 'walked'),
+    iconTile('active', `${active}%`, 'walking or arms up'),
+    iconTile('sit', String(total.sit_stand_transitions), `sit-downs · longest ${minutes(total.longest_sitting_min)}`));
 }
 
+// Time per posture as a donut; the biggest share in the middle.
 function renderPostures() {
   const share = shareOf(view.labels);
-  const row = el('div', 'day-row day-row-total');
-  row.append(el('span', 'day-row-name', SOURCES[view.source].name), stackedBar(share));
-  $('day-postures').replaceChildren(row);
+  const R = 42, C = 2 * Math.PI * R;
+  const donut = svgEl('svg', { viewBox: '0 0 120 120', class: 'day-donut', role: 'img',
+    'aria-label': POSTURES.filter((p) => share[p] > 0).map((p) => `${p} ${Math.round(share[p] * 100)}%`).join(', ') });
+  let at = 0;
+  for (const p of POSTURES) {
+    if (!(share[p] > 0)) continue;
+    donut.appendChild(svgEl('circle', { cx: 60, cy: 60, r: R, fill: 'none', stroke: POSTURE_COLORS[p], 'stroke-width': 18,
+      'stroke-dasharray': `${share[p] * C} ${C}`, 'stroke-dashoffset': -at * C, transform: 'rotate(-90 60 60)' }));
+    at += share[p];
+  }
+  const top = POSTURES.reduce((a, b) => (share[b] > share[a] ? b : a), POSTURES[0]);
+  const big = svgEl('text', { x: 60, y: 60, 'text-anchor': 'middle', class: 'day-donut-big' });
+  big.textContent = `${Math.round(share[top] * 100)}%`;
+  const small = svgEl('text', { x: 60, y: 76, 'text-anchor': 'middle', class: 'day-donut-small' });
+  small.textContent = top;
+  donut.append(big, small);
+  $('day-postures').replaceChildren(donut);
   $('day-legend').replaceChildren(...POSTURES.filter((p) => share[p] > 0).map((p) => {
     const item = el('li');
     const dot = el('span', 'day-dot');
@@ -231,6 +327,7 @@ function renderReview(report) {
   const r = report.report;
   if (!r) {
     box.replaceChildren(el('p', 'day-note', 'No review yet: run python -m director.routine_tips on this recording.'));
+    drawTrack(null);
     return;
   }
   const chipList = (title, items, extraClass = '') => {
@@ -257,8 +354,9 @@ function renderReview(report) {
   const ol = el('ol', 'changes');
   ol.append(...(r.improvements ?? []).slice(0, 3).map((c, idx) => {
     const li = el('li');
+    const t = firstTime(c.why) ?? firstTime(c.how);
     li.append(
-      el('span', 'change-step-tag', `Action ${idx + 1}`),
+      el('span', 'change-step-tag', `${idx + 1}${t !== null ? ` · ${clock(t)} on the timeline` : ''}`),
       el('strong', '', brief(c.change, 78)),
       el('span', 'change-why', brief(c.why ?? '', 90)),
       el('span', 'change-how', brief(c.how ?? '', 95)),
@@ -267,149 +365,77 @@ function renderReview(report) {
   }));
   changes.appendChild(ol);
 
+  // what they did is on the timeline; "vs past" is a chart (renderHistory fills it) with Muse's first comparison
   const subgrid = el('div', 'review-subgrid');
-  if (r.compared_with_history?.length) subgrid.appendChild(chipList('Vs. past routines', r.compared_with_history, 'review-history-callout'));
-  if (r.what_they_did?.length) subgrid.appendChild(chipList('Observed activities', r.what_they_did));
-  if (r.posture_and_movement?.length) subgrid.appendChild(chipList('Biomechanical notes', r.posture_and_movement));
-  if (r.went_well?.length) subgrid.appendChild(chipList('Positive habits', r.went_well));
+  const vs = el('section', 'review-part review-history-callout');
+  vs.append(el('h3', '', 'Vs. past routines'), Object.assign(el('div', 'vs-chart'), { id: 'vs-chart' }));
+  if (r.compared_with_history?.length) vs.appendChild(el('p', 'vs-note', brief(r.compared_with_history[0], 150)));
+  subgrid.appendChild(vs);
+  if (r.went_well?.length) subgrid.appendChild(chipList('Went well', r.went_well));
+  if (r.posture_and_movement?.length) {
+    const more = el('details', 'review-more');
+    more.append(el('summary', '', 'More from Muse Spark'), ...r.posture_and_movement.map((t) => el('p', '', t)));
+    subgrid.appendChild(more);
+  }
 
   const read = el('details', 'review-prompt');
   read.append(el('summary', '', 'View Meta Muse Spark prompt payload'), el('pre', '', r.prompt ?? 'Not saved with this review.'));
   box.replaceChildren(headline, changes, subgrid, read);
+  drawTrack(r);
   $('review-source').textContent = `Meta Muse Spark · vs ${r.history?.length ?? 0} past`;
 }
 
 // ---------- Past Routines & Cross-Session Comparison ----------
 
+// Past routines as one chart: a bar per session, its length the duration, split by posture; distance and sit-downs
+// beside it; Open loads it. Also the "vs past" chart in the review: this session's minutes and metres against the rest.
 async function renderHistory(current) {
   const { processed } = await fetchRecordings();
   const loaded = await Promise.all(processed.map(async (r) => ({
-    r,
-    ins: await getJson(r.files['insights.json']),
-    post: await getJson(r.files['postures.json']).catch(() => null),
+    r, ins: await getJson(r.files['insights.json']), post: await getJson(r.files['postures.json']).catch(() => null),
   })));
-
   $('past-count').textContent = `${loaded.length} session${loaded.length === 1 ? '' : 's'}`;
-
-  const totalMin = loaded.reduce((s, x) => s + (x.ins?.total?.duration_min ?? 0), 0);
-  const totalWalkM = loaded.reduce((s, x) => s + (x.ins?.total?.walking_distance_m ?? 0), 0);
-  const totalSits = loaded.reduce((s, x) => s + (x.ins?.total?.sit_stand_transitions ?? 0), 0);
-  const avgWalkShare = loaded.length
-    ? Math.round((loaded.reduce((s, x) => s + (x.ins?.total?.share?.walking ?? 0), 0) / loaded.length) * 100)
-    : 0;
-
-  const summaryItems = [
-    ['Total time', minutes(totalMin)],
-    ['Total distance', `${Math.round(totalWalkM)} m`],
-    ['Avg walking', `${avgWalkShare}%`],
-    ['Sit transitions', String(totalSits)],
-  ];
-  $('past-summary').replaceChildren(...summaryItems.map(([label, val]) => {
-    const item = el('div', 'past-sum-item');
-    item.append(el('span', 'past-sum-val', val), el('span', 'past-sum-label', label));
-    return item;
-  }));
-
-  const sorted = [...loaded].sort((a, b) => {
-    if (a.r.name === current?.name) return 1;
-    if (b.r.name === current?.name) return -1;
-    return a.r.name.localeCompare(b.r.name);
-  });
-  const curIns = loaded.find((x) => x.r.name === current?.name)?.ins?.total;
-
-  $('past-cards').replaceChildren(...sorted.map(({ r, ins, post }) => {
-    const isCurrent = r.name === current?.name;
+  const sum = (f) => loaded.reduce((a, x) => a + (f(x.ins?.total ?? {}) ?? 0), 0);
+  $('past-summary').replaceChildren(iconTile('time', minutes(sum((t) => t.duration_min)), 'in all'),
+    iconTile('walk', `${Math.round(sum((t) => t.walking_distance_m))} m`, 'walked'),
+    iconTile('sit', String(sum((t) => t.sit_stand_transitions)), 'sit-downs'));
+  const longest = Math.max(...loaded.map((x) => x.ins?.total?.duration_min ?? 0), 0.01);
+  $('past-cards').replaceChildren(...loaded.map(({ r, ins, post }) => {
     const t = ins.total;
-    const share = shareOf(post?.labels?.rules ?? []);
-    const card = el('article', `past-card ${isCurrent ? 'is-current-routine' : 'is-past-routine'}`);
-
-    const head = el('div', 'past-card-head');
-    const titleWrap = el('div', 'past-card-title');
-    titleWrap.append(
-      el('h3', 'past-card-name', r.name),
-      el('span', `badge ${isCurrent ? 'badge-current' : 'badge-past'}`, isCurrent ? 'Active' : 'Past routine'),
-    );
-    head.appendChild(titleWrap);
-
-    if (!isCurrent) {
-      const btn = el('button', 'btn btn-small-text', 'Load routine');
-      btn.type = 'button';
-      btn.addEventListener('click', async () => {
-        await openRecording(r);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      head.appendChild(btn);
-    }
-
-    const barWrap = el('div', 'past-card-bar');
-    barWrap.appendChild(stackedBar(share));
-    const topPostures = POSTURES
-      .filter((p) => share[p] >= 0.02)
-      .sort((a, b) => share[b] - share[a])
-      .map((p) => `${capitalize(p)} ${Math.round(share[p] * 100)}%`)
-      .join(' · ');
-    barWrap.appendChild(el('p', 'past-card-shares', topPostures));
-
-    const metrics = el('dl', 'past-card-metrics');
-    for (const [k, v] of [
-      ['Duration', minutes(t.duration_min)],
-      ['Walked', `${Math.round(t.walking_distance_m)} m`],
-      ['Sit-downs', String(t.sit_stand_transitions)],
-      ['Max sit', minutes(t.longest_sitting_min)],
-    ]) {
-      const cell = el('div');
-      cell.append(el('dt', '', k), el('dd', '', v));
-      metrics.appendChild(cell);
-    }
-
-    card.append(head, barWrap, metrics);
-
-    if (!isCurrent && curIns) {
-      const dWalk = Math.round(t.walking_distance_m - curIns.walking_distance_m);
-      const dWalkPct = Math.round(((t.share?.walking ?? 0) - (curIns.share?.walking ?? 0)) * 100);
-      const deltaText = `${dWalk >= 0 ? `+${dWalk}` : dWalk} m vs ${current.name} · `
-        + `${dWalkPct >= 0 ? `+${dWalkPct}` : dWalkPct}% walking`;
-      card.appendChild(el('p', 'past-card-delta', deltaText));
-    }
-    return card;
-  }));
-
-  const table = $('days-table');
-  const thead = el('thead');
-  const hr = el('tr');
-  hr.append(...['Session', 'Status', 'Posture split', 'Duration', 'Walked', 'Muse match', ''].map((t) => Object.assign(el('th', '', t), { scope: 'col' })));
-  thead.appendChild(hr);
-  const tbody = el('tbody');
-  for (const { r, ins, post } of sorted) {
     const isCurrent = r.name === current?.name;
-    const tr = el('tr');
-    const barTd = el('td');
-    barTd.appendChild(stackedBar(shareOf(post?.labels?.rules ?? [])));
-    const a = post?.agreement;
-    const actionTd = el('td');
-    if (!isCurrent) {
-      const open = el('button', 'btn btn-small-text', 'Open');
-      open.type = 'button';
-      open.addEventListener('click', () => {
-        openRecording(r);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      actionTd.appendChild(open);
-    } else {
-      actionTd.appendChild(el('span', 'past-active-tag', 'Active'));
+    const row = el('div', `past-row${isCurrent ? ' is-current-routine' : ''}`);
+    const name = el('button', 'past-row-name', r.name);
+    name.type = 'button';
+    name.disabled = isCurrent;
+    name.title = isCurrent ? 'Open now' : `Open ${r.name}`;
+    name.addEventListener('click', async () => { await openRecording(r); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    const wrap = el('div', 'past-row-bar');
+    const bar = stackedBar(shareOf(post?.labels?.rules ?? []));
+    bar.style.width = `${(100 * t.duration_min) / longest}%`;
+    wrap.appendChild(bar);
+    row.append(name, wrap, el('span', 'past-row-num', `${minutes(t.duration_min)} · ${Math.round(t.walking_distance_m)} m · ${t.sit_stand_transitions} sit`));
+    return row;
+  }));
+  const vs = $('vs-chart');
+  if (!vs) return;
+  const metrics = [['walked (m)', (t) => t.walking_distance_m, 'm'], ['walking (min)', (t) => t.minutes?.walking ?? 0, 'min'],
+    ['standing (min)', (t) => t.minutes?.standing ?? 0, 'min'], ['sitting (min)', (t) => t.minutes?.sitting ?? 0, 'min']];
+  vs.replaceChildren(...metrics.map(([label, f, unit]) => {
+    const top = Math.max(...loaded.map((x) => f(x.ins.total)), 0.01);
+    const row = el('div', 'vs-row');
+    row.appendChild(el('span', 'vs-label', label));
+    const bars = el('div', 'vs-bars');
+    for (const { r, ins } of loaded) {
+      const v = f(ins.total);
+      const b = el('span', `vs-bar${r.name === current?.name ? ' is-current' : ''}`);
+      b.style.width = `${(100 * v) / top}%`;
+      b.title = `${r.name}: ${unit === 'm' ? Math.round(v) : v.toFixed(2)} ${unit}`;
+      b.textContent = `${r.name} ${unit === 'm' ? Math.round(v) : v.toFixed(1)}`;
+      bars.appendChild(b);
     }
-    tr.append(
-      Object.assign(el('th', '', r.name), { scope: 'row' }),
-      el('td', '', isCurrent ? 'Current' : 'Past'),
-      barTd,
-      el('td', 'num', minutes(ins.total.duration_min)),
-      el('td', 'num', `${Math.round(ins.total.walking_distance_m)} m`),
-      el('td', 'num', a && Number.isFinite(a.muse) ? `${Math.round(a.muse * 100)}%` : '–'),
-      actionTd,
-    );
-    tbody.appendChild(tr);
-  }
-  table.replaceChildren(thead, tbody);
+    row.appendChild(bars);
+    return row;
+  }));
 }
 
 async function load(rec) {
@@ -423,8 +449,9 @@ async function load(rec) {
   Object.assign(view, { rows: parseCsv(csv), postures, captions: muse ?? [] });
   $('posture-switch').closest('.posture-pick').hidden = !postures;
   renderStats(report.total);
-  renderReview(report);
   pickSource('rules');
+  renderReview(report);
+  drawSpeed();
   $('day-status').textContent = `${rec.name} · ${clock(view.rows.length)}`;
   await renderHistory(rec);
 }

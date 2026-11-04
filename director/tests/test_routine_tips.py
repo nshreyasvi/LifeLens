@@ -28,7 +28,7 @@ def test_review_is_written_with_history(tmp_path, monkeypatch):
     run, earlier = make_run(tmp_path, 'office'), make_run(tmp_path, 'outdoor')
     sent = {}
 
-    def fake_muse(prompt, max_calls):
+    def fake_muse(prompt, max_calls, images=None):
         sent['prompt'] = prompt
         return '```json\n' + json.dumps(REVIEW) + '\n```'
 

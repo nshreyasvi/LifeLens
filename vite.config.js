@@ -29,7 +29,7 @@ const GYM_EXERCISES = ['squat', 'lunge', 'jump squat', 'step-up', 'deadlift', 'g
 const PATTERNS = ['pulse', 'chase', 'strobe', 'still'];
 const FOCUS = ['arms', 'legs', 'torso', 'all'];
 const SCENE_PROMPT = `You are the lighting designer of a live stage show. The performer wears a head camera and LifeLens
-turns it into a 3D body; these are that body's numbers and the music now:
+turns it into a 3D body; the image is that 3D body now; these are its numbers and the music:
 {facts}
 Design the next lighting scene for 6 fixtures (left arm, right arm, left leg, right leg, torso, pace); each fixture
 already follows its body part, jumps lift all lights and crouches dim them. Answer with one JSON object only:
@@ -182,6 +182,7 @@ function lifelensApi() {
     const history = recordings().processed.filter((r) => r.name !== name).map((r) => r.base).join(' ');
     return [
       ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'`)],
+      ['3D body frames', false, ...wsl(`${env('vlm')}/python pipeline/body_frames.py --run runs/${name}`)],   // what Muse sees
       ['Meta Muse Spark posture', false, python(), ['-m', 'director.posture_muse', `runs/${name}`]],
       ['Posture sources', false, ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
       ['Meta Muse Spark routine coaching', false, python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean)]],
@@ -235,11 +236,11 @@ function lifelensApi() {
       return;
     }
     const [label, critical, cmd, args] = steps[i];
-    const stageOf = ['', 'posture_muse', 'posture_muse', 'routine_tips'][i];
+    const stageOf = ['', 'posture_muse', 'posture_muse', 'posture_muse', 'routine_tips'][i];
     job.index = i;
     if (i === 0) setStage('ingest');
-    else if (i === 1 || i === 2) setStage('posture_muse');
-    else if (i === 3) setStage('routine_tips');
+    else if (i >= 1 && i <= 3) setStage('posture_muse');
+    else if (i === 4) setStage('routine_tips');
     job.step = PIPELINE_STAGES[job.stageIndex]?.label || label;
 
     const proc = spawn(cmd, args, { cwd: root, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUNBUFFERED: '1' } });
@@ -400,11 +401,13 @@ function lifelensApi() {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
         const key = museKey();
         if (!key) return send(res, 503, { error: 'scenes need a Muse key (MUSE_API_KEY in director/.env)' });
-        const { facts } = await readBody(req);
+        const { facts, image } = await readBody(req);
         if (typeof facts !== 'string' || !facts.trim() || facts.length > 1500) return send(res, 400, { error: 'Send facts.' });
+        const frame = typeof image === 'string' && image.startsWith('data:image/jpeg;base64,') && image.length < 400000 ? image : null;
         const t0 = Date.now();
         try {
-          const a = await askMuse(key, [{ type: 'input_text', text: SCENE_PROMPT.replace('{facts}', facts) }], 40000);
+          const a = await askMuse(key, [{ type: 'input_text', text: SCENE_PROMPT.replace('{facts}', facts) },
+            ...(frame ? [{ type: 'input_image', image_url: frame }] : [])], 40000);
           const palette = (Array.isArray(a.palette) ? a.palette : []).filter((c) => /^#[0-9A-Fa-f]{6}$/.test(c)).slice(0, 3);
           if (palette.length < 2 || !PATTERNS.includes(a.pattern)) return send(res, 502, { error: 'Muse gave no usable scene' });
           send(res, 200, {
