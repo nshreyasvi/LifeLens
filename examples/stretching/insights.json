@@ -55,79 +55,77 @@
   "log": "Total 1.25 min: walking 0.42 min, standing 0.25 min, crouching 0.08 min, bending 0.25 min, arms raised 0.25 min\n1 times sat or crouched down, longest sitting 0.08 min, walked 29.8 m, bent over 0.25 min.\nClip stretching:\n  walking 10 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks then checks his wrist.\n  standing 10 s. The camera wearer performs a squat. The camera wearer stands with hands clasped.\n  arms raised 5 s. The camera wearer stands up from a seated position.\n  bending 5 s. The camera wearer stumbles sideways with arms raised.\n  standing 5 s. The camera wearer walks with arms outstretched.\n  walking 10 s. The camera wearer walks forward while balancing with arms. The camera wearer walks forward.\n  crouching 5 s. The camera wearer walks while adjusting their pants.\n  bending 10 s. The camera wearer walks forward. The camera wearer balances on one leg.\n  walking 5 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks forward.",
   "runtime_s": 0.2,
   "report": {
-    "summary": "This 1.25 min stretching clip shows almost continuous moving with walking, standing, arm lifts and bends and almost no sitting. The wearer walks forward, checks wrist, squats, stands with hands clasped, stumbles sideways, and balances on one leg while walking. The 3D bodies at 0:00 to 0:35 show upright walking shifting to hands near head and an arm raised.",
+    "summary": "This 1.25 min stretching clip shows almost continuous movement with walking, standing, bending and arms-raised positions. The wearer walked 29.8 m, performed a squat, stood with hands clasped, balanced on one leg, and adjusted pants with no long sit. Muse captions note a sideways stumble at 0:30 and a wrist check while walking at 0:10.",
     "what_they_did": [
       "0:00-0:10: walks forward (walking)",
       "0:10-0:15: walks then checks wrist (arms raised)",
-      "0:15-0:25: performs a squat then stands with hands clasped (standing)",
-      "0:25-0:30: stands up from a seated position (arms raised)",
-      "0:30-0:40: stumbles sideways with arms raised then walks with arms outstretched (bending, standing)",
-      "0:40-0:55: walks forward while balancing with arms then walks while adjusting pants (walking, crouching)",
-      "0:55-1:15: walks forward, balances on one leg, then walks forward (bending, walking, arms raised)"
+      "0:15-0:25: performs a squat and stands with hands clasped (standing)",
+      "0:25-0:35: stands up from seated position then stumbles sideways with arms raised (bending)",
+      "0:35-0:45: walks with arms outstretched and balancing with arms (walking)",
+      "0:45-0:55: walks forward while adjusting pants (crouching)",
+      "0:55-1:05: walks forward and balances on one leg (bending)",
+      "1:05-1:15: walks forward (arms raised)"
     ],
     "posture_and_movement": [
-      "Moved through the whole clip with walking 0.42 min covering 29.8 m and no long still period.",
-      "Standing 0.25 min, bending 0.25 min and arms raised 0.25 min were equal shares, with bending totaling bent over 0.25 min.",
-      "Almost no low sitting with crouching 0.08 min, 1 sit-downs and longest sit 0.08 min.",
-      "3D bodies at 0:00, 0:05 and 0:10 show upright walking, while at 0:15, 0:20 and 0:25 show hands clasped near head and one arm raised, matching standing and arms raised labels."
+      "Most time was upright and moving: walking 0.42 min plus standing 0.25 min and arms raised 0.25 min out of 1.25 min total.",
+      "Very little low time: crouching 0.08 min with 1 sit-downs and longest sit 0.08 min.",
+      "Covered 29.8 m while walking, with short walking bouts including 10 s at 0:00-0:10 and 10 s at 0:40-0:50 walking forward while balancing with arms.",
+      "Bent over 0.25 min total, including 5 s stumbling sideways with arms raised at 0:30 and 10 s walking forward and balancing on one leg at 0:55-1:05."
     ],
     "compared_with_history": [
-      "Compared with eating, which had sitting 0.32 min, longest sit 0.32 min and only 3.3 m walked in 0.4 min, this stretching clip walked 29.8 m with longest sit only 0.08 min.",
-      "Compared with exercising, which had walking 0.42 min and standing 0.25 min over 0.93 min and 27.6 m walked, this clip matches walking 0.42 min and standing 0.25 min but covers slightly more distance at 29.8 m in 1.25 min.",
-      "Arms raised 0.25 min and bent over 0.25 min are higher than exercising arms raised 0.1 min and bent over 0.17 min, and higher than eating bent over 0.08 min."
+      "No earlier recordings were listed under OTHER RECORDINGS, so there is no history to compare this stretching clip with.",
+      "Without other recordings, the 1.25 min total, 29.8 m walk and posture mix cannot be ranked against any earlier routine."
     ],
     "improvements": [
       {
-        "change": "Pause and reset feet after the sideways stumble",
-        "why": "0:30 stumbles sideways with arms raised labeled bending for 5 s",
-        "how": "stop walking forward at 0:30-0:35, plant both feet, lower arms, then resume walking with arms outstretched"
+        "change": "Slow down the sideways stumble section",
+        "why": "stumbles sideways with arms raised at 0:30 during 0.25 min bent over",
+        "how": "take shorter steps and keep feet wider while walking forward around 0:30-0:35 instead of rushing with arms raised"
       },
       {
-        "change": "Keep wrist check still instead of walking",
-        "why": "0:10 walks then checks wrist during arms raised 5 s",
-        "how": "stop for those 5 s while checking wrist, then continue the forward walk"
+        "change": "Hold support when balancing on one leg",
+        "why": "balances on one leg at 1:00 in the 10 s bending bout at 0:55-1:05",
+        "how": "stay near a wall and touch it lightly while practicing the one-leg balance after walking forward"
       },
       {
-        "change": "Use two feet support during one-leg balance",
-        "why": "1:00 balances on one leg during bending 10 s from 0:55-1:05",
-        "how": "touch down lightly with the other foot or hold arms out wide while walking forward and balancing"
+        "change": "Check wrist while stopped",
+        "why": "walks then checks his wrist at 0:10 in arms raised 5 s",
+        "how": "pause the forward walk at 0:10-0:15, stand still, then look at wrist before resuming walking forward"
       },
       {
-        "change": "Make the squat and stand-up slower and separate",
-        "why": "0:15 performs a squat and 0:25 stands up from a seated position",
-        "how": "do the 0:15-0:25 squat with hands clasped as one slow stand, pause, then do the 0:25 stand-up as a second slow stand"
+        "change": "Use slow control in the squat",
+        "why": "performs a squat at 0:15 in the standing 10 s at 0:15-0:25",
+        "how": "keep feet flat and hands clasped in front during the squat at 0:15-0:20, then rise slowly to stand with hands clasped"
       },
       {
-        "change": "Avoid adjusting pants while moving",
-        "why": "0:50 walks while adjusting pants labeled crouching 5 s",
-        "how": "stop walking for those 5 s to adjust pants, then resume walking forward"
+        "change": "Keep clear space for balance walks",
+        "why": "walks forward while balancing with arms at 0:40 and walks with arms outstretched at 0:35",
+        "how": "clear the path ahead and walk slower with arms slightly out during the 0:35-0:50 balancing walk"
       }
     ],
     "went_well": [
-      "Kept moving for the full 1.25 min with 29.8 m walked and only 0.08 min longest sit.",
-      "Mixed walking, standing, bending and arms raised without a long sit, including squat at 0:15 and balancing with arms at 0:40."
+      "Kept moving for the full 1.25 min with 0.42 min walking and 29.8 m covered and no long sit beyond 0.08 min.",
+      "Included varied stretching actions: squat at 0:15, stand up from seated position at 0:25, walk with arms outstretched at 0:35, and balance on one leg at 1:00.",
+      "Kept walking forward after the sideways stumble at 0:30 through to 1:10 walks forward."
     ],
     "caveats": [
-      "Posture labels can be wrong, for example walking while adjusting pants labeled crouching and walking forward labeled bending, and standing up from seated may be a model mistake.",
-      "Legs in the 3D body are estimated because the head camera never sees the legs, so squat, stumble and one-leg balance shapes are uncertain."
+      "Muse posture labels can be wrong, for example standing labeled while walking with arms outstretched at 0:35 and crouching labeled while walking while adjusting pants at 0:50.",
+      "Leg positions come from a 3D body estimate the head camera never sees, so squat depth at 0:15 and one-leg balance at 1:00 may not be exact."
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",
-    "history": [
-      "eating",
-      "exercising"
-    ],
-    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (stretching, 1.25 min)\nRecorded 1.25 min: walking 0.42 min, standing 0.25 min, crouching 0.08 min, bending 0.25 min, arms raised 0.25 min. Walked 29.8 m, 1 sit-downs, longest sit 0.08 min, bent over 0.25 min.\nPosture bouts and what Muse saw:\nTotal 1.25 min: walking 0.42 min, standing 0.25 min, crouching 0.08 min, bending 0.25 min, arms raised 0.25 min\n1 times sat or crouched down, longest sitting 0.08 min, walked 29.8 m, bent over 0.25 min.\nClip stretching:\n  walking 10 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks then checks his wrist.\n  standing 10 s. The camera wearer performs a squat. The camera wearer stands with hands clasped.\n  arms raised 5 s. The camera wearer stands up from a seated position.\n  bending 5 s. The camera wearer stumbles sideways with arms raised.\n  standing 5 s. The camera wearer walks with arms outstretched.\n  walking 10 s. The camera wearer walks forward while balancing with arms. The camera wearer walks forward.\n  crouching 5 s. The camera wearer walks while adjusting their pants.\n  bending 10 s. The camera wearer walks forward. The camera wearer balances on one leg.\n  walking 5 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks forward.\nMuse's captions every 5 s:\n0:00 The camera wearer walks forward.\n0:05 The camera wearer walks forward.\n0:10 The camera wearer walks then checks his wrist.\n0:15 The camera wearer performs a squat.\n0:20 The camera wearer stands with hands clasped.\n0:25 The camera wearer stands up from a seated position.\n0:30 The camera wearer stumbles sideways with arms raised.\n0:35 The camera wearer walks with arms outstretched.\n0:40 The camera wearer walks forward while balancing with arms.\n0:45 The camera wearer walks forward.\n0:50 The camera wearer walks while adjusting their pants.\n0:55 The camera wearer walks forward.\n1:00 The camera wearer balances on one leg.\n1:05 The camera wearer walks forward.\n1:10 The camera wearer walks forward.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, 0:25, 0:30, 0:35, in order: use them for posture and movement.\n\nOTHER RECORDINGS\n- eating: Recorded 0.4 min: sitting 0.32 min, bending 0.08 min. Walked 3.3 m, 1 sit-downs, longest sit 0.32 min, bent over 0.08 min. What they did: 0:00 The camera wearer sits down.; 0:05 The camera wearer stirs noodles in a bowl with a spoon.; 0:10 The camera wearer eats food from a bowl.; 0:15 The camera wearer stirs noodles in a bowl.; 0:20 Stirs noodles in a bowl with a spoon.\n- exercising: Recorded 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min. Walked 27.6 m, 0 sit-downs, longest sit 0.0 min, bent over 0.17 min. What they did: 0:00 The camera wearer walks forward.; 0:05 The camera wearer is walking forward.; 0:20 The camera wearer walks then squats down.; 0:25 The camera wearer stands and clasps hands together.; 0:30 The camera wearer unclasps their hands.; 0:35 The camera wearer stands up.; 0:40 The camera wearer spins in place.; 0:45 The camera wearer bends to touch their shoes.\n\nAbout the person: 178 cm."
+    "history": [],
+    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (stretching, 1.25 min)\nRecorded 1.25 min: walking 0.42 min, standing 0.25 min, crouching 0.08 min, bending 0.25 min, arms raised 0.25 min. Walked 29.8 m, 1 sit-downs, longest sit 0.08 min, bent over 0.25 min.\nPosture bouts and what Muse saw:\nTotal 1.25 min: walking 0.42 min, standing 0.25 min, crouching 0.08 min, bending 0.25 min, arms raised 0.25 min\n1 times sat or crouched down, longest sitting 0.08 min, walked 29.8 m, bent over 0.25 min.\nClip stretching:\n  walking 10 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks then checks his wrist.\n  standing 10 s. The camera wearer performs a squat. The camera wearer stands with hands clasped.\n  arms raised 5 s. The camera wearer stands up from a seated position.\n  bending 5 s. The camera wearer stumbles sideways with arms raised.\n  standing 5 s. The camera wearer walks with arms outstretched.\n  walking 10 s. The camera wearer walks forward while balancing with arms. The camera wearer walks forward.\n  crouching 5 s. The camera wearer walks while adjusting their pants.\n  bending 10 s. The camera wearer walks forward. The camera wearer balances on one leg.\n  walking 5 s. The camera wearer walks forward.\n  arms raised 5 s. The camera wearer walks forward.\nMuse's captions every 5 s:\n0:00 The camera wearer walks forward.\n0:05 The camera wearer walks forward.\n0:10 The camera wearer walks then checks his wrist.\n0:15 The camera wearer performs a squat.\n0:20 The camera wearer stands with hands clasped.\n0:25 The camera wearer stands up from a seated position.\n0:30 The camera wearer stumbles sideways with arms raised.\n0:35 The camera wearer walks with arms outstretched.\n0:40 The camera wearer walks forward while balancing with arms.\n0:45 The camera wearer walks forward.\n0:50 The camera wearer walks while adjusting their pants.\n0:55 The camera wearer walks forward.\n1:00 The camera wearer balances on one leg.\n1:05 The camera wearer walks forward.\n1:10 The camera wearer walks forward.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, 0:25, 0:30, 0:35, in order: use them for posture and movement.\n\nOTHER RECORDINGS\nnone\n\nAbout the person: 178 cm."
   },
   "suggestions": {
     "lines": [
-      "Pause and reset feet after the sideways stumble",
-      "Keep wrist check still instead of walking",
-      "Use two feet support during one-leg balance"
+      "Slow down the sideways stumble section",
+      "Hold support when balancing on one leg",
+      "Check wrist while stopped"
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",
-    "earlier_days": 2,
+    "earlier_days": 0,
     "sample_days": 0
   }
 }

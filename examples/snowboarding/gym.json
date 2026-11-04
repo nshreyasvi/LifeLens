@@ -1,0 +1,23 @@
+{
+ "exercise": {
+  "exercise": "none",
+  "main_joint": "none",
+  "confidence": 0.95,
+  "reason": "Head camera shows a snowy downhill slope with a snowboard tip while the 3D bodies go from standing to lying, indicating a snowboard ride/fall not a repeated exercise.",
+  "source": "Meta Muse Spark",
+  "frames_at_s": [
+   3.7,
+   7.0,
+   10.3,
+   13.7,
+   17.0,
+   20.3
+  ]
+ },
+ "joint": "knee",
+ "reps": [],
+ "sets": [],
+ "summary": {},
+ "review": null,
+ "runtime_s": 17.1
+}

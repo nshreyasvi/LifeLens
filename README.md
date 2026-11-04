@@ -62,8 +62,7 @@ Smart glasses and head cameras are becoming everyday devices, but they only see 
 
 *DEMO_CAPTION*
 
-The footage is our own: five head-mounted GoPro clips (exercising, stretching, eating, snowboarding, strapping into a
-snowboard), in [`examples/`](examples) with their 3D bodies and every Muse Spark output.
+The footage is our own: head-mounted GoPro clips (`stretching`, `eating`, `snowboarding`, and `snowboard-strap-in`), in [`examples/`](examples) with their 3D bodies and every Muse Spark output.
 
 ## What LifeLens does
 

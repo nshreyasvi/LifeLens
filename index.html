@@ -160,11 +160,6 @@
             <strong>ReccoBeats + 6 Lights</strong>
           </div>
         </div>
-
-        <div class="start-hw-pill" id="start-hw-pill">
-          <span class="hw-dot" aria-hidden="true"></span>
-          <span id="start-hw-text">Detecting local GPU &amp; processor…</span>
-        </div>
       </div>
 
       <div class="start-card">
@@ -225,6 +220,14 @@
             <p class="rec-note" id="rec-note" aria-live="polite"></p>
           </div>
         </div>
+      </div>
+
+      <div class="start-resource-bubble" id="start-hw-pill" aria-label="Local compute resources">
+        <div class="start-resource-left">
+          <span class="hw-dot" aria-hidden="true"></span>
+          <span class="start-resource-kicker">Active Compute &amp; AI Stack</span>
+        </div>
+        <span class="start-resource-text" id="start-hw-text">Detecting local GPU &amp; processor…</span>
       </div>
     </div>
   </section>
@@ -525,9 +528,6 @@
             <p class="lights-reason" id="lights-reason" aria-live="polite" hidden></p>
             <div class="stage-scene-row">
               <p class="stage-scene" id="stage-scene" aria-live="polite">Rules only until Muse Spark designs the first scene.</p>
-              <div class="stage-actions">
-                <button class="toggle" id="stage-fx" type="button" aria-pressed="true">Sound FX</button>
-              </div>
               <p class="stage-out" id="stage-out">Lights out: simulator (no hardware set)</p>
               <p class="stagify-status" id="stagify-status" aria-live="polite" hidden></p>
               <div class="stagify-out" id="stagify-out" hidden></div>
@@ -650,12 +650,6 @@
     <div class="show-top">
       <span class="show-brand">LifeLens · Stage show</span>
       <span class="show-chip" id="show-tempo">No beat yet</span>
-      <button class="show-btn" id="show-fx" type="button" aria-pressed="true">Sound FX</button>
-    </div>
-    <div class="show-box show-scene-box">
-      <span class="show-label">Muse Spark scene</span>
-      <div class="show-palette" id="show-palette"></div>
-      <p id="show-scene" aria-live="polite"></p>
     </div>
     <div class="show-box show-cues-box">
       <span class="show-label">Cues</span>

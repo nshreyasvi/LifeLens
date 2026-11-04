@@ -1,0 +1,62 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "label": "standing"
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "label": "crouching"
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "label": "sitting"
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "label": "crouching"
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 25.0,
+  "label": "crouching"
+ },
+ {
+  "start_s": 25.0,
+  "end_s": 30.0,
+  "label": "crouching"
+ },
+ {
+  "start_s": 30.0,
+  "end_s": 35.0,
+  "label": "standing"
+ },
+ {
+  "start_s": 35.0,
+  "end_s": 40.0,
+  "label": "bending"
+ },
+ {
+  "start_s": 40.0,
+  "end_s": 45.0,
+  "label": "crouching"
+ },
+ {
+  "start_s": 45.0,
+  "end_s": 50.0,
+  "label": "standing"
+ },
+ {
+  "start_s": 50.0,
+  "end_s": 55.0,
+  "label": "standing"
+ },
+ {
+  "start_s": 55.0,
+  "end_s": 60.0,
+  "label": "standing"
+ }
+]

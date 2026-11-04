@@ -38,14 +38,14 @@ export const stage = {
   fixtures: FIXTURES.map(() => ({ level: 0, color: '#3977FF' })),
   spot: { x: 0.5, y: 0.5, level: 0 },
   cues: [],               // [{t, text}] newest last
-  flashUntil: 0, last: {}, fx: true, open: false, lightsOut: null, sentAt: 0, beats: 0, energy: 0,
+  flashUntil: 0, last: {}, fx: false, open: false, lightsOut: null, sentAt: 0, beats: 0, energy: 0,
   plan: null,             // Stagify's plan {segment_s, scenes[], music[]}: its scene for the time, instead of live ones
-  recDest: null,          // while the show video records: sound effects also go here
+  recDest: null,
 };
 
 export function setPlan(plan) { stage.plan = plan; }
 const planScene = (t) => (stage.plan ? stage.plan.scenes[Math.min(stage.plan.scenes.length - 1, Math.floor(t / stage.plan.segment_s))] : null);
-export function recordFx() { const c = audio(); stage.recDest = c.createMediaStreamDestination(); return stage.recDest; }
+export function recordFx() { return null; }
 
 // ---------- Colour ----------
 
@@ -62,68 +62,11 @@ function shiftHue(hex, deg) {
   return `#${[r1, g1, b1].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('')}`;
 }
 
-// ---------- Sound effects (generated, no audio files) ----------
+// ---------- Cues: moments the rules see (silent — no synthesized boom/thump SFX) ----------
 
-let ac = null;
-let noiseBuf = null;
-function audio() {
-  ac ??= new AudioContext();
-  if (ac.state === 'suspended') ac.resume();
-  noiseBuf ??= (() => {
-    const b = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
-    const d = b.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    return b;
-  })();
-  return ac;
-}
-function envelope(c, node, t, peak, dur) {
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(peak, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  node.connect(g);
-  return g;
-}
-function fx(kind, amount = 1) {
-  if (!stage.fx) return;
-  try {
-    const c = audio(), t = c.currentTime;
-    const out = c.createGain();
-    out.gain.value = 0.25 * clamp01(amount);
-    out.connect(c.destination);
-    if (stage.recDest) out.connect(stage.recDest);
-    if (kind === 'hit') {                                   // impact: falling thump + a click
-      const o = c.createOscillator();
-      o.frequency.setValueAtTime(150, t);
-      o.frequency.exponentialRampToValueAtTime(45, t + 0.2);
-      envelope(c, o, t, 1, 0.28).connect(out);
-      o.start(t); o.stop(t + 0.3);
-      const n = c.createBufferSource(); n.buffer = noiseBuf;
-      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
-      n.connect(hp); envelope(c, hp, t, 0.6, 0.06).connect(out);
-      n.start(t); n.stop(t + 0.08);
-    } else if (kind === 'turn') {                           // whoosh: noise swept through a band-pass
-      const n = c.createBufferSource(); n.buffer = noiseBuf;
-      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2;
-      bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(3500, t + 0.45);
-      n.connect(bp); envelope(c, bp, t, 0.9, 0.5).connect(out);
-      n.start(t); n.stop(t + 0.55);
-    } else if (kind === 'jump') {                           // rise: a chirp up
-      const o = c.createOscillator(); o.type = 'triangle';
-      o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(880, t + 0.3);
-      envelope(c, o, t, 0.8, 0.35).connect(out);
-      o.start(t); o.stop(t + 0.4);
-    }
-  } catch { /* no Web Audio: stay silent */ }
-}
-
-// ---------- Cues: moments the rules see ----------
-
-function cue(t, text, sound, amount) {
+function cue(t, text) {
   stage.cues.push({ t, text });
   if (stage.cues.length > 30) stage.cues.shift();
-  if (sound) fx(sound, amount);
   renderCues();
 }
 
@@ -352,20 +295,30 @@ export function keyedBody(retry = true) {
   const v = bodySource();
   // no new frame yet (a seek or a busy decoder): keep the last cut-out rather than an empty stage
   if (!v || v.readyState < 2 || !v.videoWidth) { stage.keyStale = (stage.keyStale ?? 0) + 1; return stage.vbox && { ...stage.vbox, fresh: false }; }
+  const frameKey = `${v.currentSrc || ''}:${Math.round((v.currentTime || 0) * 30)}`;
+  if (retry && stage.keyFrame === frameKey && stage.vbox) {
+    return { ...stage.vbox, fresh: false };
+  }
   const W = v.videoWidth, H = v.videoHeight, b = stage.vbox;
   let found = null;
-  if (b) {                                             // track: the last box, 40% bigger, at full resolution
+  if (b) {                                             // track: the last box, 40% bigger, capped to 260 px height for 60 fps
     const mw = (b.vx1 - b.vx0) * 0.4 + 12, mh = (b.vy1 - b.vy0) * 0.4 + 12;
     const sx = Math.max(0, b.vx0 - mw), sy = Math.max(0, b.vy0 - mh);
-    found = keyRegion(v, sx, sy, Math.min(W, b.vx1 + mw) - sx, Math.min(H, b.vy1 + mh) - sy, 1);
+    const sw = Math.min(W, b.vx1 + mw) - sx, sh = Math.min(H, b.vy1 + mh) - sy;
+    const scale = Math.min(1, 260 / Math.max(1, sh));
+    found = keyRegion(v, sx, sy, sw, sh, scale);
   }
   if (!found && retry) {                               // lost (or first frame): find it on a small full frame, then key it
-    const whole = keyRegion(v, 0, 0, W, H, 320 / W);
+    const whole = keyRegion(v, 0, 0, W, H, 280 / W);
     if (whole) { stage.vbox = whole; return keyedBody(false); }
     stage.keyLost = (stage.keyLost ?? 0) + 1;
     return null;
   }
-  if (found) { stage.vbox = found; stage.keyFresh = (stage.keyFresh ?? 0) + 1; }
+  if (found) {
+    stage.vbox = found;
+    stage.keyFrame = frameKey;
+    stage.keyFresh = (stage.keyFresh ?? 0) + 1;
+  }
   return found && { ...found, fresh: true };
 }
 
@@ -431,12 +384,17 @@ function draw() {
       kg.globalCompositeOperation = 'source-over';
     }
     const h = H * 0.36 * ((av.vy1 - av.vy0) / Math.max(1, stage.avH)), w = (h * (av.x1 - av.x0)) / Math.max(1, av.y1 - av.y0);
+    const ax = sx - (av.hip - av.x0) * (w / Math.max(1, av.x1 - av.x0)), ay = sy - h;
+    // Fast GPU radial aura behind performer instead of slow CPU canvas filter + shadowBlur convolution
+    g.globalCompositeOperation = 'lighter';
+    const aura = g.createRadialGradient(sx, ay + h * 0.5, 0, sx, ay + h * 0.5, Math.max(w, h) * 0.65);
+    const auraAlpha = Math.round(55 + 95 * lead.level).toString(16).padStart(2, '0');
+    aura.addColorStop(0, `${lead.color}${auraAlpha}`);
+    aura.addColorStop(1, `${lead.color}00`);
+    g.fillStyle = aura;
+    g.fillRect(sx - h, ay - h * 0.2, h * 2, h * 1.4);
     g.globalCompositeOperation = 'source-over';
-    g.filter = 'blur(0.6px)';
-    g.shadowColor = lead.color; g.shadowBlur = (14 + 30 * lead.level) * dpr;
-    g.drawImage(key, av.x0, av.y0, av.x1 - av.x0, av.y1 - av.y0, sx - (av.hip - av.x0) * (w / Math.max(1, av.x1 - av.x0)), sy - h, w, h);
-    g.shadowBlur = 0;
-    g.filter = 'none';
+    g.drawImage(key, av.x0, av.y0, av.x1 - av.x0, av.y1 - av.y0, ax, ay, w, h);
   }
   // the head camera, picture in picture
   g.globalCompositeOperation = 'source-over';
@@ -463,15 +421,11 @@ export function openShow(on) {
 }
 document.addEventListener('lifelens:tab', (e) => openShow(e.detail.tab === 'stage'));
 
-export function setFx(on) {
-  stage.fx = on;
-  for (const id of ['show-fx', 'stage-fx']) $(id)?.setAttribute('aria-pressed', String(on));
-  if (on) audio();          // a click is the gesture the browser needs before it plays sound
+export function setFx() {
+  stage.fx = false;
 }
 
 export function resetStage() {
   Object.assign(stage, { scene: null, cues: [], flashUntil: 0, last: {}, beats: 0, askedAt: 0, lightsOut: null, plan: null });
   renderScene(); renderCues();
 }
-
-for (const id of ['show-fx', 'stage-fx']) $(id)?.addEventListener('click', () => setFx(!stage.fx));
