@@ -565,7 +565,7 @@ function lifelensApi() {
 
 export default defineConfig({
   plugins: [lifelensApi()],
-  // recordings/ and runs/ hold big videos the pipeline writes: watching them crashes the server (EBUSY) mid-copy
-  server: { port: 8000, strictPort: true, watch: { ignored: ['**/recordings/**', '**/runs/**'] } },
+  // recordings/, runs/, brag-output*/, archive/, and docs/ hold big videos: watching them crashes the server (EBUSY) mid-copy
+  server: { port: 8000, strictPort: true, watch: { ignored: ['**/recordings/**', '**/runs/**', '**/brag-output*/**', '**/archive/**', '**/docs/**'] } },
   preview: { port: 8000, strictPort: true },
 });

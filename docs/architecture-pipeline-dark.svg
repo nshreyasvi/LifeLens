@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3155.0730000000003 312.30000000000007" width="3155.0730000000003" height="312.30000000000007" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="30 fps + Lens Preset" points="379.83199999999994,155.8 581.7099999999999,155.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Point Cloud + Gravity" points="927.4699999999998,155.8 1129.9419999999998,155.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Head + Wrist Signals" points="1421.6089999999997,155.8 1623.4869999999999,155.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="mesh_exo.mp4 + Joint Angles" points="2077.433,155.8 2321.4849999999997,155.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Posture + Habits" points="2666.504,144.73000000000002 2678.504000000001,144.73000000000002 2678.504000000001,58.45000000000001 2825.3740000000007,58.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Rep Depth + Balance" points="2666.504,152.11 2702.504,152.11 2702.504,123.35000000000001 2870.9350000000004,123.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="20s Window Sync + Day Vibe" points="2666.504,159.49 2702.504,159.49 2702.504,188.25 2906.398,188.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="6-Fixture Cues + DMX/Hue" points="2666.504,166.87 2678.504,166.87 2678.504,253.15000000000003 2870.9350000000004,253.15000000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="A" data-to="B" data-label="30 fps + Lens Preset">
+  <rect x="423.83199999999994" y="139.8" width="113.878" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="480.77099999999996" y="154.95000000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">30 fps + Lens Preset</text>
+</g>
+<g class="edge-label" data-from="B" data-to="C" data-label="Point Cloud + Gravity">
+  <rect x="971.4699999999999" y="139.8" width="114.47200000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1028.706" y="154.95000000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Point Cloud + Gravity</text>
+</g>
+<g class="edge-label" data-from="C" data-to="D" data-label="Head + Wrist Signals">
+  <rect x="1465.6089999999997" y="139.8" width="113.87800000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1522.5479999999998" y="154.95000000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Head + Wrist Signals</text>
+</g>
+<g class="edge-label" data-from="D" data-to="E" data-label="mesh_exo.mp4 + Joint Angles">
+  <rect x="2121.433" y="139.8" width="156.052" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2199.459" y="154.95000000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">mesh_exo.mp4 + Joint Angles</text>
+</g>
+<g class="edge-label" data-from="E" data-to="F" data-label="Posture + Habits">
+  <rect x="2686.504000000001" y="42.45000000000001" width="94.87" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2733.9390000000008" y="57.60000000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Posture + Habits</text>
+</g>
+<g class="edge-label" data-from="E" data-to="G" data-label="Rep Depth + Balance">
+  <rect x="2710.504" y="107.35000000000001" width="114.47200000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2767.74" y="122.50000000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Rep Depth + Balance</text>
+</g>
+<g class="edge-label" data-from="E" data-to="H" data-label="20s Window Sync + Day Vibe">
+  <rect x="2710.504" y="172.25" width="151.894" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2786.451" y="187.4" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">20s Window Sync + Day Vibe</text>
+</g>
+<g class="edge-label" data-from="E" data-to="I" data-label="6-Fixture Cues + DMX/Hue">
+  <rect x="2686.504" y="237.15000000000003" width="142.39000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2757.699" y="252.30000000000004" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">6-Fixture Cues + DMX/Hue</text>
+</g>
+<g class="node" data-id="A" data-label="First-Person Video (Meta Ray-Ban / GoPro / Phone)" data-shape="rectangle">
+  <rect x="40" y="137.35000000000002" width="339.83199999999994" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="209.91599999999997" y="155.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">First-Person Video (Meta Ray-Ban / GoPro / Phone)</text>
+</g>
+<g class="node" data-id="B" data-label="HaWoR + DROID-SLAM (3D Hands and Camera Path)" data-shape="rectangle">
+  <rect x="581.7099999999999" y="137.35000000000002" width="345.7599999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="754.5899999999999" y="155.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">HaWoR + DROID-SLAM (3D Hands and Camera Path)</text>
+</g>
+<g class="node" data-id="C" data-label="Metric3D v2 (Floor Plane and Height Scale)" data-shape="rectangle">
+  <rect x="1129.9419999999998" y="137.35000000000002" width="291.667" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1275.7754999999997" y="155.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Metric3D v2 (Floor Plane and Height Scale)</text>
+</g>
+<g class="node" data-id="D" data-label="sam-3d-body + Meta MHR + OmniEgoCap (Full 3D Body and Hand Mesh)" data-shape="rectangle">
+  <rect x="1623.4869999999999" y="137.35000000000002" width="453.9459999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1850.4599999999998" y="155.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">sam-3d-body + Meta MHR + OmniEgoCap (Full 3D Body and Hand Mesh)</text>
+</g>
+<g class="node" data-id="E" data-label="Meta Muse Spark 1.3 + Meta Llama 3.2 (Multimodal AI)" data-shape="rectangle">
+  <rect x="2321.4849999999997" y="137.35000000000002" width="345.01899999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2493.9945" y="155.8" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Meta Muse Spark 1.3 + Meta Llama 3.2 (Multimodal AI)</text>
+</g>
+<g class="node" data-id="F" data-label="Routine and Habit Coach" data-shape="rectangle">
+  <rect x="2825.3740000000007" y="40" width="183.481" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2917.1145000000006" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Routine and Habit Coach</text>
+</g>
+<g class="node" data-id="G" data-label="Gymify Visual Form Coach" data-shape="rectangle">
+  <rect x="2870.9350000000004" y="104.9" width="193.85500000000002" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2967.8625" y="123.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Gymify Visual Form Coach</text>
+</g>
+<g class="node" data-id="H" data-label="Spotify + ReccoBeats Player" data-shape="rectangle">
+  <rect x="2906.398" y="169.8" width="208.67499999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="3010.7355000000002" y="188.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Spotify + ReccoBeats Player</text>
+</g>
+<g class="node" data-id="I" data-label="Virtual Dance Studio Stage" data-shape="rectangle">
+  <rect x="2870.9350000000004" y="234.70000000000002" width="196.81899999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2969.3445" y="253.15000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Virtual Dance Studio Stage</text>
+</g>
+</svg>

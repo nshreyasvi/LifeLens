@@ -66,7 +66,7 @@ function selectTab(name, { focus = false } = {}) {
   const routineDeck = $('view-day');
   if (routineDeck) routineDeck.hidden = name !== 'activity';
   $('gym-deck').hidden = name !== 'gym';
-  els.player.hidden = !['activity', 'music', 'stage', 'gym'].includes(name);
+  els.player.hidden = !['music', 'stage', 'gym'].includes(name);
   const dock = $('music-dock'), bar = els.player.querySelector('.player-bar') ?? dock.querySelector('.player-bar');
   if (name === 'music') dock.append(bar, $('song-queue'));
   else { els.player.querySelector('.player-embed').before(bar); $('song-queue-home').append($('song-queue')); }
