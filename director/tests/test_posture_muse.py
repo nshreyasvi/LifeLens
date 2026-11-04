@@ -17,7 +17,7 @@ def test_parse_reads_numbered_lines_and_rejects_other_labels():
 def test_main_writes_one_label_per_window(tmp_path, monkeypatch):
     clip = tmp_path / 'office'
     clip.mkdir()
-    for name in ('pose_timeseries.csv', 'narration.json'):
+    for name in ('pose_timeseries.csv', 'narration_muse.json'):
         shutil.copy(OFFICE / name, clip / name)
     sent = {}
 
@@ -30,4 +30,4 @@ def test_main_writes_one_label_per_window(tmp_path, monkeypatch):
     out = json.loads((clip / 'posture_muse.json').read_text())
     assert len(out) == 17 and {w['label'] for w in out} == {'standing'}          # 83 s of office
     assert out[0]['start_s'] == 0 and out[-1]['start_s'] == 80
-    assert '1. speed' in sent['prompt'] and 'video: The camera wearer' in sent['prompt']
+    assert '1. speed' in sent['prompt'] and 'video: Walk away' in sent['prompt']
