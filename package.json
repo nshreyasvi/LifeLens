@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "LifeLens Live Panel front-end (Vite). The original plain HTML version is in legacy/.",
+  "description": "LifeLens Live Studio front-end (Vite).",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,9 +11,5 @@
   },
   "devDependencies": {
     "vite": "^6.0.0"
-  },
-  "dependencies": {
-    "@fontsource-variable/geist": "^5.3.0",
-    "@fontsource-variable/geist-mono": "^5.3.0"
   }
 }

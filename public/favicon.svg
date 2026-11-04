@@ -1,14 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <title>LifeLens</title>
   <defs>
-    <linearGradient id="lifelens-favicon-g" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3D8BFF"/>
-      <stop offset="1" stop-color="#165DFF"/>
+    <linearGradient id="ll-fav-bg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E2230"/>
+      <stop offset="1" stop-color="#0E1017"/>
     </linearGradient>
+    <radialGradient id="ll-fav-glass" cx="28" cy="26" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#546FFF"/>
+      <stop offset="0.6" stop-color="#2B44E8"/>
+      <stop offset="1" stop-color="#172554"/>
+    </radialGradient>
   </defs>
-  <!-- The LifeLens mark without the faint lens rim, which blurs at 16 px. -->
-  <circle cx="32" cy="32" r="32" fill="url(#lifelens-favicon-g)"/>
-  <path d="M21.4 19.8 L32 27.6 L42.6 19.2 M32 27.6 L31.4 36 L24.4 46.2 M31.4 36 L38.4 40.6 L38.4 49" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="14.2" r="5.5" fill="#FFFFFF"/>
-  <circle cx="32" cy="14.2" r="2.9" fill="#FF5A36"/>
+  <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#ll-fav-bg)"/>
+  <circle cx="32" cy="32" r="22" fill="url(#ll-fav-glass)" stroke="#93C5FD" stroke-opacity="0.5" stroke-width="2"/>
+  <circle cx="32" cy="32" r="10.5" fill="#0B0D13" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="1.6"/>
+  <circle cx="26.2" cy="26" r="3.2" fill="#FFFFFF"/>
+  <circle cx="50.5" cy="13.5" r="4.8" fill="#E04826" stroke="#0E1017" stroke-width="1.8"/>
 </svg>

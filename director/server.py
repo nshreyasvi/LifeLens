@@ -33,8 +33,8 @@ def _arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--max-muse-calls", type=int, default=30)
     parser.add_argument("--describe", choices=("qwen", "dam", "both"), default="qwen")
-    parser.add_argument("--captions", choices=("qwen", "muse"), default="qwen",
-                        help="whose 5 s captions the slow loop reads as narration: Qwen's (activity.csv) or Muse's")
+    parser.add_argument("--captions", choices=("qwen", "muse"), default="muse",
+                        help="whose 5 s captions the slow loop reads as narration: Muse Spark (default)")
     return parser
 
 

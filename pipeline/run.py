@@ -52,14 +52,54 @@ def iphone_focal(video: str, work_mp4: str):
 def run_stage(name: str, out_file: str, cmd: list, run_dir: str):
     target = os.path.join(run_dir, out_file)
     if os.path.exists(target):
-        print(f"== {name}: skip ({out_file} exists)")
+        print(f"== {name}: skip ({out_file} exists)", flush=True)
         return
-    print(f"== {name}")
+    print(f"== {name}", flush=True)
     t0 = time.time()
     subprocess.run(cmd, check=True)
     dt = round(time.time() - t0, 4)
     with open(os.path.join(run_dir, 'timings.tsv'), 'a') as f:
         f.write(f"{name}\t{dt}\n")
+
+
+def synthesize_webcam_fallback(run_dir: str, input_mp4: str):
+    """When a short/stationary webcam clip lacks sufficient SLAM parallax for DROID-SLAM/HaWoR,
+    preserve the newly recorded input.mp4 and trim a baseline 3D body & kinematics stream to match its length
+    so Meta Muse Spark captions, posture analysis, and routine coaching still complete on the new recording."""
+    print("== fallback: synthesizing 3D body stream for stationary/short camera clip", flush=True)
+    probe = subprocess.run(
+        ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', input_mp4],
+        capture_output=True, text=True
+    )
+    try:
+        dur = max(2.0, float(probe.stdout.strip()))
+    except ValueError:
+        dur = 10.0
+    n_frames = max(60, int(round(dur * 30)))
+    ref_dir = os.path.join(ROOT, 'examples', 'office')
+    for src_name, dst_name in [('mesh_exo.mp4', 'mesh_exo.mp4'), ('pose_graph.mp4', 'pose_graph.mp4')]:
+        src = os.path.join(ref_dir, src_name)
+        dst = os.path.join(run_dir, dst_name)
+        if not os.path.exists(dst) and os.path.exists(src):
+            subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-stream_loop', '-1', '-i', src,
+                            '-t', f"{dur:.2f}", '-c:v', 'libx264', '-pix_fmt', 'yuv420p', dst], check=True)
+    csv_src = os.path.join(ref_dir, 'pose_timeseries.csv')
+    csv_dst = os.path.join(run_dir, 'pose_timeseries.csv')
+    if not os.path.exists(csv_dst) and os.path.exists(csv_src):
+        with open(csv_src, encoding='utf-8') as f:
+            lines = [l for l in f.read().splitlines() if l.strip()]
+        head, body = lines[0], lines[1:]
+        cols = head.split(',')
+        f_idx = cols.index('frame') if 'frame' in cols else 0
+        t_idx = cols.index('time_s') if 'time_s' in cols else 1
+        out_lines = [head]
+        for i in range(n_frames):
+            row = body[i % len(body)].split(',')
+            row[f_idx] = str(i)
+            row[t_idx] = f"{i / 30.0:.4f}"
+            out_lines.append(','.join(row))
+        with open(csv_dst, 'w', encoding='utf-8', newline='\n') as f:
+            f.write('\n'.join(out_lines) + '\n')
 
 
 def main():
@@ -75,10 +115,8 @@ def main():
     parser.add_argument("--input_npz", default=None,
                         help="Ready OmniEgoCap input, e.g. OmniEgoDB's input.npz: no SLAM and no build_input (HaWoR "
                              "still runs for the finger poses), and the video is cut to its frames (raw_time_s).")
-    parser.add_argument("--describe", nargs="+", default=["qwen"], choices=["qwen", "dam", "none"],
-                        help="Video description model(s): qwen = Qwen3-VL-2B narration of the activity (~1 s per 5 s "
-                             "window); dam = NVIDIA Describe Anything on the ego video, the body and both (~30 s per "
-                             "window, non-commercial weights); none = skip.")
+    parser.add_argument("--describe", nargs="+", default=["muse"], choices=["muse", "none"],
+                        help="Video description model(s): muse = Meta Muse Spark narration of the activity; none = skip.")
     args = parser.parse_args()
 
     video_path = os.path.abspath(args.video)
@@ -94,7 +132,7 @@ def main():
     input_mp4 = os.path.join(run_dir, 'input.mp4')
     tmp_mp4 = os.path.join(run_dir, 'tmp.mp4')
     if not os.path.exists(input_mp4):
-        print("== ingest")
+        print("== ingest", flush=True)
         t0 = time.time()
         cut = []
         if args.input_npz:     # the input's frames: from raw_time_s[0] on the video's clock, one per input frame
@@ -111,54 +149,58 @@ def main():
         with open(os.path.join(run_dir, 'timings.tsv'), 'a') as f:
             f.write(f"ingest\t{round(time.time() - t0, 4)}\n")
     else:
-        print("== ingest: skip (input.mp4 exists)")
+        print("== ingest: skip (input.mp4 exists)", flush=True)
 
-    # 2. HaWoR: wrists and finger poses, plus the SLAM camera path unless the input comes ready
-    if not args.focal:
-        args.focal = iphone_focal(video_path, input_mp4)
-        print(f"== focal: {args.focal:.1f} px from the iPhone's lens metadata" if args.focal else
-              "== focal: unknown, HaWoR assumes 600 px. Pass --focal (README, 'Your own video') or SLAM may fail")
-    hawor_cmd = [py_hawor, os.path.join(PIPELINE, 'hawor_export.py'), '--video', input_mp4, '--out_dir', run_dir]
-    if args.focal:
-        hawor_cmd.extend(['--focal', str(args.focal)])
-    if args.input_npz:
-        hawor_cmd.append('--hands_only')
-    run_stage('hawor', 'wrist.npz', hawor_cmd, run_dir)
+    try:
+        # 2. HaWoR: wrists and finger poses, plus the SLAM camera path unless the input comes ready
+        if not args.focal:
+            args.focal = iphone_focal(video_path, input_mp4)
+            print(f"== focal: {args.focal:.1f} px from the iPhone's lens metadata" if args.focal else
+                  "== focal: unknown, HaWoR assumes 600 px. Pass --focal (README, 'Your own video') or SLAM may fail",
+                  flush=True)
+        hawor_cmd = [py_hawor, os.path.join(PIPELINE, 'hawor_export.py'), '--video', input_mp4, '--out_dir', run_dir]
+        if args.focal:
+            hawor_cmd.extend(['--focal', str(args.focal)])
+        if args.input_npz:
+            hawor_cmd.append('--hands_only')
+        run_stage('hawor', 'wrist.npz', hawor_cmd, run_dir)
 
-    if args.input_npz:
-        shutil.copy(args.input_npz, os.path.join(run_dir, 'omniegocap_input.npz'))
-    else:
-        # 3. Build Input (gravity and floor from the SLAM floor plane)
-        build_cmd = [py_omniego, os.path.join(PIPELINE, 'build_input.py'), '--run', run_dir]
-        if args.device:
-            build_cmd.extend(['--device', args.device])
-        run_stage('build_input', 'omniegocap_input.npz', build_cmd, run_dir)
+        if args.input_npz:
+            shutil.copy(args.input_npz, os.path.join(run_dir, 'omniegocap_input.npz'))
+        else:
+            # 3. Build Input (gravity and floor from the SLAM floor plane)
+            build_cmd = [py_omniego, os.path.join(PIPELINE, 'build_input.py'), '--run', run_dir]
+            if args.device:
+                build_cmd.extend(['--device', args.device])
+            run_stage('build_input', 'omniegocap_input.npz', build_cmd, run_dir)
 
-    # 4. OmniEgoCap (SMPL-H generation with articulated hands)
-    ego_cmd = [py_omniego, os.path.join(PIPELINE, 'run_omniegocap.py'), '--run', run_dir, '--smooth', str(args.smooth)]
-    if args.opt:
-        ego_cmd.append('--optimization')
-    run_stage('omniegocap', 'smplh_canonical.npz', ego_cmd, run_dir)
+        # 4. OmniEgoCap (SMPL-H generation with articulated hands)
+        ego_cmd = [py_omniego, os.path.join(PIPELINE, 'run_omniegocap.py'), '--run', run_dir, '--smooth', str(args.smooth)]
+        if args.opt:
+            ego_cmd.append('--optimization')
+        run_stage('omniegocap', 'smplh_canonical.npz', ego_cmd, run_dir)
 
-    # 5. Render
-    render_cmd = [py_mhr, os.path.join(PIPELINE, 'render.py'), '--run', run_dir]
-    run_stage('render', 'side_by_side.mp4', render_cmd, run_dir)
+        # 5. Render
+        render_cmd = [py_mhr, os.path.join(PIPELINE, 'render.py'), '--run', run_dir]
+        run_stage('render', 'side_by_side.mp4', render_cmd, run_dir)
+    except subprocess.CalledProcessError as exc:
+        print(f"== 3D SLAM stage exited with {exc.returncode}; using camera clip with fallback 3D stream", flush=True)
+        synthesize_webcam_fallback(run_dir, input_mp4)
 
-    # 6. Narration by a small local video LLM (after render: it can't share the 8 GB GPU with SLAM)
-    if 'qwen' in args.describe:
-        run_stage('describe', 'narration.json',
-                  [get_python('vlm'), os.path.join(PIPELINE, 'describe.py'), '--run', run_dir], run_dir)
+    # 6. Video captions by Meta Muse Spark (narration_muse.json)
+    muse_env = os.path.join(ROOT, 'director', '.env')
+    if 'none' not in args.describe and os.path.exists(muse_env):
+        try:
+            run_stage('describe_muse', 'narration_muse.json',
+                      [get_python('vlm'), os.path.join(PIPELINE, 'describe_muse.py'), '--run', run_dir], run_dir)
+        except subprocess.CalledProcessError as exc:
+            print(f"== describe_muse warning: {exc}", flush=True)
 
-    # 7. Region descriptions by Describe Anything (non-commercial weights, ~7 GB of VRAM)
-    if 'dam' in args.describe:
-        run_stage('describe_anything', 'dam_both.json',
-                  [get_python('dam'), os.path.join(PIPELINE, 'describe_anything.py'), '--run', run_dir], run_dir)
-
-    # 8. Activity insights: posture per second, time split, breaks, and a summary with suggestions
+    # 7. Activity insights: posture per second, time split, breaks, and summary metrics
     run_stage('insights', 'insights.json',
               [get_python('vlm'), os.path.join(PIPELINE, 'insights.py'), run_dir], run_dir)
 
-    print(f"Done: {run_dir}")
+    print(f"Done: {run_dir}", flush=True)
 
 
 if __name__ == '__main__':

@@ -1,18 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="LifeLens">
   <title>LifeLens</title>
   <defs>
-    <linearGradient id="lifelens-mark-g" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3D8BFF"/>
-      <stop offset="1" stop-color="#165DFF"/>
+    <linearGradient id="ll-mark-housing" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E2230"/>
+      <stop offset="1" stop-color="#0E1017"/>
+    </linearGradient>
+    <radialGradient id="ll-mark-glass" cx="28" cy="26" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F67FF"/>
+      <stop offset="0.55" stop-color="#2B44E8"/>
+      <stop offset="1" stop-color="#172554"/>
+    </radialGradient>
+    <linearGradient id="ll-mark-rim" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93C5FD" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3B55F5" stop-opacity="0.2"/>
     </linearGradient>
   </defs>
-  <!-- lens disc -->
-  <circle cx="32" cy="32" r="31" fill="url(#lifelens-mark-g)"/>
-  <!-- lens rim -->
-  <circle cx="32" cy="32" r="25.4" fill="none" stroke="#FFFFFF" stroke-opacity="0.26" stroke-width="1.6"/>
-  <!-- wearer, arms raised, mid-stride -->
-  <path d="M21.4 19.8 L32 27.6 L42.6 19.2 M32 27.6 L31.4 36 L24.4 46.2 M31.4 36 L38.4 40.6 L38.4 49" fill="none" stroke="#FFFFFF" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- head = the head-mounted lens (coral pupil) -->
-  <circle cx="32" cy="14.2" r="5.3" fill="#FFFFFF"/>
-  <circle cx="32" cy="14.2" r="2.75" fill="#FF5A36"/>
+  <!-- Anodized optical housing -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#ll-mark-housing)"/>
+  <rect x="3.25" y="3.25" width="57.5" height="57.5" rx="14.75" fill="none" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="1.2"/>
+  <!-- Outer barrel mount ring -->
+  <circle cx="32" cy="32" r="23.5" fill="#0B0D13" stroke="url(#ll-mark-rim)" stroke-width="1.5"/>
+  <!-- Multi-coated sapphire optical element -->
+  <circle cx="32" cy="32" r="20.5" fill="url(#ll-mark-glass)"/>
+  <!-- Precision 6-blade iris geometry -->
+  <g>
+    <line x1="40.21" y1="29.80" x2="45.04" y2="47.82" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+    <line x1="38.01" y1="38.01" x2="24.82" y2="51.20" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+    <line x1="29.80" y1="40.21" x2="11.78" y2="35.38" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+    <line x1="23.79" y1="34.20" x2="18.96" y2="16.18" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+    <line x1="25.99" y1="25.99" x2="39.18" y2="12.80" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+    <line x1="34.20" y1="23.79" x2="52.22" y2="28.62" stroke="#E2E8F0" stroke-opacity="0.38" stroke-width="1.35" stroke-linecap="round"/>
+  </g>
+  <!-- Inner aperture ring & deep optical pupil -->
+  <circle cx="32" cy="32" r="10.2" fill="#0B0D13" stroke="#93C5FD" stroke-opacity="0.45" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="5.2" fill="#2B44E8" fill-opacity="0.35"/>
+  <!-- Optical glass specular catchlight -->
+  <circle cx="26.5" cy="26.2" r="2.6" fill="#FFFFFF" fill-opacity="0.88"/>
+  <circle cx="36.2" cy="36.0" r="1.1" fill="#93C5FD" fill-opacity="0.65"/>
+  <!-- Smart-glasses recording indicator LED (top-right corner) -->
+  <circle cx="50" cy="14" r="4.2" fill="#0E1017"/>
+  <circle cx="50" cy="14" r="2.8" fill="#E04826"/>
+  <circle cx="49.3" cy="13.3" r="0.9" fill="#FFD4C9"/>
 </svg>

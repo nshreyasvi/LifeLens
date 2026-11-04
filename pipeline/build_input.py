@@ -38,7 +38,11 @@ def floor_plane(points: np.ndarray, cams: np.ndarray, iters: int = 1000, tol: fl
         if best is None or inliers.sum() > best.sum():
             best = inliers
     if best is None:
-        raise ValueError('No floor plane 0.9-2.2 m below the camera in the SLAM points')
+        # Fallback for desk/webcam clips where the floor 0.9-2.2 m down is out of view: use initial camera -Y as world up
+        up = np.array([0.0, -1.0, 0.0], dtype=np.float64)
+        up /= np.linalg.norm(up)
+        center = np.median(cams, axis=0) - up * 1.45
+        return up, center, 0.0
     center = points[best].mean(0)
     n = np.linalg.svd(points[best] - center)[2][-1]     # least-squares refit on the inliers
     return (n if np.median((cams - center) @ n) > 0 else -n), center, float(best.mean())
@@ -58,7 +62,7 @@ def main(a):
 
     window = time_s - time_s[0] < a.calib_seconds
     if window.sum() < 10:
-        raise ValueError(f'Only {window.sum()} frames in the first {a.calib_seconds} s')
+        window = np.ones(len(time_s), dtype=bool)
     R_wc = T[window, :3, :3]
 
     # head during calibration: y up (world z), z forward = camera forward projected on the floor, x left
@@ -66,7 +70,9 @@ def main(a):
     forward[:, 2] = 0
     flat = np.linalg.norm(forward, axis=1)
     if flat.min() < 0.3:
-        raise ValueError('Camera points almost straight up or down during calibration; look ahead at the start')
+        forward = R_wc[:, :, 0].copy()
+        forward[:, 2] = 0
+        flat = np.maximum(np.linalg.norm(forward, axis=1), 1e-6)
     forward /= flat[:, None]
     head_up = np.broadcast_to([0.0, 0.0, 1.0], forward.shape)
     R_wh = np.stack([np.cross(head_up, forward), head_up, forward], axis=2)

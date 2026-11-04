@@ -77,8 +77,9 @@ function selectTab(name, { focus = false } = {}) {
     if (on && focus) btn.focus();
   }
   for (const view of els.views) view.hidden = view.dataset.view !== name;
+  const routineDeck = $('view-day');
+  if (routineDeck) routineDeck.hidden = name !== 'activity';
   els.player.hidden = !['music', 'stage'].includes(name);
-  if (name === 'day' && state.phase === 'live') stopDirector(); // only the live views keep playing
   emit('tab', { tab: name });
 }
 
@@ -472,7 +473,7 @@ async function startDirector(start) {
   renderControls();
   try {
     const res = await fetch('/api/live/start', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ run: session.rec.base, start, captions: captionModel() }) });
+      body: JSON.stringify({ run: session.rec.base, start, captions: 'muse' }) });
     const body = await res.json().catch(() => ({}));
     if (res.status === 404) throw new Error('Play needs the dev server: run npm run dev.');
     if (!res.ok) throw new Error(body.error || `The dev server answered ${res.status}.`);
@@ -492,9 +493,6 @@ function fail(reason) {
   showNotice(`Couldn't play. ${reason}`);
   renderControls();
 }
-
-// Which model's captions the director reads: the header switch (Qwen3-VL or Muse Spark).
-const captionModel = () => document.querySelector('#caption-switch [aria-pressed="true"]')?.dataset.captions ?? 'qwen';
 
 async function stopDirector() {
   player.ctrl?.pause();

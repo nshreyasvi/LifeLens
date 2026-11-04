@@ -1,19 +1,18 @@
 import { defineConfig } from 'vite';
-import { spawn } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import { basename, extname, join } from 'node:path';
 
 // Dev-server endpoints behind the page (npm run dev only), local requests only:
+//   GET  /api/hardware            live GPU (nvidia-smi) and CPU processor telemetry
 //   GET  /api/recordings          processed recordings (runs/, examples/) and raw videos waiting in recordings/
 //   POST /api/recordings          save a camera clip from the page to recordings/<time>.webm (or .mp4)
-//   POST /api/process {file}      run the pipeline on a raw video, then the posture models and Muse's review
-//   GET  /api/process/status      what the pipeline is doing
-//   POST /api/live/start {run, start, captions}   the director replays that recording from `start` s with Qwen's or
-//                                 Muse's captions; the page follows it
+//   POST /api/process {file}      run the 3D body + Meta Muse Spark pipeline on a raw video
+//   GET  /api/process/status      live pipeline stage progress (0-100%), logs, and GPU/CPU telemetry
+//   POST /api/live/start {run, start}   the director replays that recording from `start` s with Meta Muse Spark captions
 //   POST /api/live/stop           stop the director
 //   POST /api/live/caption {images}   live session: Meta Muse Spark captions 1-2 camera frames and names the posture
-// The pipeline runs in WSL on Windows (conda envs from setup.sh); DIRECTOR_PYTHON is a Python with
-// director/requirements.txt (default director/venv, else "python"). Model calls need director/.env (Muse key).
 const MAX_RECORDING_BYTES = 500 * 2 ** 20;
 const VIDEO = /\.(mp4|mov|webm|mkv)$/i;
 const SKIP = new Set(['day', '_smoke']);
@@ -23,10 +22,60 @@ const LIVE_PROMPT = 'These are frames, 1 s apart, from a camera on a person\'s h
   + '{"caption": what the person is doing, one short sentence starting with a verb, "posture": one of '
   + `${POSTURES.join(', ')}}.`;
 
+const PIPELINE_STAGES = [
+  { id: 'ingest', label: 'Video ingest & 30 fps normalization', pct: 8 },
+  { id: 'hawor', label: 'HaWoR 3D hand tracking & DROID-SLAM', pct: 24 },
+  { id: 'build_input', label: 'Floor plane & camera height calibration', pct: 42 },
+  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body SMPL-H reconstruction', pct: 60 },
+  { id: 'render', label: '3D body mesh & kinematics stream rendering', pct: 74 },
+  { id: 'describe_muse', label: 'Meta Muse Spark egocentric scene narration', pct: 84 },
+  { id: 'posture_muse', label: 'Biomechanical & Meta Muse Spark posture analysis', pct: 92 },
+  { id: 'routine_tips', label: 'Meta Muse Spark routine coaching & history review', pct: 97 },
+];
+
 function lifelensApi() {
   let director = null;
-  let job = null; // { file, name, step, steps, log, error, done }
+  let job = null;
   let root = '';
+  let hwCache = {
+    gpu: 'CUDA GPU',
+    vramTotalMb: 0,
+    vramUsedMb: 0,
+    gpuUtilPct: 0,
+    gpuTempC: 0,
+    cpu: (os.cpus()[0]?.model || 'Multi-core Processor').replace(/\s+/g, ' ').trim(),
+    cpuCores: os.cpus().length,
+    ramGb: Math.round(os.totalmem() / 2 ** 30),
+    stack: 'WSL2 CUDA · OmniEgoCap + HaWoR · Meta Muse Spark',
+    updatedAt: 0,
+  };
+
+  function refreshHardware() {
+    if (Date.now() - hwCache.updatedAt < 1800) return;
+    hwCache.updatedAt = Date.now();
+    execFile(
+      'nvidia-smi',
+      ['--query-gpu=name,memory.total,memory.used,utilization.gpu,temperature.gpu', '--format=csv,noheader,nounits'],
+      { timeout: 1500 },
+      (err, stdout) => {
+        if (err || !stdout) return;
+        const parts = stdout.trim().split('\n')[0].split(',').map((s) => s.trim());
+        if (parts.length >= 4) {
+          hwCache = {
+            ...hwCache,
+            gpu: parts[0] || hwCache.gpu,
+            vramTotalMb: Number(parts[1]) || 0,
+            vramUsedMb: Number(parts[2]) || 0,
+            gpuUtilPct: Number(parts[3]) || 0,
+            gpuTempC: Number(parts[4]) || 0,
+            updatedAt: Date.now(),
+          };
+        }
+      },
+    );
+  }
+  refreshHardware();
+
   const python = () => process.env.DIRECTOR_PYTHON
     || [join('director', 'venv', 'bin', 'python'), join('director', 'venv', 'Scripts', 'python.exe')].find(existsSync)
     || 'python';
@@ -38,21 +87,19 @@ function lifelensApi() {
   };
   const readBody = (req) => new Promise((ok) => {
     let s = '';
-    req.on('data', (c) => { s += c; if (s.length > 2e6) req.destroy(); }); // JSON bodies only; videos stream separately
+    req.on('data', (c) => { s += c; if (s.length > 2e6) req.destroy(); });
     req.on('end', () => { try { ok(JSON.parse(s || '{}')); } catch { ok({}); } });
   });
   const wsl = (cmd) => (process.platform === 'win32'
     ? ['wsl', ['-e', 'bash', '-lc', `cd '/mnt/${root[0].toLowerCase()}${root.slice(2).replace(/\\/g, '/')}' && ${cmd}`]]
     : ['bash', ['-lc', `cd '${root}' && ${cmd}`]]);
   const env = (name) => `~/anaconda3/envs/${name}/bin`;
-  // The Muse key, from director/.env only (gitignored); never sent to the page.
   const museKey = () => {
     const f = join(root, 'director', '.env');
     const line = existsSync(f) ? readFileSync(f, 'utf8').split(/\r?\n/).find((l) => l.trim().startsWith('MUSE_API_KEY=')) : null;
     return line ? line.split('=').slice(1).join('=').trim() : '';
   };
 
-  // A processed recording has the 3D body and its kinematics; runs/ wins over examples/ (it holds the POV).
   function recordings() {
     const found = new Map();
     for (const dir of ['examples', 'runs']) {
@@ -62,17 +109,26 @@ function lifelensApi() {
         const run = join(base, name);
         if (SKIP.has(name) || name.startsWith('bench_') || !existsSync(join(run, 'pose_timeseries.csv'))
           || !existsSync(join(run, 'mesh_exo.mp4')) || !existsSync(join(run, 'insights.json'))) continue;
-        const url = (f) => (existsSync(join(run, f)) ? `/${dir}/${name}/${f}` : null);
-        const small = (f) => (existsSync(join(root, 'public', 'video', f)) ? `/video/${f}` : null);
+        const url = (f) => {
+          const full = join(run, f);
+          return existsSync(full) ? `/${dir}/${name}/${f}?v=${Math.floor(statSync(full).mtimeMs)}` : null;
+        };
+        const small = (f) => {
+          const full = join(root, 'public', 'video', f);
+          return existsSync(full) ? `/video/${f}?v=${Math.floor(statSync(full).mtimeMs)}` : null;
+        };
         const frames = readFileSync(join(run, 'pose_timeseries.csv'), 'utf8').split('\n').length - 2;
         const prev = found.get(name);
         found.set(name, {
-          name, base: `${dir}/${name}`, seconds: Math.round(frames / 30), processed: statSync(run).mtime.toISOString(),
-          pov: small(`input/${name}.mp4`) ?? url('input.mp4') ?? prev?.pov ?? null,
-          body: small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
-          graph: small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
+          name,
+          base: `${dir}/${name}`,
+          seconds: Math.max(1, Math.round(frames / 30)),
+          processed: statSync(run).mtime.toISOString(),
+          pov: url('input.mp4') ?? small(`input/${name}.mp4`) ?? prev?.pov ?? null,
+          body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
+          graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
           files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json', 'postures.json',
-            'narration.json', 'narration_muse.json'].map((f) => [f, url(f)])),
+            'narration_muse.json'].map((f) => [f, url(f)])),
         });
       }
     }
@@ -82,33 +138,94 @@ function lifelensApi() {
     return { processed: [...found.values()].sort((a, b) => a.name.localeCompare(b.name)), raw };
   }
 
-  // The pipeline, then the posture models and Muse's review against the other recordings.
   function processSteps(file, name) {
     const history = recordings().processed.filter((r) => r.name !== name).map((r) => r.base).join(' ');
     return [
-      ['3D body, narration, posture', ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'`)],
-      ['Qwen3-VL posture', ...wsl(`${env('vlm')}/python pipeline/describe.py --run runs/${name} --ask posture`)],
-      ['Muse captions', ...wsl(`${env('vlm')}/python pipeline/describe_muse.py --run runs/${name}`)],
-      ['Muse posture', python(), ['-m', 'director.posture_muse', `runs/${name}`]],
-      ['Posture sources', ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
-      ['Muse review', python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean)]],
+      ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'`)],
+      ['Meta Muse Spark posture', false, python(), ['-m', 'director.posture_muse', `runs/${name}`]],
+      ['Posture sources', false, ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
+      ['Meta Muse Spark routine coaching', false, python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean)]],
     ];
   }
 
+  function setStage(stageId) {
+    if (!job) return;
+    const idx = PIPELINE_STAGES.findIndex((s) => s.id === stageId);
+    if (idx === -1 || idx < job.stageIndex) return;
+    job.stageIndex = idx;
+    job.stageAt = Date.now();
+    job.step = PIPELINE_STAGES[idx].label;
+    job.percent = Math.max(job.percent, PIPELINE_STAGES[idx].pct);
+  }
+
+  function parseStageFromOutput(chunk) {
+    const text = String(chunk);
+    if (/==\s*ingest/i.test(text)) setStage('ingest');
+    if (/==\s*hawor/i.test(text)) setStage('hawor');
+    if (/==\s*(build_input|fallback)/i.test(text)) setStage('build_input');
+    if (/==\s*omniegocap/i.test(text)) setStage('omniegocap');
+    if (/==\s*render/i.test(text)) setStage('render');
+    if (/==\s*describe_muse/i.test(text)) setStage('describe_muse');
+    if (/==\s*insights/i.test(text)) setStage('posture_muse');
+  }
+
   function runSteps(steps, i = 0) {
-    if (i === steps.length) { job.done = true; job.step = 'Done'; return; }
-    const [label, cmd, args] = steps[i];
-    job.step = label;
+    if (i === steps.length) {
+      job.done = true;
+      job.percent = 100;
+      job.stageIndex = PIPELINE_STAGES.length;
+      job.step = 'Complete';
+      return;
+    }
+    const [label, critical, cmd, args] = steps[i];
     job.index = i;
-    const proc = spawn(cmd, args, { cwd: root, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
-    const keep = (d) => { job.log = (job.log + d).slice(-1500); };
+    if (i === 0) setStage('ingest');
+    else if (i === 1 || i === 2) setStage('posture_muse');
+    else if (i === 3) setStage('routine_tips');
+    job.step = PIPELINE_STAGES[job.stageIndex]?.label || label;
+
+    const proc = spawn(cmd, args, { cwd: root, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUNBUFFERED: '1' } });
+    const keep = (d) => {
+      parseStageFromOutput(d);
+      job.log = (job.log + d).slice(-2400);
+    };
     proc.stdout.on('data', keep);
     proc.stderr.on('data', keep);
-    proc.on('error', (err) => { job.error = `${label}: ${err.message}`; });
-    proc.on('exit', (code) => {
-      if (code !== 0) job.error = `${label} stopped (exit ${code})`;
+    proc.on('error', (err) => {
+      if (critical) job.error = `${label}: ${err.message}`;
       else runSteps(steps, i + 1);
     });
+    proc.on('exit', (code) => {
+      if (code !== 0 && critical) job.error = `${label} stopped (exit ${code})`;
+      else runSteps(steps, i + 1);
+    });
+  }
+
+  function statusPayload() {
+    refreshHardware();
+    if (!job) return { idle: true, hardware: hwCache };
+    const elapsedMs = Date.now() - job.startedAt;
+    let percent = job.percent;
+    if (!job.done && !job.error) {
+      const cur = PIPELINE_STAGES[job.stageIndex]?.pct ?? 8;
+      const next = PIPELINE_STAGES[job.stageIndex + 1]?.pct ?? 99;
+      const stageElapsedS = (Date.now() - job.stageAt) / 1000;
+      const creep = Math.min(next - cur - 1, Math.floor(stageElapsedS * 0.8));
+      percent = Math.max(percent, cur + Math.max(0, creep));
+      job.percent = percent;
+    }
+    const stages = PIPELINE_STAGES.map((s, idx) => ({
+      id: s.id,
+      label: s.label,
+      state: job.done || idx < job.stageIndex ? 'done' : idx === job.stageIndex ? (job.error ? 'error' : 'active') : 'pending',
+    }));
+    return {
+      ...job,
+      percent: job.done ? 100 : percent,
+      elapsedMs,
+      stages,
+      hardware: hwCache,
+    };
   }
 
   return {
@@ -116,6 +233,11 @@ function lifelensApi() {
     configureServer(server) {
       root = server.config.root;
       server.middlewares.use('/api/', (req, res, next) => (local(req) ? next() : send(res, 403, { error: 'Local only.' })));
+
+      server.middlewares.use('/api/hardware', (req, res) => {
+        refreshHardware();
+        send(res, 200, hwCache);
+      });
 
       server.middlewares.use('/api/recordings', (req, res) => {
         if (req.method === 'GET') return send(res, 200, recordings());
@@ -130,14 +252,14 @@ function lifelensApi() {
         req.on('end', () => {
           if (!size) return send(res, 400, { error: 'The recording is empty.' });
           mkdirSync(join(root, 'recordings'), { recursive: true });
-          const ext = (req.headers['content-type'] || '').includes('mp4') ? 'mp4' : 'webm'; // Safari records mp4
+          const ext = (req.headers['content-type'] || '').includes('mp4') ? 'mp4' : 'webm';
           const name = `live-${new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-')}`;
           writeFileSync(join(root, 'recordings', `${name}.${ext}`), Buffer.concat(chunks));
           send(res, 200, { file: `recordings/${name}.${ext}`, name });
         });
       });
 
-      server.middlewares.use('/api/process/status', (req, res) => send(res, 200, job ?? { idle: true }));
+      server.middlewares.use('/api/process/status', (req, res) => send(res, 200, statusPayload()));
 
       server.middlewares.use('/api/process', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
@@ -148,9 +270,23 @@ function lifelensApi() {
           return send(res, 400, { error: 'Pick a video from recordings/.' });
         }
         const steps = processSteps(file, name);
-        job = { file, name, step: '', index: 0, steps: steps.map((s) => s[0]), log: '', error: '', done: false };
+        const now = Date.now();
+        job = {
+          file,
+          name,
+          step: PIPELINE_STAGES[0].label,
+          index: 0,
+          stageIndex: 0,
+          stageAt: now,
+          startedAt: now,
+          percent: 5,
+          steps: PIPELINE_STAGES.map((s) => s.label),
+          log: '',
+          error: '',
+          done: false,
+        };
         runSteps(steps);
-        send(res, 200, { ok: true, steps: job.steps });
+        send(res, 200, statusPayload());
       });
 
       server.middlewares.use('/api/live/status', (req, res) => send(res, 200, { running: Boolean(director) }));
@@ -163,17 +299,15 @@ function lifelensApi() {
 
       server.middlewares.use('/api/live/start', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
-        const { run, start, captions } = await readBody(req);
+        const { run, start } = await readBody(req);
         const known = recordings().processed.find((r) => r.base === run);
         if (!known) return send(res, 400, { error: 'Unknown recording.' });
         director?.kill();
         const from = Math.max(0, Math.min(Number(start) || 0, known.seconds - 2));
-        const args = ['-m', 'director.server', known.base, '--start', from.toFixed(2)];
+        const args = ['-m', 'director.server', known.base, '--start', from.toFixed(2), '--captions', 'muse'];
         if (!existsSync(join(root, 'director', '.env'))) args.push('--no-model');
-        if (captions === 'muse' && known.files['narration_muse.json']) args.push('--captions', 'muse');
         let lastError = '';
         const proc = spawn(python(), args, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'],
-          // UTF-8: on Windows a piped Python stdout is cp1252 and crashes on a model reply with "→"
           env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
         director = proc;
         proc.stdout.on('data', (d) => process.stdout.write(`[director] ${d}`));

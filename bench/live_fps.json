@@ -16,240 +16,266 @@
         "run": "bench_live10",
         "frames": 300,
         "video_s": 10.0,
+        "loadavg_1min_before": 4.3,
         "stages": [
           {
             "stage": "ingest",
-            "wall_s": 11.59,
-            "s_per_video_s": 1.16,
-            "equiv_fps": 25.9,
-            "gpu_mem_peak_mb": 493.0,
-            "gpu_util_mean_pct": 4
+            "wall_s": 17.78,
+            "s_per_video_s": 1.78,
+            "equiv_fps": 16.87,
+            "gpu_mem_peak_mb": 382.0,
+            "gpu_util_mean_pct": 17
           },
           {
             "stage": "hawor",
-            "wall_s": 394.59,
-            "s_per_video_s": 39.46,
-            "equiv_fps": 0.76,
-            "gpu_mem_peak_mb": 7826.0,
-            "gpu_util_mean_pct": 43
+            "wall_s": 765.09,
+            "s_per_video_s": 76.51,
+            "equiv_fps": 0.39,
+            "gpu_mem_peak_mb": 7943.0,
+            "gpu_util_mean_pct": 46
           },
           {
             "stage": "build_input",
-            "wall_s": 3.48,
-            "s_per_video_s": 0.35,
-            "equiv_fps": 86.27,
-            "gpu_mem_peak_mb": 273.0,
-            "gpu_util_mean_pct": 13
+            "wall_s": 2.79,
+            "s_per_video_s": 0.28,
+            "equiv_fps": 107.47,
+            "gpu_mem_peak_mb": 4354.0,
+            "gpu_util_mean_pct": 19
           },
           {
             "stage": "omniegocap",
-            "wall_s": 44.82,
-            "s_per_video_s": 4.48,
-            "equiv_fps": 6.69,
-            "gpu_mem_peak_mb": 1144.0,
-            "gpu_util_mean_pct": 29
+            "wall_s": 34.82,
+            "s_per_video_s": 3.48,
+            "equiv_fps": 8.62,
+            "gpu_mem_peak_mb": 5366.0,
+            "gpu_util_mean_pct": 25
           },
           {
             "stage": "render",
-            "wall_s": 38.09,
-            "s_per_video_s": 3.81,
-            "equiv_fps": 7.88,
-            "gpu_mem_peak_mb": 273.0,
-            "gpu_util_mean_pct": 29
+            "wall_s": 39.1,
+            "s_per_video_s": 3.91,
+            "equiv_fps": 7.67,
+            "gpu_mem_peak_mb": 4727.0,
+            "gpu_util_mean_pct": 22
           },
           {
             "stage": "describe",
-            "wall_s": 30.5,
-            "s_per_video_s": 3.05,
-            "equiv_fps": 9.84,
-            "gpu_mem_peak_mb": 4674.0,
-            "gpu_util_mean_pct": 23
+            "wall_s": 15.49,
+            "s_per_video_s": 1.55,
+            "equiv_fps": 19.37,
+            "gpu_mem_peak_mb": 4687.0,
+            "gpu_util_mean_pct": 10
           },
           {
             "stage": "insights",
-            "wall_s": 32.87,
-            "s_per_video_s": 3.29,
-            "equiv_fps": 9.13,
-            "gpu_mem_peak_mb": 4534.0,
-            "gpu_util_mean_pct": 28
+            "wall_s": 20.98,
+            "s_per_video_s": 2.1,
+            "equiv_fps": 14.3,
+            "gpu_mem_peak_mb": 4547.0,
+            "gpu_util_mean_pct": 23
           }
         ],
         "hawor_steps": [
           {
-            "step": "imports",
-            "wall_s": 34.24,
-            "s_per_video_s": 3.42,
-            "equiv_fps": 8.76
+            "step": "python + torch imports",
+            "wall_s": 25.8,
+            "s_per_video_s": 2.58,
+            "equiv_fps": 11.63
           },
           {
             "step": "extract frames to jpg",
-            "wall_s": 4.08,
-            "s_per_video_s": 0.41,
-            "equiv_fps": 73.61
+            "wall_s": 8.55,
+            "s_per_video_s": 0.86,
+            "equiv_fps": 35.07
           },
           {
-            "step": "hand detection + tracking",
-            "wall_s": 90.7,
-            "s_per_video_s": 9.07,
-            "equiv_fps": 3.31
+            "step": "hand detection + tracking (YOLO)",
+            "wall_s": 54.84,
+            "s_per_video_s": 5.48,
+            "equiv_fps": 5.47
           },
           {
-            "step": "HaWoR hand mesh",
-            "wall_s": 127.02,
-            "s_per_video_s": 12.7,
-            "equiv_fps": 2.36
+            "step": "HaWoR checkpoint load",
+            "wall_s": 67.45,
+            "s_per_video_s": 6.74,
+            "equiv_fps": 4.45
           },
           {
-            "step": "DROID-SLAM",
-            "wall_s": 84.94,
-            "s_per_video_s": 8.49,
-            "equiv_fps": 3.53
+            "step": "HaWoR hand mesh + SLAM masks",
+            "wall_s": 467.68,
+            "s_per_video_s": 46.77,
+            "equiv_fps": 0.64
           },
           {
-            "step": "Metric3D load + keyframe depth",
-            "wall_s": 48.42,
-            "s_per_video_s": 4.84,
-            "equiv_fps": 6.2
+            "step": "DROID-SLAM (load, track, BA)",
+            "wall_s": 86.44,
+            "s_per_video_s": 8.64,
+            "equiv_fps": 3.47
+          },
+          {
+            "step": "Metric3D checkpoint load",
+            "wall_s": 28.51,
+            "s_per_video_s": 2.85,
+            "equiv_fps": 10.52
+          },
+          {
+            "step": "Metric3D keyframe depth",
+            "wall_s": 21.39,
+            "s_per_video_s": 2.14,
+            "equiv_fps": 14.03
           },
           {
             "step": "metric scale + export",
-            "wall_s": 5.22,
-            "s_per_video_s": 0.52,
-            "equiv_fps": 57.52
+            "wall_s": 4.44,
+            "s_per_video_s": 0.44,
+            "equiv_fps": 67.51
           }
         ],
         "model_only_s": {
-          "omniegocap_load": 12.214733600616455,
-          "omniegocap_predict": 13.789034605026245,
-          "qwen_narration_load": 9.6,
-          "qwen_narration_run": 9.0,
-          "insights_total": 31.1
+          "omniegocap_load": 8.614078283309937,
+          "omniegocap_predict": 15.484612226486206,
+          "qwen_narration_load": 3.4,
+          "qwen_narration_run": 4.7,
+          "insights_total": 19.7
         },
         "end_to_end": {
-          "wall_s": 555.94,
-          "s_per_video_s": 55.59,
-          "equiv_fps": 0.54,
-          "latency_for_video_s": 555.9
+          "wall_s": 896.05,
+          "s_per_video_s": 89.61,
+          "equiv_fps": 0.33,
+          "latency_for_video_s": 896.1
         }
       },
       {
         "run": "bench_live10_r2",
         "frames": 300,
         "video_s": 10.0,
+        "loadavg_1min_before": 6.5,
         "stages": [
           {
             "stage": "ingest",
-            "wall_s": 11.48,
-            "s_per_video_s": 1.15,
-            "equiv_fps": 26.13,
-            "gpu_mem_peak_mb": 273.0,
-            "gpu_util_mean_pct": 25
+            "wall_s": 6.9,
+            "s_per_video_s": 0.69,
+            "equiv_fps": 43.49,
+            "gpu_mem_peak_mb": 286.0,
+            "gpu_util_mean_pct": 0
           },
           {
             "stage": "hawor",
-            "wall_s": 539.87,
-            "s_per_video_s": 53.99,
-            "equiv_fps": 0.56,
-            "gpu_mem_peak_mb": 7860.0,
+            "wall_s": 300.85,
+            "s_per_video_s": 30.09,
+            "equiv_fps": 1.0,
+            "gpu_mem_peak_mb": 7839.0,
             "gpu_util_mean_pct": 37
           },
           {
             "stage": "build_input",
-            "wall_s": 5.19,
-            "s_per_video_s": 0.52,
-            "equiv_fps": 57.77,
-            "gpu_mem_peak_mb": 307.0,
-            "gpu_util_mean_pct": 32
+            "wall_s": 1.9,
+            "s_per_video_s": 0.19,
+            "equiv_fps": 157.56,
+            "gpu_mem_peak_mb": 286.0,
+            "gpu_util_mean_pct": 0
           },
           {
             "stage": "omniegocap",
-            "wall_s": 42.05,
-            "s_per_video_s": 4.21,
-            "equiv_fps": 7.13,
-            "gpu_mem_peak_mb": 1178.0,
-            "gpu_util_mean_pct": 25
+            "wall_s": 21.53,
+            "s_per_video_s": 2.15,
+            "equiv_fps": 13.93,
+            "gpu_mem_peak_mb": 1157.0,
+            "gpu_util_mean_pct": 5
           },
           {
             "stage": "render",
-            "wall_s": 48.65,
-            "s_per_video_s": 4.86,
-            "equiv_fps": 6.17,
-            "gpu_mem_peak_mb": 307.0,
-            "gpu_util_mean_pct": 32
+            "wall_s": 21.97,
+            "s_per_video_s": 2.2,
+            "equiv_fps": 13.65,
+            "gpu_mem_peak_mb": 286.0,
+            "gpu_util_mean_pct": 0
           },
           {
             "stage": "describe",
-            "wall_s": 38.91,
-            "s_per_video_s": 3.89,
-            "equiv_fps": 7.71,
-            "gpu_mem_peak_mb": 4708.0,
-            "gpu_util_mean_pct": 24
+            "wall_s": 12.53,
+            "s_per_video_s": 1.25,
+            "equiv_fps": 23.95,
+            "gpu_mem_peak_mb": 4687.0,
+            "gpu_util_mean_pct": 11
           },
           {
             "stage": "insights",
-            "wall_s": 33.21,
-            "s_per_video_s": 3.32,
-            "equiv_fps": 9.03,
-            "gpu_mem_peak_mb": 4570.0,
-            "gpu_util_mean_pct": 31
+            "wall_s": 19.53,
+            "s_per_video_s": 1.95,
+            "equiv_fps": 15.36,
+            "gpu_mem_peak_mb": 4549.0,
+            "gpu_util_mean_pct": 20
           }
         ],
         "hawor_steps": [
           {
-            "step": "imports",
-            "wall_s": 24.84,
-            "s_per_video_s": 2.48,
-            "equiv_fps": 12.08
+            "step": "python + torch imports",
+            "wall_s": 17.41,
+            "s_per_video_s": 1.74,
+            "equiv_fps": 17.23
           },
           {
             "step": "extract frames to jpg",
-            "wall_s": 4.59,
-            "s_per_video_s": 0.46,
-            "equiv_fps": 65.33
+            "wall_s": 3.46,
+            "s_per_video_s": 0.35,
+            "equiv_fps": 86.81
           },
           {
-            "step": "hand detection + tracking",
-            "wall_s": 154.63,
-            "s_per_video_s": 15.46,
-            "equiv_fps": 1.94
+            "step": "hand detection + tracking (YOLO)",
+            "wall_s": 26.18,
+            "s_per_video_s": 2.62,
+            "equiv_fps": 11.46
           },
           {
-            "step": "HaWoR hand mesh",
-            "wall_s": 192.78,
-            "s_per_video_s": 19.28,
-            "equiv_fps": 1.56
+            "step": "HaWoR checkpoint load",
+            "wall_s": 45.37,
+            "s_per_video_s": 4.54,
+            "equiv_fps": 6.61
           },
           {
-            "step": "DROID-SLAM",
-            "wall_s": 98.66,
-            "s_per_video_s": 9.87,
-            "equiv_fps": 3.04
+            "step": "HaWoR hand mesh + SLAM masks",
+            "wall_s": 107.67,
+            "s_per_video_s": 10.77,
+            "equiv_fps": 2.79
           },
           {
-            "step": "Metric3D load + keyframe depth",
-            "wall_s": 56.73,
-            "s_per_video_s": 5.67,
-            "equiv_fps": 5.29
+            "step": "DROID-SLAM (load, track, BA)",
+            "wall_s": 59.59,
+            "s_per_video_s": 5.96,
+            "equiv_fps": 5.03
+          },
+          {
+            "step": "Metric3D checkpoint load",
+            "wall_s": 19.88,
+            "s_per_video_s": 1.99,
+            "equiv_fps": 15.09
+          },
+          {
+            "step": "Metric3D keyframe depth",
+            "wall_s": 17.65,
+            "s_per_video_s": 1.76,
+            "equiv_fps": 17.0
           },
           {
             "step": "metric scale + export",
-            "wall_s": 7.67,
-            "s_per_video_s": 0.77,
-            "equiv_fps": 39.14
+            "wall_s": 3.67,
+            "s_per_video_s": 0.37,
+            "equiv_fps": 81.8
           }
         ],
         "model_only_s": {
-          "omniegocap_load": 11.42742133140564,
-          "omniegocap_predict": 14.662019491195679,
-          "qwen_narration_load": 8.5,
-          "qwen_narration_run": 13.4,
-          "insights_total": 31.1
+          "omniegocap_load": 6.753246545791626,
+          "omniegocap_predict": 7.962614059448242,
+          "qwen_narration_load": 3.1,
+          "qwen_narration_run": 3.8,
+          "insights_total": 18.4
         },
         "end_to_end": {
-          "wall_s": 719.36,
-          "s_per_video_s": 71.94,
-          "equiv_fps": 0.42,
-          "latency_for_video_s": 719.4
+          "wall_s": 385.21,
+          "s_per_video_s": 38.52,
+          "equiv_fps": 0.78,
+          "latency_for_video_s": 385.2
         }
       }
     ]
