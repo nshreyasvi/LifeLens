@@ -18,6 +18,8 @@ import { output as lightsOutput, status as lightsStatus } from './server/lights.
 //   POST /api/stage/scene {body, song, mood}   Meta Muse Spark as lighting designer: the next scene for the 6 fixtures
 //   GET|POST /api/lights          the fixtures to real lights (server/lights.js: simulator, Art-Net or Hue)
 //   POST /api/gymify {run, exercise}   pipeline/gymify.py on a processed recording -> <run>/gym.json; GET .../status
+//   POST /api/stage/plan {segments, images}   Stagify: Muse Spark plans a scene per 10 s segment and music sections
+//   POST /api/stage/save?run=&file=   save stage.json, stage_cues.csv or stage_show.webm into a processed recording
 const MAX_RECORDING_BYTES = 500 * 2 ** 20;
 const VIDEO = /\.(mp4|mov|webm|mkv)$/i;
 const SKIP = new Set(['day', '_smoke']);
@@ -27,6 +29,18 @@ const POSTURES = ['walking', 'standing', 'sitting', 'crouching', 'bending', 'arm
 const GYM_EXERCISES = ['squat', 'lunge', 'jump squat', 'step-up', 'deadlift', 'good morning', 'hip hinge', 'sit-up',
   'push-up', 'bicep curl', 'shoulder press', 'tricep dip', 'jumping jacks', 'arm raise'];
 const PATTERNS = ['pulse', 'chase', 'strobe', 'still'];
+const STAGE_FILES = { 'stage.json': 5 * 2 ** 20, 'stage_cues.csv': 20 * 2 ** 20, 'stage_show.webm': 400 * 2 ** 20 };
+const PLAN_PROMPT = `You are the lighting designer and music supervisor of a stage show made from one recording. The
+performer wore a head camera and LifeLens turned it into a 3D body. The show has {n} segments of about 10 s; for each
+you get the body's numbers, and image k shows the 3D body in the middle of segment k (legs estimated):
+{segments}
+Plan the whole show so it builds and breathes with the movement. Answer with one JSON object only:
+{"scenes": exactly {n} objects, one per segment in order: {"name": 2-4 words, "palette": 2 or 3 hex colors like
+"#FF3366", "pattern": "pulse", "chase", "strobe" or "still", "focus": "arms", "legs", "torso" or "all",
+"strobe_on_hits": true or false, "intensity": 0.3 to 1, "reason": one short sentence naming the numbers},
+"music": 2 to 4 sections in order covering the show: {"start_s": seconds, "search": 2-4 words of genre or style for
+a seed song, "energy": 0-1, "tempo": BPM, "valence": 0-1, "danceability": 0-1, "instrumentalness": 0-1, "reason":
+one sentence}}.`;
 const FOCUS = ['arms', 'legs', 'torso', 'all'];
 const SCENE_PROMPT = `You are the lighting designer of a live stage show. The performer wears a head camera and LifeLens
 turns it into a 3D body; the image is that 3D body now; these are its numbers and the music:
@@ -168,7 +182,8 @@ function lifelensApi() {
           body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
           graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
           files: Object.fromEntries(['pose_timeseries.csv', 'activity.csv', 'insights.json', 'postures.json',
-            'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4', 'gym.json'].map((f) => [f, url(f)])),
+            'narration_muse.json', 'kinematics/joints_world.csv', 'mesh_exo.mp4', 'gym.json', 'stage.json',
+            'stage_cues.csv', 'stage_show.webm'].map((f) => [f, url(f)])),
         });
       }
     }
@@ -441,6 +456,58 @@ function lifelensApi() {
         proc.on('error', (err) => { job.error = err.message; });
         proc.on('exit', (code) => { if (code === 0) job.done = true; else job.error = job.log.trim().split('\n').pop() || `exit ${code}`; });
         send(res, 200, { ok: true });
+      });
+
+      // Stagify: Muse Spark plans the whole show at once from every segment's numbers and a 3D body frame of each.
+      server.middlewares.use('/api/stage/plan', async (req, res) => {
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
+        const key = museKey();
+        if (!key) return send(res, 503, { error: 'Stagify needs a Muse key (MUSE_API_KEY in director/.env)' });
+        const { segments, images } = await readBody(req);
+        if (!Array.isArray(segments) || !segments.length || segments.length > 40
+          || !segments.every((g) => typeof g === 'string' && g.length < 600)) return send(res, 400, { error: 'Send segments.' });
+        const frames = (Array.isArray(images) ? images : []).filter((i) => typeof i === 'string'
+          && i.startsWith('data:image/jpeg;base64,') && i.length < 200000).slice(0, segments.length);
+        const t0 = Date.now();
+        try {
+          const prompt = PLAN_PROMPT.replaceAll('{n}', String(segments.length))
+            .replace('{segments}', segments.map((g, k) => `${k + 1}. ${g}`).join('\n'));
+          const a = await askMuse(key, [{ type: 'input_text', text: prompt }, ...frames.map((image_url) => ({ type: 'input_image', image_url }))],
+            180000, 'medium');
+          const scenes = segments.map((_, k) => {
+            const c = (a.scenes ?? [])[k] ?? (a.scenes ?? [])[(a.scenes ?? []).length - 1] ?? {};
+            const palette = (Array.isArray(c.palette) ? c.palette : []).filter((x) => /^#[0-9A-Fa-f]{6}$/.test(x)).slice(0, 3);
+            return { name: String(c.name ?? 'Scene').slice(0, 40), palette: palette.length >= 2 ? palette : ['#3977FF', '#FF5A36'],
+              pattern: PATTERNS.includes(c.pattern) ? c.pattern : 'pulse', focus: FOCUS.includes(c.focus) ? c.focus : 'all',
+              strobe_on_hits: c.strobe_on_hits !== false, intensity: Math.min(1, Math.max(0.3, Number(c.intensity) || 0.8)),
+              reason: String(c.reason ?? '').slice(0, 240) };
+          });
+          const num = (v, lo, hi, d) => Math.min(hi, Math.max(lo, Number.isFinite(Number(v)) ? Number(v) : d));
+          const music = (Array.isArray(a.music) ? a.music : []).slice(0, 4).map((m) => ({ start_s: num(m.start_s, 0, 36000, 0),
+            search: String(m.search ?? 'energetic').slice(0, 60), energy: num(m.energy, 0, 1, 0.6), tempo: num(m.tempo, 50, 200, 110),
+            valence: num(m.valence, 0, 1, 0.5), danceability: num(m.danceability, 0, 1, 0.5),
+            instrumentalness: num(m.instrumentalness, 0, 1, 0.2), reason: String(m.reason ?? '').slice(0, 240) }));
+          send(res, 200, { scenes, music, prompt, ms: Date.now() - t0 });
+        } catch (err) {
+          send(res, 502, { error: museError(err) });
+        }
+      });
+
+      // Stagify's outputs, saved next to the recording: only these files, only into a known processed recording.
+      server.middlewares.use('/api/stage/save', (req, res) => {
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
+        const params = new URL(req.url, 'http://local').searchParams;
+        const known = recordings().processed.find((r) => r.base === params.get('run'));
+        const file = params.get('file');
+        if (!known || !Object.hasOwn(STAGE_FILES, file)) return send(res, 400, { error: 'Unknown recording or file.' });
+        const chunks = [];
+        let size = 0;
+        req.on('data', (c) => { size += c.length; if (size > STAGE_FILES[file]) req.destroy(); else chunks.push(c); });
+        req.on('end', () => {
+          if (!size) return send(res, 400, { error: 'Empty file.' });
+          writeFileSync(join(root, known.base, file), Buffer.concat(chunks));
+          send(res, 200, { ok: true, url: `/${known.base}/${file}` });
+        });
       });
 
       server.middlewares.use('/api/lights', async (req, res) => {

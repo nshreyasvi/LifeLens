@@ -43,9 +43,11 @@ could change, and it drives music and stage lights from your movement.
 |---|---|---|
 | The head-camera video | Your 3D body (with 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → OmniEgoCap (body) |
 | The video, every 5 s | A caption of what you are doing | Meta Muse Spark, from 3 frames |
-| The body's numbers + the captions, every 5 s | A second posture label | Meta Muse Spark |
+| A 3D body frame + the caption, every 5 s | A second posture label | Meta Muse Spark (sees the frame) |
 | The 3D body, every second | Posture: walking, standing, sitting, crouching, bending, arms raised | Fixed rules on the body (below) |
-| All of the above | A review: what you did, what to change and why, compared with other recordings | Meta Muse Spark |
+| All of the above + 8 3D body frames | A review: what you did, what to change and why, compared with other recordings | Meta Muse Spark |
+| **Gymify:** the 3D body's reps | The exercise, reps, sets and rests, range of motion, tempo, left-right difference; form coaching; music to train to | Measured on the joints; Muse Spark names the exercise and coaches from 3D body frames |
+| **Stagify:** the whole recording | A planned show: a scene every 10 s, songs per section, the show video and a lighting cue file | Muse Spark plans from each segment's numbers and a 3D body frame; ReccoBeats |
 | The 3D body, live | Mood (every ~6 s), light level and flashes (every frame) | Director: Muse Spark + speed rules |
 | The body's own rhythm (last 8 s) | The tempo the songs and lights follow | Autocorrelation of all four limbs' speeds |
 | The last 10 s of the body | 5 songs that fit your pace, rhythm and arm swing | ReccoBeats, Spotify |
@@ -60,19 +62,27 @@ cp director/.env.example director/.env     # then set MUSE_API_KEY=...
 DIRECTOR_PYTHON=director/venv/bin/python npm run dev     # http://localhost:8000
 ```
 
-On Windows the venv's Python is `directorenv\Scripts\python.exe`; the dev server finds either one by itself.
+On Windows the venv's Python is `director\venv\Scripts\python.exe`; the dev server finds either one by itself.
 
 Enter your name, then pick one:
 
 - **Open a recording.** The two examples ([`examples/office`](examples/office), 83 s indoors;
-  [`examples/outdoor`](examples/outdoor), 105 s outside) work without a GPU. So does any run in `runs/`. A video
-  dropped in `recordings/` gets a **Process** button.
+  [`examples/outdoor`](examples/outdoor), 105 s outside) work without a GPU. So does any run in `runs/`. Saved,
+  unprocessed clips in `recordings/` have **Process** and **Delete**; several can be queued.
 - **New live session.** Your camera becomes the POV, and every 6 s Muse Spark captions two frames and names your
-  posture over it. **Record**, then **Stop**: the dev server runs the pipeline on the clip and opens it when it's done.
+  posture over it. Name the recording, **Record**, then **Stop**: the clip is saved, not processed. **Process now**
+  (or later, from Open a recording) builds the 3D body, the music and the stage show at full quality, and the session
+  is there next time. A live 3D body would need about 1–2 fps: an NVIDIA GPU with 16 GB of VRAM or more (RTX
+  4080/4090 class, estimated; an RTX 4060 Laptop measured 0.3–0.8 fps).
 
-**Play** starts the director on the open recording. **Routine** shows the POV, the 3D body and the kinematics, the
-posture timeline (rules, Muse Spark, or the seconds where both agree), the Muse review and the other recordings.
-**Music** and **Stage** keep playing while you switch between them.
+**Play** starts the director on the open recording. The tabs:
+
+| Tab | Shows |
+|---|---|
+| **Routine** | The POV, 3D body and kinematics. Icon tiles and a posture donut. A timeline with Muse's activities as spans, its changes as numbered pins, the posture strip (rules, Muse Spark, or where both agree) and walking speed. A film strip of POV thumbnails. The Muse review, past routines as one chart, and "vs. past" bars |
+| **Music** | The body's features, the targets and 5 songs, playing through one Spotify player |
+| **Stage** | Lights per body part; Muse's scene; **Show view** (the 3D body on a virtual stage); **Stagify** |
+| **Gym** | **Gymify**: the exercise, rep chart, sets and rests, range, tempo, symmetry, Muse's coaching and gym music |
 
 The `director/.env` file is gitignored; the browser never sees the key. Without `director/.env`, the director runs on
 its speed rules only, and the app shows no mood or songs rather than defaults. With an empty key it falls back to a
@@ -126,15 +136,15 @@ fixed formula, as listed here.
 | 3D body, joint angles, speed | HaWoR + OmniEgoCap on your video | Smoothing σ = 2 frames; the camera's offset from the head is fixed at (0, 0.16, 0.12) m |
 | Captions | Muse Spark, 3 frames per 5 s | Muse can misread a frame |
 | Posture "Rules" | [`insights.py`](pipeline/insights.py) on the 3D body | Walking > 0.5 m/s; a low posture held 8 s or more counts as sitting; tuned on the demo clips |
-| Posture "Muse Spark" | Muse, from the body's numbers and the captions, per 5 s | Shows unknown where Muse gave no label |
+| Posture "Muse Spark" | Muse, from a 3D body frame and the caption per 5 s ([`posture_muse.py`](director/posture_muse.py)) | No numbers: Muse looks at the body. Shows unknown where Muse gave no label |
 | Posture "Both agree" | The seconds where the rules and Muse name the same posture | Grey where they differ |
 | Agreement % (examples only) | Against the same rules run on OmniEgoDB's motion capture | It shares the rules' thresholds, so it favors the rules: agreement, not accuracy |
-| Review | Muse Spark, from the posture log, captions and totals | Other recordings may be other people (the two examples are different OmniEgoDB wearers) |
+| Review | Muse Spark, from the posture log, captions, totals and 8 3D body frames | Other recordings may be other people (the two examples are different OmniEgoDB wearers) |
 | Mood | Muse Spark every ~6 s | |
 | Tempo | The body's rhythm: the lag (60–180 BPM) at which all four limbs' speeds over the last 8 s best repeat ([`session.js`](src/session.js) `rhythmBpm`) | Used when the match is 0.3 or more. Otherwise Muse's tempo for the mood, which moves toward the mood's range by at most 10 BPM per update ([`music_map.py`](director/music_map.py)) |
 | Overall light level, flashes, freeze | Speed rules ([`fast_loop.py`](director/fast_loop.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s. The freeze "predictor" is a stand-in with a fixed score |
 | Each light | Its body part plus poses, jumps, crouches, turns and arm hits ([`stage.js`](src/stage.js)) | Fixed scales and thresholds, listed under [Music and stage](#music-and-stage) |
-| Scene (palette, beat pattern, focus, strobe) | Muse Spark, 10 s after its last answer, from the body's numbers and the song, with its reason ([`vite.config.js`](vite.config.js) `/api/stage/scene`) | Until the first answer, the rules run with the director's colour |
+| Scene (palette, beat pattern, focus, strobe) | Muse Spark, 10 s after its last answer, from the body's numbers, a 3D body frame and the song, with its reason ([`vite.config.js`](vite.config.js) `/api/stage/scene`) | Until the first answer, the rules run with the director's colour |
 | Energy (low/medium/high) | Pelvis speed divided by the clip's own 95th percentile | Relative to the clip, not absolute |
 | Song targets | The last 10 s of the body | Fixed formulas in [`main.js`](src/main.js) (`musicTargets`) |
 | Songs, BPM | ReccoBeats recommendations, seeded by its top search result for the mood; BPM is each song's measured tempo | Spotify plays a 30 s preview unless you are logged in |
@@ -190,6 +200,42 @@ the next scene with its reason. On top of that, the director sets the overall le
 | `hue` | A Philips Hue bridge, changed lights only, 2× a second (the bridge's limit) | `HUE_BRIDGE`, `HUE_KEY`, `HUE_LIGHTS` (ids in fixture order) |
 
 Art-Net and Hue are written to their specs but not yet tested on hardware.
+
+## Gym (Gymify)
+
+Gymify (Gym tab, [`pipeline/gymify.py`](pipeline/gymify.py)) analyses an exercise in a processed recording:
+
+1. **Exercise:** Muse Spark names it from 6 frames of the 3D body over the most active 20 s (plus 2 POV frames), or you
+   pick it from the list. When Muse sees no exercise, no reps are counted. On `office` and `outdoor` it answers
+   "no exercise" (walking, sitting), with 85–90% confidence.
+2. **Reps** are measured on the exercise's main joint (knee, hip, elbow, or hand height): every bend of at least 15°,
+   or 35% of the joint's range, is a rep. Reps more than 8 s apart start a new set.
+
+   | Measure | How |
+   |---|---|
+   | Range of motion | The joint's angle at the bottom of each rep minus its resting angle |
+   | Tempo | Seconds from leaving rest to the bottom, and back |
+   | Left-right difference | Between the two sides at the bottom |
+   | Fatigue | Change in range from the first to the last third of the reps |
+3. **Coaching:** Muse sees the 3D body at the start and the bottom of the first, middle and last rep, plus a POV frame,
+   with the measured numbers. It returns form observations, changes (what, why, how), what went well, and a music
+   profile. **Play gym music** finds songs for that profile on ReccoBeats.
+
+## Stagify
+
+**Stagify** (Stage tab) plans and records a show for the whole recording:
+
+- **Plan:** for every 10 s segment the page measures the body's numbers (pace, rhythm, arm hits, jumps, crouches,
+  turns, hands up, spread) and takes a 3D body frame. Muse Spark plans a scene per segment and 2–4 music sections at
+  once, and ReccoBeats picks each section's song. This is saved as `stage.json`; with it, the Stage tab and Show view
+  play the planned scenes instantly and switch songs at the sections.
+- **Show video:** the Show view is replayed from 0:00 and recorded with its sound effects (`stage_show.webm`, not
+  committed). Spotify's audio can't be recorded from its embed.
+- **Lighting cues:** the 6 lights are sampled 10 times a second into `stage_cues.csv` (time, fixture, red, green, blue,
+  level). `node server/replay.js examples/office/stage_cues.csv` plays them to Art-Net or Hue.
+
+On `office`, Muse planned 9 scenes and 4 music sections in 30 s, for example "Opening Stride Chase: matches pace 0.63
+m/s, still 16%, rhythm 100 BPM and 12 arm moves".
 
 ## Platforms
 
@@ -252,8 +298,11 @@ SLAM) is not measured.
 
 | | Rules | Muse Spark | Both agree | Always "standing" |
 |---|---|---|---|---|
-| office (83 s) | 100% | 84% | 84% | 63% |
-| outdoor (105 s) | 90% | 79% | 77% | 30% |
+| office (83 s) | 100% | 70% | 70% | 63% |
+| outdoor (105 s) | 90% | 72% | 68% | 30% |
+
+Muse Spark labels posture from one 3D body frame and the caption per 5 s. When it read the body's numbers instead, it
+agreed more (office 84%, outdoor 79%): a single frame is a weaker cue than speed, hip height and knee angle.
 
 The motion-capture labels come from the same rules run on the Xsens skeleton, so they favor the rules column: this
 is agreement, not accuracy.

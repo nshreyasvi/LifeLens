@@ -233,3 +233,5 @@ body.show-open { overflow: hidden; }
 .gym-label { font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-text); }
 .gym-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .gym-chip { padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 0.8rem; }
+.stagify-status { margin: 0; font-size: 0.84rem; color: var(--accent-text); }
+.stagify-out { display: flex; flex-wrap: wrap; gap: 8px; }

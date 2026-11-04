@@ -39,7 +39,13 @@ export const stage = {
   spot: { x: 0.5, y: 0.5, level: 0 },
   cues: [],               // [{t, text}] newest last
   flashUntil: 0, last: {}, fx: true, open: false, lightsOut: null, sentAt: 0, beats: 0, energy: 0,
+  plan: null,             // Stagify's plan {segment_s, scenes[], music[]}: its scene for the time, instead of live ones
+  recDest: null,          // while the show video records: sound effects also go here
 };
+
+export function setPlan(plan) { stage.plan = plan; }
+const planScene = (t) => (stage.plan ? stage.plan.scenes[Math.min(stage.plan.scenes.length - 1, Math.floor(t / stage.plan.segment_s))] : null);
+export function recordFx() { const c = audio(); stage.recDest = c.createMediaStreamDestination(); return stage.recDest; }
 
 // ---------- Colour ----------
 
@@ -86,6 +92,7 @@ function fx(kind, amount = 1) {
     const out = c.createGain();
     out.gain.value = 0.25 * clamp01(amount);
     out.connect(c.destination);
+    if (stage.recDest) out.connect(stage.recDest);
     if (kind === 'hit') {                                   // impact: falling thump + a click
       const o = c.createOscillator();
       o.frequency.setValueAtTime(150, t);
@@ -153,7 +160,12 @@ export function updateStage(f, ctx) {
   if (ctx.songBeats != null) stage.beats = ctx.songBeats;
   else if (bpm && ctx.live) stage.beats += (bpm / 60) * dt;
   const frac = stage.beats % 1;
-  const scene = stage.scene;
+  const scene = planScene(ctx.t) ?? stage.scene;
+  if (stage.plan && scene !== stage.last.planned) {          // a planned scene starts: show it and log it
+    stage.last.planned = scene;
+    if (ctx.live) cue(ctx.t, `Scene: ${scene.name} (${scene.pattern})`);
+    renderScene();
+  }
   const pattern = scene?.pattern ?? (bpm ? 'pulse' : 'still');
   const palette = scene?.palette ?? [ctx.color];
   const crouch = n.lift < -0.12 ? Math.max(0.2, 1 + (n.lift + 0.12) / 0.25) : 1;
@@ -182,7 +194,7 @@ export function updateStage(f, ctx) {
   if (ctx.live) {
     if (now - stage.sentAt > LIGHTS_EVERY_MS) sendLights(now);
     // Muse designs from at least 6 s of the body, on any tab, so a scene is ready when Stage or the Show view opens
-    if (!stage.asking && ctx.t >= 6 && now - stage.askedAt > SCENE_EVERY_MS) askScene(f, ctx);
+    if (!stage.plan && !stage.asking && ctx.t >= 6 && now - stage.askedAt > SCENE_EVERY_MS) askScene(f, ctx);
   }
   return stage;
 }
@@ -251,7 +263,7 @@ async function askScene(f, ctx) {
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 function renderScene(note) {
-  const s = stage.scene;
+  const s = (stage.plan && stage.last.planned) || stage.scene;
   const text = note ?? (s ? `${s.name} · ${s.pattern}${s.focus !== 'all' ? `, ${s.focus}` : ''}. ${s.reason}`
     : stage.asking ? 'Muse Spark is designing the first scene…' : stage.sceneNote);
   for (const id of ['stage-scene', 'show-scene']) if ($(id)) $(id).textContent = text;
@@ -443,7 +455,7 @@ export function setFx(on) {
 }
 
 export function resetStage() {
-  Object.assign(stage, { scene: null, cues: [], flashUntil: 0, last: {}, beats: 0, askedAt: 0, lightsOut: null });
+  Object.assign(stage, { scene: null, cues: [], flashUntil: 0, last: {}, beats: 0, askedAt: 0, lightsOut: null, plan: null });
   renderScene(); renderCues();
 }
 

@@ -572,6 +572,13 @@ document.addEventListener('lifelens:session', () => {
   reset();
   renderControls();
 });
+// Stagify's song plan: a planned section's song plays, and the body-based picks pause while the plan runs.
+document.addEventListener('lifelens:play-song', (e) => {
+  songs.profile = e.detail;
+  if (state.phase === 'live') playSong(e.detail);
+});
+export { askSongs };
+
 document.addEventListener('lifelens:music-profile', async (e) => {
   const m = e.detail;
   songs.profile = m;

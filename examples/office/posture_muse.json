@@ -2,7 +2,7 @@
  {
   "start_s": 0.0,
   "end_s": 5.0,
-  "label": "standing"
+  "label": "walking"
  },
  {
   "start_s": 5.0,
@@ -17,7 +17,7 @@
  {
   "start_s": 15.0,
   "end_s": 20.0,
-  "label": "walking"
+  "label": "bending"
  },
  {
   "start_s": 20.0,
@@ -42,7 +42,7 @@
  {
   "start_s": 40.0,
   "end_s": 45.0,
-  "label": "standing"
+  "label": "walking"
  },
  {
   "start_s": 45.0,
@@ -77,11 +77,11 @@
  {
   "start_s": 75.0,
   "end_s": 80.0,
-  "label": "walking"
+  "label": "bending"
  },
  {
   "start_s": 80.0,
   "end_s": 83.1,
-  "label": "standing"
+  "label": "arms raised"
  }
 ]

@@ -498,9 +498,12 @@
               <p class="stage-scene" id="stage-scene" aria-live="polite">Rules only until Muse Spark designs the first scene.</p>
               <div class="stage-actions">
                 <button class="btn btn-small-text" id="show-btn" type="button">Show view</button>
+                <button class="btn btn-small-text btn-primary" id="stagify-btn" type="button" title="Muse Spark plans the whole show, picks songs per section, then records the show video and the lighting cues">Stagify</button>
                 <button class="toggle" id="stage-fx" type="button" aria-pressed="true">Sound FX</button>
               </div>
               <p class="stage-out" id="stage-out">Lights out: simulator (no hardware set)</p>
+              <p class="stagify-status" id="stagify-status" aria-live="polite" hidden></p>
+              <div class="stagify-out" id="stagify-out" hidden></div>
             </div>
           </section>
         </section>
@@ -649,5 +652,6 @@
   <script type="module" src="/src/extras.js"></script>
   <script type="module" src="/src/day.js"></script>
   <script type="module" src="/src/gym.js"></script>
+  <script type="module" src="/src/stagify.js"></script>
 </body>
 </html>
