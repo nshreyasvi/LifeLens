@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 from pathlib import Path
 
@@ -20,7 +21,7 @@ from .model_client import _muse
 
 LABELS = ('walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised')
 WINDOW_S = 5.0
-CHUNK = 4  # windows per Muse call (two images each)
+CHUNK = 3  # windows per Muse call (two images each); 8 images timed out at 120 s
 PROMPT = """You label the body posture of a person filmed by a camera on their head. For each window below there are
 two images, in this order: the person's 3D body, reconstructed by LifeLens from that camera (its legs are estimated:
 the camera never sees them), and the head camera itself, both at the window's middle.
@@ -73,7 +74,13 @@ def main(argv: list[str] | None = None) -> None:
         for i in range(0, len(ws), CHUNK):
             part = ws[i:i + CHUNK]
             images = [f.read_bytes() for w in part for f in (w['frame'], w['pov'])]
-            labels += parse(_muse(build_prompt(part), max_calls=10 ** 6, images=images), len(part))
+            for attempt in range(3):              # Muse can time out on image-heavy calls: try again
+                try:
+                    labels += parse(_muse(build_prompt(part), max_calls=10 ** 6, images=images), len(part))
+                    break
+                except RuntimeError as err:
+                    if attempt == 2:
+                        raise SystemExit(f'{clip.name}: Muse did not answer windows {i + 1}-{i + len(part)}: {err}')
         out = [{'start_s': w['start_s'], 'end_s': w['end_s'], 'label': lab} for w, lab in zip(ws, labels)]
         (clip / 'posture_muse.json').write_text(json.dumps(out, indent=1), encoding='utf-8')
         print(f"{clip.name}: {len(ws)} windows, {labels.count('unknown')} unanswered:", ' '.join(labels))
