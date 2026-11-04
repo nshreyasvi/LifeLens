@@ -2,6 +2,7 @@
   "name": "lifelens-frontend",
   "private": true,
   "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "description": "LifeLens Live Studio front-end (Vite).",
   "scripts": {

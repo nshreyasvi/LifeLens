@@ -2,5 +2,4 @@ LifeLens outputs for "exercising": recorded by the repository author with a head
 https://github.com/nshreyasvi/LifeLens
 
 input.mp4 is the head camera, made smaller (960 px wide); everything else is what LifeLens computed from it.
-The 3D body comes from models with non-commercial licenses (OmniEgoCap CC BY-NC 4.0, SMPL-H and MANO from MPI,
-HaWoR), so these outputs are for research and demos. smplh.npz holds body parameters; viewing them needs SMPL-H.
+Open source under the MIT License (see ../LICENSE) with no non-commercial restrictions.

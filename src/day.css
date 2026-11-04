@@ -460,7 +460,7 @@
 .days td:nth-child(3) { width: 28%; min-width: 130px; }
 .days .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* ---------- Review (director/routine_tips.py): structured, scannable UI ---------- */
+/* ---------- Review (director/routine_tips.py): visual, scannable coaching UI ---------- */
 
 .review {
   display: flex;
@@ -471,15 +471,21 @@
 .review-headline-box {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 13px 16px;
   border-radius: 14px;
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
 
+.review-headline-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .review-kicker {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -488,12 +494,34 @@
 
 .review-summary {
   margin: 0;
-  max-width: 64ch;
-  font-size: 0.9rem;
-  font-weight: 550;
-  line-height: 1.48;
+  max-width: 66ch;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
   color: var(--text);
 }
+
+.review-posture-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review-posture-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.review-posture-pill .day-dot { width: 8px; height: 8px; }
 
 .review-subgrid {
   display: grid;
@@ -516,7 +544,6 @@
 }
 
 .review-history-callout {
-  grid-column: 1 / -1;
   background: var(--accent-soft);
   border-color: var(--accent-line);
 }
@@ -529,7 +556,7 @@
 
 .review-part h3 {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -540,95 +567,209 @@
   color: var(--accent-text);
 }
 
-.review-chips {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.review-chip-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  font-size: 0.81rem;
-  line-height: 1.38;
-  color: var(--text);
-}
-
-.review-history-callout .review-chip-item {
-  background: var(--surface-2);
-  border-color: var(--accent-line);
-}
-
-.review-bullet {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-top: 6px;
-  flex: none;
-}
-
 .changes {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
 }
 
-.changes li {
+.change-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  overflow: hidden;
+  border-radius: 13px;
   border: 1px solid var(--accent-line);
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.change-card:hover {
+  border-color: var(--accent);
+}
+
+.change-media {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-solid);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.change-media:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.change-thumbs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  height: 78px;
+  background: var(--surface-solid);
+}
+
+.change-thumbs img {
+  width: 100%;
+  height: 78px;
+  object-fit: cover;
+  display: block;
+  background: #FFFFFF;
+}
+
+.change-badges {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--surface);
 }
 
 .change-step-tag {
-  align-self: flex-start;
   font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 750;
+  letter-spacing: 0.05em;
   padding: 2px 7px;
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent-text);
 }
 
-.changes strong { font-size: 0.86rem; font-weight: 650; color: var(--text); line-height: 1.35; }
-.change-why { font-size: 0.76rem; color: var(--muted); line-height: 1.35; }
-.change-how {
-  font-size: 0.8rem;
-  font-weight: 550;
+.change-posture-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.73rem;
+  font-weight: 600;
   color: var(--text);
-  padding-top: 6px;
-  border-top: 1px solid var(--border);
+}
+
+.change-posture-tag .day-dot { width: 7px; height: 7px; }
+
+.change-jump-tag {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-variant-numeric: tabular-nums;
+}
+
+.change-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+
+.change-title {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.change-cue-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.76rem;
   line-height: 1.35;
 }
 
+.change-cue-pill {
+  font-size: 0.64rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--surface-solid);
+  color: var(--muted);
+}
+
+.change-cue-row.is-try .change-cue-pill {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.change-cue-row.is-try .change-cue-text {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.change-cue-row.is-why .change-cue-text {
+  color: var(--muted);
+}
+
+.review-well-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.review-well-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 550;
+  line-height: 1.32;
+  color: var(--text);
+}
+
+.review-well-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(28, 122, 58, 0.14);
+  color: #1C7A3A;
+}
+
+.review-more-line {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
 .review-prompt {
-  padding: 10px 14px;
+  padding: 9px 14px;
   border-radius: 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 .review-prompt summary { cursor: pointer; font-weight: 600; color: var(--text); }
 .review-prompt pre {
-  max-height: 240px;
+  max-height: 220px;
   overflow: auto;
   margin: 10px 0 0;
   padding: 12px;

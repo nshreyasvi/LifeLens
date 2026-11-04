@@ -440,9 +440,6 @@
         <div class="stage-dock" id="stage-dock" hidden></div>
         <!-- Music tab: the player bar and the queue sit here, under the video (main.js moves them in and out) -->
         <div class="music-dock" id="music-dock" hidden></div>
-        <div class="media-pane media-graph" data-pane="graph" hidden>
-          <video muted playsinline loop preload="auto" aria-label="Kinematics of the 3D body over the last 10 seconds"></video>
-        </div>
         <p class="media-caption" id="media-caption"></p>
         <div class="saved-bar" id="saved-bar" hidden>
           <span class="saved-text" id="saved-text"></span>
@@ -453,9 +450,12 @@
         <p class="media-note" hidden>No POV video for this recording on this machine, so the 3D body fills the main window.</p>
       </section>
 
-      <aside class="shell-rail" aria-label="3D body and activity">
+      <aside class="shell-rail" aria-label="3D body, kinematics, and activity">
         <div class="media-pane media-side" data-pane="body" hidden>
           <video muted playsinline loop preload="auto" aria-label="3D body, reconstructed from the head camera"></video>
+        </div>
+        <div class="media-pane media-graph" data-pane="graph" hidden>
+          <video muted playsinline loop preload="auto" aria-label="Kinematics of the 3D body over the last 10 seconds"></video>
         </div>
         <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
           <!-- What Meta Muse Spark saw at the playhead (day.js): the two frames it labelled, its posture and its caption -->

@@ -12,6 +12,7 @@
   <a href="#built-with-meta"><img alt="Llama 3.2" src="https://img.shields.io/badge/Meta-Llama_3.2_fallback-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
   <a href="#how-it-works"><img alt="3D body" src="https://img.shields.io/badge/3D_body-OmniEgoCap_%2B_HaWoR-C83E1B?style=flat-square"></a>
   <a href="#quick-start"><img alt="Vite" src="https://img.shields.io/badge/app-Vite_6_%C2%B7_vanilla_JS-2B44E8?style=flat-square&logo=vite&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT_Open_Source-1C7A3A?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -282,17 +283,10 @@ Built in ten days for the **Meta Global AI Developer Hackathon 2026**.
 | **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end foundation: Vite app, live director connection, lights and music (ReccoBeats + Spotify), routine view, synced 3D body video, light/dark theme |
 | **Yash** | Research, testing on real recordings, demo and submission support |
 
-## Licenses
+## License
 
-No license is set for this code yet. The models it runs are not included; check theirs before any commercial use:
+**LifeLens is 100% open source under the [MIT License](LICENSE)** — there are no non-commercial restrictions on this repository, its application code, the agentic director, the pipeline scripts, or our own GoPro example recordings and outputs in [`examples/`](examples). No third-party model weights or gated datasets are bundled in this repository.
 
-- OmniEgoCap: code MIT; its checkpoint CC BY-NC 4.0
-- HaWoR: CC BY-NC-ND
-- SMPL-H and MANO: MPI licenses
-- OmniEgoDB (used for the evaluation only, not included): CC BY-NC, gated
-
-The example recordings and the demo are our own GoPro footage.
-
-**Built on:** OmniEgoCap · HaWoR · DROID-SLAM · SMPL-H / MANO · [OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB) · [Meta Muse Spark](https://dev.meta.ai/docs/quickstart) · [Meta Llama 3.2](https://ollama.com/library/llama3.2) · ReccoBeats · Spotify.
+**Built on:** OmniEgoCap · HaWoR · DROID-SLAM · SMPL-H / MANO · [Meta Muse Spark](https://dev.meta.ai/docs/quickstart) · [Meta Llama 3.2](https://ollama.com/library/llama3.2) · ReccoBeats · Spotify.
 
 <p align="center">© 2026 LifeLens team</p>

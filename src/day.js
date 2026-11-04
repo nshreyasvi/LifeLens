@@ -325,6 +325,15 @@ function renderPostures() {
   }));
 }
 
+function cleanReviewText(s, max = 68) {
+  const cleaned = String(s || '')
+    .replace(/\b(in\s+)?(rep\s+\d+\s+)?images?\s+\d+(?:\s*(?:and|-|to)\s*\d+)?/gi, '')
+    .replace(/^the (camera )?(wearer|person)\s+(is\s+)?/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return brief(capitalize(cleaned), max);
+}
+
 function renderReview(report) {
   const box = $('review');
   const r = report.report;
@@ -333,56 +342,115 @@ function renderReview(report) {
     drawTrack(null);
     return;
   }
-  const chipList = (title, items, extraClass = '') => {
-    const sec = el('section', `review-part ${extraClass}`.trim());
-    sec.append(el('h3', '', title));
-    const ul = el('ul', 'review-chips');
-    ul.append(...items.slice(0, 3).map((t) => {
-      const li = el('li', 'review-chip-item');
-      li.append(el('span', 'review-bullet'), el('span', '', brief(t, 96)));
-      return li;
-    }));
-    sec.appendChild(ul);
-    return sec;
-  };
+
+  const base = session.rec?.base;
+  const share = shareOf(view.labels);
 
   const headline = el('div', 'review-headline-box');
-  headline.append(
+  const headTop = el('div', 'review-headline-top');
+  headTop.append(
     el('span', 'review-kicker', 'Session Takeaway'),
-    el('p', 'review-summary', brief(r.summary, 180)),
+    el('p', 'review-summary', cleanReviewText(r.summary?.split(/(?<=[.!?])\s+/)[0] ?? r.summary, 115)),
   );
+  const pillRow = el('div', 'review-posture-pills');
+  for (const p of POSTURES.filter((x) => share[x] >= 0.04)) {
+    const pill = el('span', 'review-posture-pill');
+    const dot = el('span', 'day-dot');
+    dot.style.background = POSTURE_COLORS[p];
+    pill.append(dot, `${capitalize(p)} ${Math.round(share[p] * 100)}%`);
+    pillRow.appendChild(pill);
+  }
+  headline.append(headTop, pillRow);
 
   const changes = el('section', 'review-part review-changes');
-  changes.append(el('h3', '', 'Recommended habit adjustments'));
+  changes.append(el('h3', '', 'Visual habit adjustments'));
   const ol = el('ol', 'changes');
   ol.append(...(r.improvements ?? []).slice(0, 3).map((c, idx) => {
-    const li = el('li');
-    const t = firstTime(c.why) ?? firstTime(c.how);
-    li.append(
-      el('span', 'change-step-tag', `${idx + 1}${t !== null ? ` · ${clock(t)} on the timeline` : ''}`),
-      el('strong', '', brief(c.change, 78)),
-      el('span', 'change-why', brief(c.why ?? '', 90)),
-      el('span', 'change-how', brief(c.how ?? '', 95)),
-    );
+    const li = el('li', 'change-card');
+    const t = firstTime(c.why) ?? firstTime(c.how) ?? 0;
+    const snap = Math.max(0, Math.floor(t / 5) * 5);
+    const pad = String(snap).padStart(4, '0');
+    const posture = view.labels[Math.min(t, Math.max(0, view.labels.length - 1))] || 'standing';
+
+    const mediaBtn = el('button', 'change-media');
+    mediaBtn.type = 'button';
+    mediaBtn.title = `Jump to ${clock(t)} in video`;
+    mediaBtn.addEventListener('click', () => media.seek(t + 0.05));
+
+    if (base) {
+      const thumbsWrap = el('div', 'change-thumbs');
+      const bodyImg = Object.assign(document.createElement('img'), {
+        src: `/${base}/frames/body_${pad}.jpg`,
+        alt: `3D body at ${clock(snap)}`,
+        loading: 'lazy',
+      });
+      bodyImg.onerror = () => { bodyImg.hidden = true; };
+      const povImg = Object.assign(document.createElement('img'), {
+        src: `/${base}/frames/pov_${pad}.jpg`,
+        alt: `POV at ${clock(snap)}`,
+        loading: 'lazy',
+      });
+      povImg.onerror = () => { povImg.hidden = true; };
+      thumbsWrap.append(bodyImg, povImg);
+      mediaBtn.appendChild(thumbsWrap);
+    }
+
+    const badgeBar = el('div', 'change-badges');
+    const stepBadge = el('span', 'change-step-tag', `#${idx + 1}`);
+    const pBadge = el('span', 'change-posture-tag');
+    const pDot = el('span', 'day-dot');
+    pDot.style.background = POSTURE_COLORS[posture] ?? 'var(--accent)';
+    pBadge.append(pDot, capitalize(posture));
+    const jumpBadge = el('span', 'change-jump-tag', `▶ ${clock(t)}`);
+    badgeBar.append(stepBadge, pBadge, jumpBadge);
+    mediaBtn.appendChild(badgeBar);
+
+    const bodyBox = el('div', 'change-body');
+    bodyBox.appendChild(el('strong', 'change-title', brief(c.change, 64)));
+
+    if (c.how) {
+      const tryRow = el('div', 'change-cue-row is-try');
+      tryRow.append(el('span', 'change-cue-pill', 'TRY'), el('span', 'change-cue-text', cleanReviewText(c.how, 68)));
+      bodyBox.appendChild(tryRow);
+    }
+    if (c.why) {
+      const whyRow = el('div', 'change-cue-row is-why');
+      whyRow.append(el('span', 'change-cue-pill', 'SEEN'), el('span', 'change-cue-text', cleanReviewText(c.why, 62)));
+      bodyBox.appendChild(whyRow);
+    }
+
+    li.append(mediaBtn, bodyBox);
     return li;
   }));
   changes.appendChild(ol);
 
-  // what they did is on the timeline; "vs past" is a chart (renderHistory fills it) with Muse's first comparison
   const subgrid = el('div', 'review-subgrid');
   const vs = el('section', 'review-part review-history-callout');
   vs.append(el('h3', '', 'Vs. past routines'), Object.assign(el('div', 'vs-chart'), { id: 'vs-chart' }));
-  if (r.compared_with_history?.length) vs.appendChild(el('p', 'vs-note', brief(r.compared_with_history[0], 150)));
   subgrid.appendChild(vs);
-  if (r.went_well?.length) subgrid.appendChild(chipList('Went well', r.went_well));
-  if (r.posture_and_movement?.length) {
-    const more = el('details', 'review-more');
-    more.append(el('summary', '', 'More from Muse Spark'), ...r.posture_and_movement.map((t) => el('p', '', t)));
-    subgrid.appendChild(more);
+
+  if (r.went_well?.length) {
+    const wellSec = el('section', 'review-part review-well-part');
+    wellSec.append(el('h3', '', 'Went well'));
+    const ul = el('ul', 'review-well-grid');
+    ul.append(...r.went_well.slice(0, 3).map((t) => {
+      const li = el('li', 'review-well-card');
+      const check = el('span', 'review-well-icon', '✓');
+      check.setAttribute('aria-hidden', 'true');
+      li.append(check, el('span', 'review-well-text', cleanReviewText(t, 74)));
+      return li;
+    }));
+    wellSec.appendChild(ul);
+    subgrid.appendChild(wellSec);
   }
 
   const read = el('details', 'review-prompt');
-  read.append(el('summary', '', 'View Meta Muse Spark prompt payload'), el('pre', '', r.prompt ?? 'Not saved with this review.'));
+  const extraLines = [...(r.posture_and_movement ?? []), ...(r.compared_with_history ?? [])];
+  read.append(
+    el('summary', '', 'Full Muse Spark notes & prompt payload'),
+    ...extraLines.map((t) => el('p', 'review-more-line', t)),
+    el('pre', '', r.prompt ?? 'Not saved with this review.'),
+  );
   box.replaceChildren(headline, changes, subgrid, read);
   drawTrack(r);
   $('review-source').textContent = `Meta Muse Spark · vs ${r.history?.length ?? 0} past`;

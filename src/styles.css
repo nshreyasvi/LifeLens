@@ -526,13 +526,16 @@ h1 {
 }
 
 .media-pane { margin: 0; }
+.media-pane[hidden] { display: none; }
 .media-pane video { display: block; width: 100%; height: 100%; }
 .media-base { position: absolute; inset: 0; }
 .media-base video { width: 100%; height: 100%; object-fit: cover; }
 .media-base video[data-stand-in] { object-fit: contain; background: #FFFFFF; } /* the 3D render standing in for a missing POV */
 
-/* Kinematics: a strip under the POV, the graph's own 1400:162 shape. */
+/* Kinematics: docked directly below the 3D body mesh in the right rail, above "What Muse Spark sees now". */
 .media-graph {
+  flex: none;
+  width: 100%;
   aspect-ratio: 1400 / 162;
   overflow: hidden;
   border-radius: 12px;
@@ -541,6 +544,8 @@ h1 {
   box-shadow: var(--shadow-sm);
   animation: pane-in 220ms var(--ease);
 }
+
+.media-graph video { object-fit: contain; background: #FFFFFF; }
 
 /* 3D body: docked at the top of the rail in a compact studio monitor bezel so it never crowds out the tab panels. */
 .media-side {

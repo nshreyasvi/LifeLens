@@ -14,7 +14,7 @@ const $ = (id) => document.getElementById(id);
 
 const SYNC_TOLERANCE_S = 0.75;
 const LIVE_IDLE_MS = 3000;
-const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body'], gym: ['body', 'graph'] };
+const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body', 'graph'], gym: ['body', 'graph'] };
 // Stage and Gym have their own main view (stage.js show, gym.js viewer) over the POV; the rail keeps the body and graph.
 const TAB_TEXT = {
   activity: 'First-person POV, 3D body, live kinematics & session routine.',

@@ -68,6 +68,25 @@ function repChart(g, seconds) {
   return s;
 }
 
+// Clean internal prompt references ("in rep 4 image 4", "seen in images 5-6") and trim to a crisp visual line.
+function cleanGymText(s, max = 72) {
+  const cleaned = String(s || '')
+    .replace(/\b(seen\s+in\s+|in\s+)?(rep\s+\d+\s+)?images?\s+\d+(?:\s*(?:and|-|to)\s*\d+)?/gi, '')
+    .replace(/\bper\s+numbers,?\s*/gi, '')
+    .replace(/^cue\s+['"“”][^'"“”]+['"“”]\s*(?:and\s+)?/i, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[,;:\s]+$/, '')
+    .trim();
+  if (!cleaned) return '';
+  const c = cap(cleaned);
+  return c.length <= max ? c : `${c.slice(0, max - 1).replace(/[,;:\s]+$/, '')}…`;
+}
+
+function extractCueQuote(how) {
+  const m = /['"“”]([^'"“”]{4,60})['"“”]/.exec(String(how || ''));
+  return m ? m[1].trim() : '';
+}
+
 function render(g) {
   view.g = g;
   const box = $('gym-result');
@@ -81,7 +100,7 @@ function render(g) {
   const head = el('div', 'gym-ex');
   head.append(el('strong', '', ex.exercise === 'none' ? 'No exercise' : cap(ex.exercise)),
     el('span', 'gym-ex-src', ex.source === 'you' ? 'picked by you' : `Muse Spark${ex.confidence != null ? ` · ${Math.round(100 * ex.confidence)}% sure` : ''}`));
-  if (ex.reason) head.appendChild(el('p', 'gym-ex-why', ex.reason));
+  if (ex.reason) head.appendChild(el('p', 'gym-ex-why', cleanGymText(ex.reason, 110)));
   if (!g.reps.length) {
     box.replaceChildren(head, el('p', 'gym-empty', ex.exercise === 'none'
       ? 'Muse Spark saw no repeated exercise in this recording, so no reps are counted.'
@@ -100,40 +119,142 @@ function render(g) {
   if (Math.abs(fade) >= 5) numbers.append(el('p', 'gym-note', `Range of motion ${fade < 0 ? 'dropped' : 'grew'} ${Math.abs(fade)}% from the first to the last third of the reps${fade < 0 ? ', a sign of fatigue' : ''}.`));
   const parts = [];
   const r = g.review;
+  const base = session.rec?.base;
   if (r) {
-    parts.push(el('p', 'gym-summary', r.summary));
+    // Visual 3-gauge biomechanical scoreboard instead of a dense summary paragraph
+    const board = el('div', 'gym-scoreboard');
+    const romPct = Math.min(100, Math.max(12, Math.round((sm.rom_mean_deg / Math.max(sm.rom_max_deg, 120)) * 100)));
+    const downShare = Math.round((sm.down_mean_s / Math.max(0.1, sm.down_mean_s + sm.up_mean_s)) * 100);
+    const symPct = Math.max(12, Math.min(100, Math.round(100 - sm.asym_mean_deg * 3.2)));
+
+    const gauge = (label, valText, badgeText, pct, color) => {
+      const gBox = el('div', 'gym-gauge');
+      const gTop = el('div', 'gym-gauge-top');
+      gTop.append(el('span', 'gym-gauge-label', label), el('span', 'gym-gauge-badge', badgeText));
+      const gVal = el('strong', 'gym-gauge-val', valText);
+      const track = el('div', 'gym-gauge-track');
+      const fill = el('span', 'gym-gauge-fill');
+      fill.style.width = `${pct}%`;
+      if (color) fill.style.background = color;
+      track.appendChild(fill);
+      gBox.append(gTop, gVal, track);
+      return gBox;
+    };
+
+    board.append(
+      gauge('Depth range', `${Math.round(sm.rom_min_deg)}°–${Math.round(sm.rom_max_deg)}°`,
+        Math.abs(fade) < 12 ? 'Steady' : `${fade > 0 ? '+' : ''}${Math.round(fade)}% fade`, romPct, 'var(--accent)'),
+      gauge('Eccentric / concentric', `${sm.down_mean_s}s ↓ · ${sm.up_mean_s}s ↑`,
+        `${sm.reps_per_min}/min`, downShare, 'var(--accent)'),
+      gauge('L/R symmetry', `${sm.asym_mean_deg}° avg diff`,
+        sm.asym_mean_deg < 8 ? 'Balanced' : sm.asym_mean_deg < 16 ? 'Watch' : 'Asymmetric', symPct, asymColor(sm.asym_mean_deg)),
+    );
+    parts.push(board);
+
     const list = el('ol', 'gym-cards');
     list.append(...(r.improvements ?? []).map((c, k) => {
       const li = el('li', 'gym-card');
-      const head = el('div', 'gym-card-head');
-      head.append(el('span', 'gym-card-n', String(k + 1)), el('strong', '', c.change));
-      const rep = repOf(`${c.change} ${c.why} ${c.how}`, g.reps.length);   // the rep the change rests on, if it names one
-      if (rep) {
-        const go = el('button', 'gym-rep-link', `Rep ${rep}`);
-        go.type = 'button';
-        go.setAttribute('aria-label', `Play rep ${rep}`);
-        go.addEventListener('click', () => { media.seek(g.reps[rep - 1].bottom_s); media.play(); });
-        head.appendChild(go);
+      const repIdx = repOf(`${c.change} ${c.why} ${c.how}`, g.reps.length) || Math.min(k + 1, g.reps.length);
+      const repObj = g.reps[repIdx - 1];
+
+      const cardGrid = el('div', 'gym-card-grid');
+
+      if (base && repObj) {
+        const snap = Math.max(0, Math.floor(repObj.bottom_s / 5) * 5);
+        const pad = String(snap).padStart(4, '0');
+        const thumbBtn = el('button', 'gym-card-thumb');
+        thumbBtn.type = 'button';
+        thumbBtn.title = `Jump to Rep ${repIdx} (${clock(repObj.bottom_s)})`;
+        thumbBtn.addEventListener('click', () => { media.seek(repObj.bottom_s); media.play(); });
+        const img = Object.assign(document.createElement('img'), {
+          src: `/${base}/frames/body_${pad}.jpg`,
+          alt: `3D body at Rep ${repIdx}`,
+          loading: 'lazy',
+        });
+        img.onerror = () => { thumbBtn.hidden = true; };
+        const badge = el('span', 'gym-thumb-badge', `▶ Rep ${repIdx}`);
+        thumbBtn.append(img, badge);
+        cardGrid.appendChild(thumbBtn);
       }
-      const rows = el('dl', 'gym-card-rows');
-      rows.append(el('dt', '', 'Why'), el('dd', '', c.why ?? ''), el('dt', '', 'How'), el('dd', '', c.how ?? ''));
-      li.append(head, rows);
+
+      const content = el('div', 'gym-card-content');
+      const headRow = el('div', 'gym-card-head');
+      headRow.append(el('span', 'gym-card-n', `#${k + 1}`), el('strong', 'gym-card-title', cleanGymText(c.change, 64)));
+      if (repObj) {
+        const go = el('button', 'gym-rep-link', `Rep ${repIdx} · ${clock(repObj.bottom_s)}`);
+        go.type = 'button';
+        go.addEventListener('click', () => { media.seek(repObj.bottom_s); media.play(); });
+        headRow.appendChild(go);
+      }
+      content.appendChild(headRow);
+
+      if (repObj) {
+        const metricsRow = el('div', 'gym-rep-pills');
+        const pRom = el('span', 'gym-rep-pill', `${Math.round(repObj.rom_deg)}° depth`);
+        const pTempo = el('span', 'gym-rep-pill', `↓${repObj.down_s}s ↑${repObj.up_s}s`);
+        const pSym = el('span', 'gym-rep-pill');
+        const dot = el('span', 'gym-lr-dot');
+        dot.style.background = asymColor(repObj.asym_deg);
+        pSym.append(dot, `${repObj.asym_deg}° L/R`);
+        metricsRow.append(pRom, pTempo, pSym);
+        content.appendChild(metricsRow);
+      }
+
+      const quote = extractCueQuote(c.how);
+      if (quote) {
+        const cueChip = el('div', 'gym-voice-cue');
+        cueChip.append(el('span', 'gym-voice-tag', 'CUE'), el('span', 'gym-voice-quote', `“${cap(quote)}”`));
+        content.appendChild(cueChip);
+      }
+
+      const howClean = cleanGymText(c.how, 68);
+      if (howClean) {
+        const fixRow = el('div', 'gym-cue-line is-fix');
+        fixRow.append(el('span', 'gym-cue-badge', 'TRY'), el('span', '', howClean));
+        content.appendChild(fixRow);
+      }
+      const whyClean = cleanGymText(c.why, 66);
+      if (whyClean) {
+        const whyRow = el('div', 'gym-cue-line is-why');
+        whyRow.append(el('span', 'gym-cue-badge', 'SEEN'), el('span', '', whyClean));
+        content.appendChild(whyRow);
+      }
+
+      cardGrid.appendChild(content);
+      li.appendChild(cardGrid);
       return li;
     }));
     parts.push(list);
+
     if (r.went_well?.length) {
-      const good = el('div', 'gym-card gym-card-good');
-      const ul = el('ul', 'gym-good');
-      ul.append(...r.went_well.map((t) => el('li', '', t)));
-      good.append(el('strong', '', 'Went well'), ul);
+      const good = el('div', 'gym-well-box');
+      good.appendChild(el('span', 'gym-section-kicker', 'Went well'));
+      const ul = el('ul', 'gym-well-list');
+      ul.append(...r.went_well.slice(0, 3).map((t) => {
+        const li = el('li', 'gym-well-pill');
+        li.append(el('span', 'gym-well-check', '✓'), el('span', '', cleanGymText(t, 74)));
+        return li;
+      }));
+      good.appendChild(ul);
       parts.push(good);
     }
+
+    if (r.music) {
+      const mCard = el('div', 'gym-music-card');
+      const mLeft = el('div', 'gym-music-info');
+      mLeft.append(
+        el('span', 'gym-music-kicker', 'Matched Training Track'),
+        el('strong', 'gym-music-title', r.music.search || 'Workout tempo track'),
+      );
+      const mRight = el('span', 'gym-music-window', `${clock(g.reps[0].start_s)}–${clock(g.reps[g.reps.length - 1].end_s)}`);
+      mCard.append(mLeft, mRight);
+      parts.push(mCard);
+    }
+
     const more = el('details', 'gym-more');
-    more.append(el('summary', '', `What Muse saw in the frames (${(r.form ?? []).length})`), ...(r.form ?? []).map((t) => el('p', '', t)),
+    more.append(el('summary', '', `Full Muse Spark frame notes (${(r.form ?? []).length})`), ...(r.form ?? []).map((t) => el('p', '', t)),
       ...(r.caveats ?? []).map((t) => el('p', 'gym-caveat', t)));
     parts.push(more);
-    if (r.music) parts.push(el('p', 'gym-note', `Music for the reps: "${r.music.search}" is in the Music queue for `
-      + `${clock(g.reps[0].start_s)}-${clock(g.reps[g.reps.length - 1].end_s)} (Muse Spark's pick for this exercise).`));
   }
   const feedback = el('div', 'gym-col gym-feedback');
   feedback.append(el('h3', 'gym-col-title', 'Muse Spark feedback'), ...parts);
