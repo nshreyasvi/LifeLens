@@ -33,6 +33,7 @@ function openTab(next) {
   if (next !== tab && TAB_PANES[tab]) chosen[tab] = media.shown();
   tab = next;
   mediaRoot.dataset.tab = tab;
+  renderActions();
   mediaRoot.hidden = !TAB_PANES[tab];
   if (!TAB_PANES[tab]) return;
   media.show(chosen[tab] ?? TAB_PANES[tab]);
@@ -114,6 +115,24 @@ function toggleCalls(open = $('muse-log').hidden) {
 aiBadge.addEventListener('click', () => toggleCalls());
 aiBadge.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCalls(); } });
 $('muse-log-close').addEventListener('click', () => toggleCalls(false));
+
+// Stagify and Gymify run from the bar under the video. Idle: the big button. Running (its button is disabled): a
+// progress bar and the step it is on. Done (a plan or a rep report is on screen): a small "Run again".
+const ACTIONS = { stage: { btn: 'stagify-btn', status: 'stagify-status', done: () => Boolean(document.querySelector('#stagify-out a')) || Boolean(session.rec?.files?.['stage.json']), again: 'Stagify again' },
+  gym: { btn: 'gym-btn', status: 'gym-status', done: () => Boolean(document.querySelector('#gym-result .gym-ex')), again: 'Run Gymify again' } };
+const firstLabel = {};
+function renderActions() {
+  for (const [name, a] of Object.entries(ACTIONS)) {
+    const box = document.querySelector(`.media-action[data-tab="${name}"]`);
+    const btn = $(a.btn);
+    firstLabel[name] ??= btn.textContent;
+    box.hidden = tab !== name || !session.rec || session.live;
+    box.dataset.state = btn.disabled ? 'running' : a.done() ? 'done' : 'idle';
+    btn.textContent = box.dataset.state === 'done' ? a.again : firstLabel[name];
+    box.querySelector('.action-status').textContent = btn.disabled ? $(a.status)?.textContent ?? '' : '';
+  }
+}
+setInterval(renderActions, 600);
 
 function setAi(text, mode) {
   aiState.textContent = text;

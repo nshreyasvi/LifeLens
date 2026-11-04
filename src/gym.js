@@ -294,7 +294,8 @@ function drawGym() {
   const cur = reps.findIndex((r) => t >= r.start_s && t <= r.end_s);
   const done = reps.filter((r) => r.end_s < t).length;
   const r = reps[cur];
-  gg.fillText(`${cap(g.exercise.exercise)} · rep ${cur >= 0 ? cur + 1 : done} of ${reps.length}`, pad, pad + 20 * dpr);
+  const count = cur >= 0 ? `rep ${cur + 1} of ${reps.length}` : done ? `${done} of ${reps.length} reps done` : `${reps.length} reps ahead`;
+  gg.fillText(`${cap(g.exercise.exercise)} · ${count}`, pad, pad + 20 * dpr);
   gg.font = `${14 * dpr}px Geist, sans-serif`;
   gg.fillStyle = '#FFFFFFCC';
   gg.fillText(r ? `${t < r.bottom_s ? 'Going down' : 'Coming up'} · ${Math.round(r.rom_deg)}° ${g.joint} range · ${r.asym_deg}° left-right`

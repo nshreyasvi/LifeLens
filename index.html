@@ -417,6 +417,23 @@
             </div>
           </div>
         </div>
+        <!-- Under the video: Stagify (Stage tab) and Gymify (Gym tab); while one runs, a progress bar (extras.js) -->
+        <div class="media-actions" id="media-actions">
+          <div class="media-action" data-tab="stage" data-state="idle" hidden>
+            <button class="btn btn-cta" id="stagify-btn" type="button">Stagify this recording</button>
+            <p class="action-sub">Meta Muse Spark plans a scene every 10 s and the songs per section, then the show is recorded.</p>
+            <div class="action-progress" aria-hidden="true"><span></span></div>
+            <p class="action-status" aria-live="polite"></p>
+          </div>
+          <div class="media-action" data-tab="gym" data-state="idle" hidden>
+            <button class="btn btn-cta" id="gym-btn" type="button">Run Gymify</button>
+            <p class="action-sub">Meta Muse Spark recognises the exercise; reps, depth and tempo are measured on the 3D joints.</p>
+            <div class="action-progress" aria-hidden="true"><span></span></div>
+            <p class="action-status" aria-live="polite"></p>
+          </div>
+        </div>
+        <!-- Music tab: the player bar and the queue sit here, under the video (main.js moves them in and out) -->
+        <div class="music-dock" id="music-dock" hidden></div>
         <div class="media-pane media-graph" data-pane="graph" hidden>
           <video muted playsinline loop preload="auto" aria-label="Kinematics of the 3D body over the last 10 seconds"></video>
         </div>
@@ -481,13 +498,15 @@
                 <div class="tempo-label" id="tempo-label">Press Play</div>
               </div>
             </div>
-            <div class="songs">
-              <div class="songs-head">
-                <h3 id="songs-title">Matched tracks</h3>
-                <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
+            <div class="songs" id="song-queue-home">
+              <div class="song-queue" id="song-queue">
+                <div class="songs-head">
+                  <h3 id="songs-title">Up next</h3>
+                  <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
+                </div>
+                <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
+                <p class="songs-note" id="songs-note">Tracks appear as movement pace settles.</p>
               </div>
-              <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
-              <p class="songs-note" id="songs-note">Tracks appear as movement pace settles.</p>
             </div>
           </section>
         </section>
@@ -510,7 +529,6 @@
             <div class="stage-scene-row">
               <p class="stage-scene" id="stage-scene" aria-live="polite">Rules only until Muse Spark designs the first scene.</p>
               <div class="stage-actions">
-                <button class="btn btn-cta" id="stagify-btn" type="button" title="Muse Spark plans the whole show, picks songs per section, then records the show video and the lighting cues">Stagify this recording</button>
                 <button class="btn btn-small-text" id="show-btn" type="button">Full-screen show</button>
                 <button class="toggle" id="stage-fx" type="button" aria-pressed="true">Sound FX</button>
               </div>
@@ -530,7 +548,6 @@
             </div>
             <p class="panel-sub">Meta Muse Spark recognises the exercise from frames of the 3D body and the head camera;
               the reps are measured on the 3D joints. The report appears below the video.</p>
-            <button class="btn btn-cta" id="gym-btn" type="button">Run Gymify</button>
           </section>
         </section>
 

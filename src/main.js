@@ -72,6 +72,10 @@ function selectTab(name, { focus = false } = {}) {
   if (routineDeck) routineDeck.hidden = name !== 'activity';
   $('gym-deck').hidden = name !== 'gym';
   els.player.hidden = !['music', 'stage', 'gym'].includes(name);
+  const dock = $('music-dock'), bar = els.player.querySelector('.player-bar') ?? dock.querySelector('.player-bar');
+  if (name === 'music') dock.append(bar, $('song-queue'));
+  else { els.player.querySelector('.player-embed').before(bar); $('song-queue-home').append($('song-queue')); }
+  dock.hidden = name !== 'music';
   emit('tab', { tab: name });
 }
 
@@ -302,7 +306,7 @@ function preSection(t) {
   const sec = songs.pre[i];
   player.queue = sec.songs;
   drawSongs(sec.songs);
-  els.songsMood.textContent = `${clock(sec.start_s)}-${clock(sec.end_s)}: ${sec.style}, ${sec.mood} (Muse Spark, picked when processed)`;
+  els.songsMood.textContent = 'Picked when the recording was processed: body numbers + a Meta Muse Spark style per section';
   els.songsNote.hidden = true;
   renderBar();
   if (state.phase === 'live' && (!player.song || player.song.ended)) playSong(sec.songs[0]);
@@ -368,21 +372,40 @@ async function askSongs(t) {
   return { seed: `"${seed.name}"`, songs: list.slice(0, 5) };
 }
 
-function drawSongs(list) {
-  els.songList.replaceChildren(...list.map((song) => {
-    const li = Object.assign(document.createElement('li'), { className: 'song' });
-    li.dataset.id = song.spotifyId;
-    const info = Object.assign(document.createElement('div'), { className: 'song-info' });
-    info.append(Object.assign(document.createElement('span'), { className: 'song-name', textContent: song.name }),
-      Object.assign(document.createElement('span'), { className: 'song-artist', textContent: song.artist }));
-    li.appendChild(info);
-    if (song.tempo) li.appendChild(Object.assign(document.createElement('span'), { className: 'song-tempo', textContent: `${song.tempo} BPM` }));
-    const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'song-play', textContent: 'Play' });
-    btn.setAttribute('aria-label', `Play ${song.name}`);
-    btn.addEventListener('click', () => playSong(song));
-    li.appendChild(btn);
+function drawQueue() {
+  const cur = songs.preAt;
+  els.songList.replaceChildren(...songs.pre.map((sec, k) => {
+    const li = Object.assign(document.createElement('li'), { className: `queue-section${k === cur ? ' is-current' : ''}` });
+    const head = Object.assign(document.createElement('div'), { className: 'queue-head' });
+    head.append(Object.assign(document.createElement('span'), { className: 'queue-time', textContent: `${clock(sec.start_s)}-${clock(sec.end_s)}` }),
+      Object.assign(document.createElement('strong'), { textContent: sec.style }),
+      Object.assign(document.createElement('span'), { className: 'queue-mood', textContent: sec.mood }));
+    const ol = Object.assign(document.createElement('ol'), { className: 'queue-songs' });
+    ol.append(...sec.songs.map((song) => songRow(song)));
+    li.append(head, ol);
     return li;
   }));
+  markPlaying();
+}
+
+function songRow(song) {
+  const li = Object.assign(document.createElement('li'), { className: 'song' });
+  li.dataset.id = song.spotifyId;
+  const info = Object.assign(document.createElement('div'), { className: 'song-info' });
+  info.append(Object.assign(document.createElement('span'), { className: 'song-name', textContent: song.name }),
+    Object.assign(document.createElement('span'), { className: 'song-artist', textContent: song.artist }));
+  li.appendChild(info);
+  if (song.tempo) li.appendChild(Object.assign(document.createElement('span'), { className: 'song-tempo', textContent: `${song.tempo} BPM` }));
+  const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'song-play', textContent: 'Play' });
+  btn.setAttribute('aria-label', `Play ${song.name}`);
+  btn.addEventListener('click', () => playSong(song));
+  li.appendChild(btn);
+  return li;
+}
+
+function drawSongs(list) {
+  if (songs.pre && !songs.profile) { drawQueue(); return; }
+  els.songList.replaceChildren(...list.map(songRow));
   markPlaying();
 }
 
@@ -606,6 +629,7 @@ function connectLive() {
     retryMs = LIVE_RETRY_MS;
     els.error.hidden = true;
     if (player.song && !player.song.ended) player.ctrl?.resume();
+    else if (player.queue.length) playSong(player.queue[0]);   // music starts with the show
     renderControls();
   });
   socket.addEventListener('message', (event) => {

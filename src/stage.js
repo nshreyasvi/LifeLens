@@ -350,7 +350,8 @@ function bodySource() {
 export { key as bodyKey };      // the cut-out body, for the Gym viewer (gym.js) too
 export function keyedBody(retry = true) {
   const v = bodySource();
-  if (!v || v.readyState < 2 || !v.videoWidth) return null;
+  // no new frame yet (a seek or a busy decoder): keep the last cut-out rather than an empty stage
+  if (!v || v.readyState < 2 || !v.videoWidth) { stage.keyStale = (stage.keyStale ?? 0) + 1; return stage.vbox && { ...stage.vbox, fresh: false }; }
   const W = v.videoWidth, H = v.videoHeight, b = stage.vbox;
   let found = null;
   if (b) {                                             // track: the last box, 40% bigger, at full resolution
@@ -359,11 +360,13 @@ export function keyedBody(retry = true) {
     found = keyRegion(v, sx, sy, Math.min(W, b.vx1 + mw) - sx, Math.min(H, b.vy1 + mh) - sy, 1);
   }
   if (!found && retry) {                               // lost (or first frame): find it on a small full frame, then key it
-    stage.vbox = keyRegion(v, 0, 0, W, H, 320 / W);
-    return stage.vbox ? keyedBody(false) : null;
+    const whole = keyRegion(v, 0, 0, W, H, 320 / W);
+    if (whole) { stage.vbox = whole; return keyedBody(false); }
+    stage.keyLost = (stage.keyLost ?? 0) + 1;
+    return null;
   }
-  stage.vbox = found;
-  return found;
+  if (found) { stage.vbox = found; stage.keyFresh = (stage.keyFresh ?? 0) + 1; }
+  return found && { ...found, fresh: true };
 }
 
 function draw() {
@@ -421,10 +424,12 @@ function draw() {
     const prevH = stage.avH ?? (box.vy1 - box.vy0);
     stage.avH = prevH + 0.2 * ((box.vy1 - box.vy0) - prevH);   // smooth the size, not the position
     const lead = stage.fixtures.reduce((m, f) => (f.level > m.level ? f : m), stage.fixtures[0]);
-    kg.globalCompositeOperation = 'source-atop';
-    kg.fillStyle = `${lead.color}55`;
-    kg.fillRect(0, 0, key.width, key.height);
-    kg.globalCompositeOperation = 'source-over';
+    if (av.fresh) {                                  // tint a new cut-out once; a kept one is already tinted
+      kg.globalCompositeOperation = 'source-atop';
+      kg.fillStyle = `${lead.color}55`;
+      kg.fillRect(0, 0, key.width, key.height);
+      kg.globalCompositeOperation = 'source-over';
+    }
     const h = H * 0.36 * ((av.vy1 - av.vy0) / Math.max(1, stage.avH)), w = (h * (av.x1 - av.x0)) / Math.max(1, av.y1 - av.y0);
     g.globalCompositeOperation = 'source-over';
     g.filter = 'blur(0.6px)';

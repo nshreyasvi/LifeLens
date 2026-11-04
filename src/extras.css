@@ -239,6 +239,40 @@ body.show-open { overflow: hidden; }
   background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem;
 }
 /* Big call-to-action buttons: Stagify, Gymify */
+/* Bar under the video (extras.js renderActions): idle, running (progress), done (a small re-run) */
+.media-actions { display: contents; }
+.media-action { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px 14px; margin-top: 12px; }
+.action-sub { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.action-progress, .action-status { display: none; grid-column: 1 / -1; }
+.media-action[data-state="running"] .btn-cta, .media-action[data-state="running"] .action-sub { display: none; }
+.media-action[data-state="running"] .action-progress, .media-action[data-state="running"] .action-status { display: block; }
+.action-progress { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.action-progress span { display: block; width: 35%; height: 100%; border-radius: inherit; background: var(--accent);
+  animation: action-run 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+@keyframes action-run { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+@media (prefers-reduced-motion: reduce) { .action-progress span { animation: none; width: 100%; opacity: 0.6; } }
+.action-status { margin: 0; font-size: 0.85rem; color: var(--text); }
+.media-action[data-state="done"] { grid-template-columns: auto; justify-content: end; }
+.media-action[data-state="done"] .action-sub { display: none; }
+.media-action[data-state="done"] .btn-cta { min-height: 34px; padding: 6px 14px; font-size: 0.85rem; background: var(--surface-2);
+  color: var(--text); border: 1px solid var(--border-strong); box-shadow: none; }
+
+/* Stage and Gym: the player sits right under the 3D body in the rail; Music: player and queue under the video */
+.shell-rail > * { order: 2; }
+.shell-rail > .media-side { order: 0; }
+#media[data-tab="stage"] #player, #media[data-tab="gym"] #player { order: 1; }
+.music-dock { display: grid; gap: 12px; margin-top: 12px; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
+.music-dock .player-bar { margin: 0; }
+.music-dock .song-list { max-height: 340px; overflow: auto; }
+.queue-section { list-style: none; padding: 8px 0; border-top: 1px solid var(--border); }
+.queue-section:first-child { border-top: 0; }
+.queue-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.queue-head strong { font-size: 0.9rem; }
+.queue-time { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.queue-mood { font-size: 0.78rem; color: var(--accent-text); text-transform: capitalize; }
+.queue-section:not(.is-current) .queue-songs { opacity: 0.6; }
+.queue-songs { margin: 0; padding: 0; display: grid; gap: 4px; }
+
 .btn-cta {
   min-height: 48px; padding: 12px 22px; border-radius: 999px; border: 0; font: inherit; font-size: 1rem; font-weight: 650;
   background: var(--accent); color: #FFFFFF; cursor: pointer; box-shadow: 0 2px 6px rgba(20, 18, 14, 0.18);
