@@ -241,7 +241,7 @@ body.show-open { overflow: hidden; }
 /* Big call-to-action buttons: Stagify, Gymify */
 .btn-cta {
   min-height: 48px; padding: 12px 22px; border-radius: 999px; border: 0; font: inherit; font-size: 1rem; font-weight: 650;
-  background: var(--accent); color: #FFFFFF; cursor: pointer; box-shadow: 0 6px 16px rgba(43, 68, 232, 0.25);
+  background: var(--accent); color: #FFFFFF; cursor: pointer; box-shadow: 0 2px 6px rgba(20, 18, 14, 0.18);
 }
 .btn-cta:hover { filter: brightness(1.08); }
 .btn-cta:active { transform: translateY(1px); }
@@ -273,7 +273,7 @@ body.show-open { overflow: hidden; }
 .p-now span { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-progress { height: 4px; border-radius: 999px; background: var(--border); overflow: hidden; margin-top: 4px; }
 .p-progress span { display: block; height: 100%; width: 0; background: var(--accent); }
-.p-time { font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.p-time { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Meta model calls panel (extras.js): fixed bottom-right, newest call first */
 .ai-badge[role="button"] { cursor: pointer; }
@@ -283,10 +283,10 @@ body.show-open { overflow: hidden; }
   background: var(--surface); box-shadow: 0 18px 40px rgba(20, 18, 14, 0.18); overflow: hidden;
 }
 .muse-log-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-.muse-log-sub { flex: 1; font-size: 0.74rem; color: var(--muted); }
+.muse-log-sub { flex: 1; font-size: 0.75rem; color: var(--muted); }
 .muse-log-list { list-style: none; margin: 0; padding: 6px 12px 12px; overflow: auto; display: grid; gap: 10px; }
-.muse-call-head { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-text); }
-.muse-call-text { margin: 2px 0 0; font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.4; color: var(--text);
+.muse-call-head { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-text); }
+.muse-call-text { margin: 2px 0 0; font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.4; color: var(--text);
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .muse-call-text.is-error { color: var(--danger, #c0392b); }
 
@@ -300,4 +300,17 @@ body.show-open { overflow: hidden; }
 #rec-processed .rec > button { grid-column: 2; grid-row: 1 / 3; }
 #rec-raw .rec { grid-template-columns: minmax(0, 1fr) auto auto; row-gap: 6px; }
 #rec-raw .rec-name, #rec-raw .rec-meta { grid-column: 1 / -1; justify-self: start; }
-.gym-deck .gym-chart { width: 100%; max-width: 820px; justify-self: center; }
+.gym-deck .gym-chart { width: 100%; }
+.gym-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1100px) { .gym-cols { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+.gym-col { display: grid; gap: 14px; align-content: start; }
+.gym-col-title { margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em; }
+.gym-reps { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.gym-reps th { text-align: left; font-weight: 600; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border-strong); }
+.gym-reps td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.gym-reps tbody tr { cursor: pointer; }
+.gym-reps tbody tr:hover, .gym-reps tbody tr:focus-visible { background: var(--surface-2); outline: none; }
+.gym-depth { display: grid; grid-template-columns: minmax(0, 1fr) 3.5em; align-items: center; gap: 8px; }
+.gym-depth-track { height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.gym-depth-bar { display: block; height: 100%; border-radius: 999px; background: var(--accent); min-width: 4px; }
+.gym-lr-dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; vertical-align: -1px; }

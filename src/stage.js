@@ -347,7 +347,8 @@ function bodySource() {
   if (!v.paused && hq.paused) hq.play().catch(() => {});
   return hq.readyState >= 2 ? hq : v;
 }
-function keyedBody(retry = true) {
+export { key as bodyKey };      // the cut-out body, for the Gym viewer (gym.js) too
+export function keyedBody(retry = true) {
   const v = bodySource();
   if (!v || v.readyState < 2 || !v.videoWidth) return null;
   const W = v.videoWidth, H = v.videoHeight, b = stage.vbox;

@@ -64,6 +64,25 @@ def totals_line(total: dict) -> str:
             f"bent over {total.get('bent_over_min')} min.")
 
 
+def did(run: Path, limit: int = 8) -> str:
+    """What the narration shows, as distinct lines with their start time."""
+    seen, out = set(), []
+    for r in csv.DictReader(open(run / 'activity.csv', encoding='utf-8')):
+        text = r['narration'].strip()
+        if text and text not in seen:
+            seen.add(text)
+            out.append(f"{clock(int(r['second']))} {text}")
+    step = max(1, len(out) // limit)
+    return '; '.join(out[::step][:limit])
+
+
+def frames_of(run: Path, k: int = 8) -> list[tuple[int, bytes]]:
+    """Up to k frames of the rendered 3D body spread over the recording (pipeline/body_frames.py): (second, JPEG)."""
+    files = sorted((run / 'frames').glob('body_*.jpg'))
+    step = max(1, len(files) // k)
+    return [(int(f.stem.split('_')[1]), f.read_bytes()) for f in files[::step][:k]]
+
+
 def build_prompt(run: Path, history: list[Path]) -> str:
     report = json.loads((run / 'insights.json').read_text(encoding='utf-8'))
     total = report['total']
