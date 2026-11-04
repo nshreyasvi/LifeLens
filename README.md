@@ -277,6 +277,7 @@ The director ([`director/server.py`](director/server.py)) reads `pose_timeseries
 - **Dual-loop architecture:**
   - **Fast loop ([`director/fast_loop.py`](director/fast_loop.py), <30 ms/frame):** Maps pelvis speed and deterministic 3-zone floor `k-means` (`A`, `B`, `C`) to light intensity and zone color, triggers a white **flash** on sudden pelvis speed jumps ($\ge 0.5\text{ m/s}$ and $\ge 0.3\text{ m/s}$ above the prior 4 s mean), and pre-arms a **dim** $\to$ **blackout** when the wearer freezes (`StubPredictor` / `AnticipationWebSocketPredictor`).
   - **Slow loop ([`director/slow_loop.py`](director/slow_loop.py), every ~6 s):** Sends a compact (<80-word) biomechanical + narration summary to **Meta Muse Spark 1.3** (Meta Model API) or local **Llama 3.2 3B** (via Ollama) to update semantic `mood`, clamped `music_tempo` (bounded to the mood's BPM range in [`director/music_map.py`](director/music_map.py) and $\le 10\text{ BPM}$ change per step), and base color.
+  - Muse reasoning effort is set with `MUSE_REASONING` (low/medium/high). In a 40-call benchmark on 5 real director prompts, low averaged 8.4 s vs 16.0 s at default, with 10/10 valid replies; the director clamps tempo to the mood's range.
 - **Daily Routine Coaching with Meta Muse Spark ([`director/routine_tips.py`](director/routine_tips.py)):**
   ```sh
   python -m director.routine_tips public/day --history public/day/history.json
