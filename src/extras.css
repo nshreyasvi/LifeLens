@@ -801,3 +801,116 @@ body.show-open { overflow: hidden; }
 .gym-depth-track { height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; }
 .gym-depth-bar { display: block; height: 100%; border-radius: 999px; background: var(--accent); min-width: 4px; }
 .gym-lr-dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; vertical-align: -1px; }
+
+/* ---------- Music Tab: Day Vibe in a Song & Play Next Time For Similar Tasks ---------- */
+.vibe-recs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.vibe-day-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 14px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+}
+.vibe-day-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vibe-badge {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  color: var(--accent-text);
+}
+.vibe-title {
+  font-size: 0.96rem;
+  font-weight: 750;
+  color: var(--text);
+}
+.vibe-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.vibe-day-card .song {
+  list-style: none;
+  margin: 0;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+}
+
+.vibe-next-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.vibe-next-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vibe-next-head h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.vibe-next-head span {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.vibe-next-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+}
+.vibe-next-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.vibe-task-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.vibe-task-why {
+  margin: 0;
+  font-size: 0.77rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.vibe-next-item .song {
+  list-style: none;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}

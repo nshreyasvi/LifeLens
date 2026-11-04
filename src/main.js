@@ -207,7 +207,7 @@ function frame() {
   lastFeaturesAt = performance.now();
   const targets = { ...musicTargets(f, state.last), at: t };
   renderFeatures(f, targets);
-  els.chainWindow.textContent = `3D body window ${clock(Math.max(0, t - f.window))}–${clock(t)} · synced with music player.`;
+  els.chainWindow.textContent = `Matched to your movement (${clock(Math.max(0, t - f.window))}–${clock(t)}) · synced with player.`;
   maybeAskSongs(targets);
   preSection(t);
   renderBar();
@@ -316,6 +316,7 @@ function renderShortClipMusic() {
   li.appendChild(card);
   els.songList.appendChild(li);
   els.songsNote.hidden = true;
+  if ($('vibe-recs')) $('vibe-recs').hidden = true;
   els.songsMood.textContent = songs.tooShort ? 'Clip under 10s — need 10s+ for a song match' : 'Previewing <10s clip notice';
 }
 
@@ -446,7 +447,7 @@ function drawQueue() {
     className: 'queue-rule-text',
     textContent: single
       ? '20–30s clip: locked to 1 best-fitting track in sync with the video.'
-      : `Synced by ~20s windows (${songs.pre.length} windows): the track switches automatically as the video progresses.`,
+      : `Synced by ~20s windows (${songs.pre.length} windows): the track switches automatically as the video plays.`,
   });
   const shortBtn = Object.assign(document.createElement('button'), {
     type: 'button',
@@ -459,7 +460,113 @@ function drawQueue() {
   });
   ruleLi.append(ruleText, shortBtn);
   els.songList.replaceChildren(...items, ruleLi);
+  renderVibeRecs();
   markPlaying();
+}
+
+const SIMILAR_POOLS = {
+  cozy: {
+    vibeBadge: '☀️ Your Day Vibe in a Song',
+    vibeTitle: 'Unhurried Cozy Reset',
+    vibeDesc: 'Warm, laid-back acoustic energy that matches a relaxed seated moment.',
+    vibeFallback: { name: 'Better Together', artist: 'Jack Johnson, Paula Fuga', spotifyId: '2iXdwVdzA0KrI2Q0iZNJbX', tempo: 110 },
+    tasks: [
+      { when: '☕ Next time you’re having coffee or a quiet meal', why: 'Gentle acoustic rhythm that keeps the table relaxed.', song: { name: 'Banana Pancakes', artist: 'Jack Johnson', spotifyId: '0BgbobvykXxEvxo2HhCuvM', tempo: 115 } },
+      { when: '🍳 Next time you’re cooking or prepping food', why: 'Easygoing feel-good groove for moving around the kitchen.', song: { name: 'Put Your Records On', artist: 'Corinne Bailey Rae', spotifyId: '2nGFzvICaeEWjIrBrL2RAx', tempo: 96 } },
+      { when: '📖 Next time you’re winding down or reading', why: 'Soft, unhurried melody for a calm evening break.', song: { name: 'Sunrise', artist: 'Norah Jones', spotifyId: '7zkLpY72g6lKQbiHDqri1S', tempo: 106 } },
+    ],
+  },
+  outdoor: {
+    vibeBadge: '🏔️ Your Day Vibe in a Song',
+    vibeTitle: 'Dialed-In Mountain Prep',
+    vibeDesc: 'Focused, grounded energy as you crouch, reach, and lock into your gear before riding.',
+    vibeFallback: { name: 'On Top Of The World', artist: 'Imagine Dragons', spotifyId: '213x4gsFDm04hSqIUkg88w', tempo: 100 },
+    tasks: [
+      { when: '🏂 Next time you’re strapping in or gearing up outdoors', why: 'Steady head-nod beat while you lock in your boots and bindings.', song: { name: 'Best Day Of My Life', artist: 'American Authors', spotifyId: '5Hroj5K7vLpIG4FNCRIjbP', tempo: 100 } },
+      { when: '🎿 Next time you’re carving down a slope or trail', why: 'Upbeat momentum that matches balance shifts and turns.', song: { name: 'Walking On Sunshine', artist: 'Katrina & The Waves', spotifyId: '05wIrZSwuaVWhcv5FfqeH0', tempo: 110 } },
+      { when: '🎒 Next time you’re packing gear or heading out', why: 'Bright indie energy for the trip to the mountain.', song: { name: 'Send Me On My Way', artist: 'Rusted Root', spotifyId: '6XK6Zw6JkFsHXzAcMWNiIr', tempo: 106 } },
+    ],
+  },
+  workout: {
+    vibeBadge: '⚡ Your Day Vibe in a Song',
+    vibeTitle: 'High-Energy Training Flow',
+    vibeDesc: 'Upbeat stride and driving power that move with your walk-in, squat set, and cool-down.',
+    vibeFallback: { name: 'On Top Of The World', artist: 'Imagine Dragons', spotifyId: '213x4gsFDm04hSqIUkg88w', tempo: 100 },
+    tasks: [
+      { when: '🏃 Next time you’re warming up or taking a brisk walk', why: 'Matches a steady walking cadence to get you moving.', song: { name: 'Best Day Of My Life', artist: 'American Authors', spotifyId: '5Hroj5K7vLpIG4FNCRIjbP', tempo: 100 } },
+      { when: '💪 Next time you’re doing squats or a quick home set', why: 'Punchy beat that paces controlled down-and-up reps.', song: { name: 'Stronger', artist: 'Kanye West', spotifyId: '0j2T0R9dR9qdJYsB7ciXhf', tempo: 104 } },
+      { when: '🧘 Next time you’re cooling down or stretching after a set', why: 'Smooth, grounded tempo to bring your breathing down.', song: { name: 'Better Together', artist: 'Jack Johnson, Paula Fuga', spotifyId: '2iXdwVdzA0KrI2Q0iZNJbX', tempo: 110 } },
+    ],
+  },
+};
+
+function renderVibeRecs() {
+  const box = $('vibe-recs');
+  if (!box) return;
+  if (!songs.pre?.length || songs.tooShort || songs.previewShort) {
+    box.hidden = true;
+    return;
+  }
+  const actText = `${session.rec?.name || ''} ${session.activity || ''}`.toLowerCase();
+  const kind = /snow|board|strap|ski|skate/.test(actText)
+    ? 'outdoor'
+    : (session.active === false || /eat|noodle|meal|coffee|sit|desk/.test(actText))
+      ? 'cozy'
+      : 'workout';
+  const preset = SIMILAR_POOLS[kind];
+  const allFallbacks = songs.pre.flatMap((s) => s.fallbacks ?? []).filter((s) => s?.spotifyId);
+  const usedIds = new Set(songs.pre.flatMap((s) => (s.songs ?? []).map((x) => x.spotifyId)));
+
+  const pickSong = (preferred) => {
+    const fromRun = allFallbacks.find((f) => !usedIds.has(f.spotifyId));
+    if (fromRun) {
+      usedIds.add(fromRun.spotifyId);
+      return fromRun;
+    }
+    usedIds.add(preferred.spotifyId);
+    return preferred;
+  };
+
+  const vibeSong = pickSong(preset.vibeFallback);
+
+  const vibeCard = document.createElement('div');
+  vibeCard.className = 'vibe-day-card';
+  const vibeTop = document.createElement('div');
+  vibeTop.className = 'vibe-day-top';
+  vibeTop.append(
+    Object.assign(document.createElement('span'), { className: 'vibe-badge', textContent: preset.vibeBadge }),
+    Object.assign(document.createElement('strong'), { className: 'vibe-title', textContent: preset.vibeTitle }),
+    Object.assign(document.createElement('p'), { className: 'vibe-desc', textContent: preset.vibeDesc }),
+  );
+  const vibeRow = songRow(vibeSong, null, false);
+  vibeRow.querySelector('.song-play').textContent = 'Play day vibe';
+  vibeCard.append(vibeTop, vibeRow);
+
+  const nextWrap = document.createElement('div');
+  nextWrap.className = 'vibe-next-wrap';
+  const nextHead = document.createElement('div');
+  nextHead.className = 'vibe-next-head';
+  nextHead.append(
+    Object.assign(document.createElement('h4'), { textContent: 'Play next time you’re doing similar tasks' }),
+    Object.assign(document.createElement('span'), { textContent: 'Picked from your pace & activity vibe' }),
+  );
+  const nextList = document.createElement('ul');
+  nextList.className = 'vibe-next-list';
+
+  for (const item of preset.tasks) {
+    const s = pickSong(item.song);
+    const li = document.createElement('li');
+    li.className = 'vibe-next-item';
+    const taskTag = Object.assign(document.createElement('span'), { className: 'vibe-task-tag', textContent: item.when });
+    const whyText = Object.assign(document.createElement('p'), { className: 'vibe-task-why', textContent: item.why });
+    const row = songRow(s, null, false);
+    row.querySelector('.song-play').textContent = 'Play';
+    li.append(taskTag, whyText, row);
+    nextList.appendChild(li);
+  }
+  nextWrap.append(nextHead, nextList);
+  box.replaceChildren(vibeCard, nextWrap);
+  box.hidden = false;
 }
 
 function songRow(song, sectionIdx = null, isCurrentSection = false) {
@@ -651,8 +758,8 @@ function renderControls() {
   }
   els.musicPanel.classList.toggle('is-paused', !activePlay);
   if (session.live) els.progressLabel.textContent = 'Live session';
-  else if (!hasRec) els.progressLabel.textContent = 'Pick a recording';
-  else if (activePlay) els.progressLabel.textContent = state.liveCount ? `Synced · message ${state.liveCount}` : 'Playing video & music in sync';
+  else if (!hasRec) els.progressLabel.textContent = 'Pick a session';
+  else if (activePlay) els.progressLabel.textContent = 'Playing video & music in sync';
   else els.progressLabel.textContent = state.phase === 'ended' ? 'Finished' : state.phase === 'paused' ? 'Paused' : 'Ready';
   els.progressFill.style.transform = `scaleX(${activePlay ? 1 : 0})`;
   renderBar();
@@ -679,6 +786,7 @@ function reset() {
   songs.at = 0;
   songs.profile = null;
   els.songList.replaceChildren();
+  if ($('vibe-recs')) $('vibe-recs').hidden = true;
   els.songsNote.hidden = false;
   els.songsNote.textContent = 'Songs load per ~20 s window for this clip.';
   els.songsMood.textContent = 'Waiting';

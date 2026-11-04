@@ -154,10 +154,10 @@ const LIVE_IDLE_MS = 3000;
 const TAB_PANES = { activity: ['body', 'graph'], music: ['body', 'graph'], stage: ['body', 'graph'], gym: ['body', 'graph'] };
 // Stage and Gym have their own main view (stage.js show, gym.js viewer) over the POV; the rail keeps the body and graph.
 const TAB_TEXT = {
-  activity: 'First-person POV, 3D body, live kinematics & session routine.',
-  music: 'Video & music player in sync: 1 matched song per ~20s movement window (1 song for 20–30s clips).',
-  stage: 'Lights follow each body part, poses, jumps, turns and hits; Muse Spark designs the scene.',
-  gym: 'Gymify: reps, sets, range of motion, tempo and symmetry from the 3D body; Muse Spark gives form feedback.',
+  activity: 'Your camera view, 3D body (MHR), movement flow, and session summary.',
+  music: 'Video & music in sync, plus your day vibe and recommendations for next time.',
+  stage: 'Six stage lights follow your moves while Meta Muse Spark sets the scene.',
+  gym: 'Workout coach: counts your reps, depth, and balance with form tips.',
 };
 
 const mediaRoot = $('media');
@@ -176,7 +176,7 @@ function openTab(next) {
   if (!TAB_PANES[tab]) return;
   media.show(chosen[tab] ?? TAB_PANES[tab]);
   $('media-sub').textContent = session.live
-    ? 'Live camera with Meta Muse Spark captions every 6 s. Click Record, then Stop to reconstruct the 3D body.'
+    ? 'Live camera with captions. Click Record, then Stop to build your 3D body.'
     : TAB_TEXT[tab];
 }
 
@@ -191,8 +191,8 @@ document.addEventListener('lifelens:session', () => {
   const rec = session.rec;
   if (rec) {
     media.setSources({ pov: rec.pov, body: rec.body, graph: rec.graph });
-    $('media-title').textContent = rec.name;
-    $('media-caption').textContent = 'POV: head camera · 3D body & kinematics: OmniEgoCap + HaWoR · AI: Meta Muse Spark.';
+    $('media-title').textContent = rec.name.replace(/[-_]+/g, ' ');
+    $('media-caption').textContent = 'Powered by Meta Muse Spark, Meta SAM 3D & MHR.';
   } else if (session.live) {
     media.clear();
     $('media-title').textContent = 'Live session';
@@ -222,40 +222,8 @@ export { media };
 const aiState = $('ai-state');
 const aiBadge = $('ai-badge');
 
-// Meta model calls panel: the AI badge opens it; every 2 s it shows the newest Muse Spark calls (model, request, reply)
-const FEATURE = { captions: 'Captions', posture_muse: 'Posture', routine_tips: 'Routine feedback', gymify: 'Gymify form feedback',
-  server: 'Director mood', live_caption: 'Live caption', stage_scene: 'Stage scene', stagify_plan: 'Stagify plan', songs: 'Songs' };
-let logTimer = null;
-async function showCalls() {
-  const calls = await fetch('/api/muse/log', { cache: 'no-store' }).then((r) => r.json()).catch(() => []);
-  $('muse-log-list').replaceChildren(...calls.map((c) => {
-    const li = document.createElement('li');
-    const head = document.createElement('div');
-    head.className = 'muse-call-head';
-    head.textContent = [new Date(c.t).toLocaleTimeString(), FEATURE[c.feature] ?? c.feature, c.model, c.effort && `effort ${c.effort}`,
-      c.ms != null && `${(c.ms / 1000).toFixed(1)} s`].filter(Boolean).join(' · ');
-    const ask = document.createElement('p');
-    ask.className = 'muse-call-text';
-    ask.textContent = `→ ${c.prompt}${c.images ? ` [+ ${c.images} image${c.images > 1 ? 's' : ''}]` : ''}`;
-    const reply = document.createElement('p');
-    reply.className = `muse-call-text${c.error ? ' is-error' : ''}`;
-    reply.textContent = c.error ? `✕ ${c.error}` : `← ${c.reply}`;
-    li.append(head, ask, reply);
-    return li;
-  }));
-}
-function toggleCalls(open = $('muse-log').hidden) {
-  $('muse-log').hidden = !open;
-  aiBadge.setAttribute('aria-expanded', String(open));
-  clearInterval(logTimer);
-  if (open) { showCalls(); logTimer = setInterval(showCalls, 2000); }
-}
-aiBadge.addEventListener('click', () => toggleCalls());
-aiBadge.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCalls(); } });
-$('muse-log-close').addEventListener('click', () => toggleCalls(false));
-
-const ACTIONS = { stage: { btn: 'stagify-btn', status: 'stagify-status', done: () => Boolean(document.querySelector('#stagify-out a')) || Boolean(session.rec?.files?.['stage.json']), again: 'Stagify again' },
-  gym: { btn: 'gym-btn', status: 'gym-status', done: () => Boolean(document.querySelector('#gym-result .gym-ex')), again: 'Run Gymify again' } };
+const ACTIONS = { stage: { btn: 'stagify-btn', status: 'stagify-status', done: () => Boolean(document.querySelector('#stagify-out a')) || Boolean(session.rec?.files?.['stage.json']), again: 'Rebuild stage show' },
+  gym: { btn: 'gym-btn', status: 'gym-status', done: () => Boolean(document.querySelector('#gym-result .gym-ex')), again: 'Re-analyze workout' } };
 const firstLabel = {};
 
 function renderRest() {

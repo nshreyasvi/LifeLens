@@ -363,7 +363,7 @@ function renderReview(report) {
   headline.append(headTop, pillRow);
 
   const changes = el('section', 'review-part review-changes');
-  changes.append(el('h3', '', 'Visual habit adjustments'));
+  changes.append(el('h3', '', 'Small changes to try'));
   const ol = el('ol', 'changes');
   ol.append(...(r.improvements ?? []).slice(0, 3).map((c, idx) => {
     const li = el('li', 'change-card');
@@ -444,14 +444,7 @@ function renderReview(report) {
     subgrid.appendChild(wellSec);
   }
 
-  const read = el('details', 'review-prompt');
-  const extraLines = [...(r.posture_and_movement ?? []), ...(r.compared_with_history ?? [])];
-  read.append(
-    el('summary', '', 'Full Muse Spark notes & prompt payload'),
-    ...extraLines.map((t) => el('p', 'review-more-line', t)),
-    el('pre', '', r.prompt ?? 'Not saved with this review.'),
-  );
-  box.replaceChildren(headline, changes, subgrid, read);
+  box.replaceChildren(headline, changes, subgrid);
   drawTrack(r);
   $('review-source').textContent = `Meta Muse Spark · vs ${r.history?.length ?? 0} past`;
 }

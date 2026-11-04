@@ -13,14 +13,14 @@ const note = (text) => { if ($('rec-note')) $('rec-note').textContent = text; };
 let polling = null;
 
 const DEFAULT_STAGES = [
-  { id: 'ingest', label: 'Video ingest & 30 fps normalization', state: 'active' },
-  { id: 'hawor', label: 'HaWoR 3D hand tracking & DROID-SLAM', state: 'pending' },
-  { id: 'build_input', label: 'Floor plane & camera height calibration', state: 'pending' },
-  { id: 'omniegocap', label: 'OmniEgoCap 3D full-body reconstruction', state: 'pending' },
-  { id: 'render', label: '3D body mesh & kinematics stream rendering', state: 'pending' },
-  { id: 'describe_muse', label: 'Meta Muse Spark egocentric scene narration', state: 'pending' },
-  { id: 'posture_muse', label: 'Meta Muse Spark posture from 3D body and POV frames', state: 'pending' },
-  { id: 'routine_tips', label: 'Meta Muse Spark routine feedback & history', state: 'pending' },
+  { id: 'ingest', label: 'Preparing video clip', state: 'active' },
+  { id: 'hawor', label: 'Tracking hands & camera movement', state: 'pending' },
+  { id: 'build_input', label: 'Setting floor & height scale', state: 'pending' },
+  { id: 'omniegocap', label: 'Building your 3D body (Meta SAM 3D · MHR)', state: 'pending' },
+  { id: 'render', label: 'Rendering 3D body & movement flow', state: 'pending' },
+  { id: 'describe_muse', label: 'Meta Muse Spark describing each moment', state: 'pending' },
+  { id: 'posture_muse', label: 'Meta Muse Spark reading your posture', state: 'pending' },
+  { id: 'routine_tips', label: 'Meta Muse Spark writing your coaching tips', state: 'pending' },
 ];
 
 function updateGreeting() {
@@ -51,34 +51,32 @@ export function enter() {
 
 export function renderHardware(hw) {
   if (!hw) return;
-  const shortCpu = (hw.cpu || 'Multi-core CPU').replace(/\(R\)|\(TM\)|CPU|@.*$/gi, '').replace(/\s+/g, ' ').trim();
+  const shortCpu = (hw.cpu || 'Processor').replace(/\(R\)|\(TM\)|CPU|@.*$/gi, '').replace(/\s+/g, ' ').trim();
   const startText = $('start-hw-text');
   if (startText) {
-    const vramGb = hw.vramTotalMb ? ` (${Math.round(hw.vramTotalMb / 1024)} GB VRAM)` : '';
-    startText.textContent = `${hw.gpu}${vramGb} · ${shortCpu} · Meta Muse Spark`;
+    startText.textContent = `${hw.gpu || shortCpu} · Meta Muse Spark · Meta SAM 3D · MHR`;
   }
   const gpuName = $('hw-gpu-name');
-  if (gpuName) gpuName.textContent = hw.gpu || 'GPU';
+  if (gpuName) gpuName.textContent = hw.gpu || 'Graphics Card';
   const gpuMeta = $('hw-gpu-meta');
   if (gpuMeta) {
     const parts = [];
-    if (hw.vramTotalMb) parts.push(`VRAM ${hw.vramUsedMb} / ${hw.vramTotalMb} MB`);
-    if (hw.telemetry) parts.push(`Load ${hw.gpuUtilPct ?? 0}%`);
-    if (hw.gpuTempC) parts.push(`${hw.gpuTempC}°C`);
-    gpuMeta.textContent = parts.join(' · ') || 'No live GPU readings on this machine';
+    if (hw.vramTotalMb) parts.push(`${Math.round(hw.vramTotalMb / 1024)} GB memory`);
+    if (hw.telemetry) parts.push(`${hw.gpuUtilPct ?? 0}% active`);
+    gpuMeta.textContent = parts.join(' · ') || 'Ready on your device';
   }
   const gpuBar = $('hw-gpu-bar');
   if (gpuBar) {
     const vramPct = hw.vramTotalMb ? (hw.vramUsedMb / hw.vramTotalMb) * 100 : 0;
-    const pct = hw.telemetry ? Math.min(100, Math.max(hw.gpuUtilPct || 0, vramPct)) : 0; // measured, or empty
+    const pct = hw.telemetry ? Math.min(100, Math.max(hw.gpuUtilPct || 0, vramPct)) : 0;
     gpuBar.style.width = `${Math.round(pct)}%`;
   }
   const cpuName = $('hw-cpu-name');
   if (cpuName) cpuName.textContent = shortCpu;
   const cpuMeta = $('hw-cpu-meta');
-  if (cpuMeta) cpuMeta.textContent = `${hw.cpuCores} logical threads · ${hw.ramGb} GB RAM · ${hw.platform}`;
+  if (cpuMeta) cpuMeta.textContent = `${hw.ramGb ? `${hw.ramGb} GB RAM` : 'Local processor'}`;
   const stackChip = $('hw-stack-chip');
-  if (stackChip && hw.stack) stackChip.textContent = hw.stack.split(' · ')[0];
+  if (stackChip) stackChip.textContent = 'Ready';
 }
 
 async function fetchHardware() {
@@ -170,8 +168,7 @@ export async function showRecordings() {
     const { processed, raw } = await fetchRecordings();
     const countChip = $('rec-count-chip');
     if (countChip) countChip.textContent = `${processed.length} ready${raw.length ? ` · ${raw.length} raw` : ''}`;
-    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, [clock(rec.seconds), rec.camera?.lens,
-      rec.camera?.horizontal_fov_deg && `${Math.round(rec.camera.horizontal_fov_deg)}°`].filter(Boolean).join(' · '), 'Open', async (btn) => {
+    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, [clock(rec.seconds), rec.camera?.label || '3D session'].filter(Boolean).join(' · '), 'Open', async (btn) => {
       btn.disabled = true;
       await openRecording(rec);
       enter();

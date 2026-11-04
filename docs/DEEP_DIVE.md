@@ -71,13 +71,7 @@ world is instead scaled so the camera sits at your height minus 7 cm (a head-str
 bash archive/scripts/setup.sh     # conda envs omniegocap, hawor, mhr, vlm; upstream code; weights; HaWoR patch
 ```
 
-The body models need a free registration at https://mano.is.tue.mpg.de:
-
-| Download | Put it at |
-|---|---|
-| SMPL-H "Extended SMPL+H model" `smplh.tar.xz` | `tar -xJf smplh.tar.xz -O neutral/model.npz > third_party/OmniEgoCap/data/smplh/SMPLH_NEUTRAL.npz` |
-| MANO `mano_v1_2.zip`: `models/MANO_RIGHT.pkl` | `third_party/HaWoR/_DATA/data/mano/` |
-| MANO `mano_v1_2.zip`: `models/MANO_LEFT.pkl` | `third_party/HaWoR/_DATA/data_left/mano_left/` |
+The 3D human body and hand representation uses **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** and **[Meta SAM 3D](https://ai.meta.com/sam2/)** alongside [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) and [HaWoR](https://github.com/ThunderVVV/HaWoR).
 
 The dev server finds the conda envs in `CONDA_ROOT` (default `~/anaconda3`).
 

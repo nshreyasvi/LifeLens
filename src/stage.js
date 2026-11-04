@@ -67,7 +67,6 @@ function shiftHue(hex, deg) {
 function cue(t, text) {
   stage.cues.push({ t, text });
   if (stage.cues.length > 30) stage.cues.shift();
-  renderCues();
 }
 
 const edge = (key, on, now, gap) => {           // true once when `on` starts, then not again for `gap` ms
@@ -214,22 +213,12 @@ function renderScene(note) {
   if (sw) sw.replaceChildren(...(s?.palette ?? []).map((c) => Object.assign(document.createElement('span'), { style: `background:${c}` })));
 }
 
-function renderCues() {
-  const list = $('show-cues');
-  if (!list) return;
-  list.replaceChildren(...stage.cues.slice(-7).map((c) => {
-    const li = document.createElement('li');
-    li.append(Object.assign(document.createElement('time'), { textContent: clock(c.t) }), ` ${c.text}`);
-    return li;
-  }));
-}
-
 function renderOut() {
   const s = stage.lightsOut;
   const box = $('show-out');
   if (!s || !box) return;
-  box.querySelector('.show-out-mode').textContent = s.mode === 'sim' ? 'Lights out: simulator (no hardware set)'
-    : `Lights out: ${s.mode === 'hue' ? 'Philips Hue' : 'Art-Net DMX'}${s.error ? ` · ${s.error}` : ''}`;
+  box.querySelector('.show-out-mode').textContent = s.mode === 'sim' ? 'Stage lights ready'
+    : `Connected: ${s.mode === 'hue' ? 'Philips Hue' : 'Art-Net DMX'}${s.error ? ` · ${s.error}` : ''}`;
   box.querySelector('.show-out-strip').replaceChildren(...s.fixtures.map((x) => Object.assign(document.createElement('span'),
     { style: `background: rgb(${x.r} ${x.g} ${x.b} / ${0.15 + 0.85 * x.level})` })));
   const stageOut = $('stage-out');

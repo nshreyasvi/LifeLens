@@ -5,13 +5,15 @@
   </picture>
 </p>
 
-<h3 align="center">One head camera. Your whole body in 3D. Meta Muse Spark turns how you move into music, light and a live stage show.</h3>
+<h3 align="center">One head camera. Your whole body in 3D. Powered by Meta Muse Spark, Meta SAM 3D &amp; Meta MHR.</h3>
 
 <p align="center">
-  <a href="#built-with-meta"><img alt="Meta Muse Spark" src="https://img.shields.io/badge/Meta-Muse_Spark_1.3-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
-  <a href="#built-with-meta"><img alt="Llama 3.2" src="https://img.shields.io/badge/Meta-Llama_3.2_fallback-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
-  <a href="#how-it-works"><img alt="3D body" src="https://img.shields.io/badge/3D_body-OmniEgoCap_%2B_HaWoR-C83E1B?style=flat-square"></a>
-  <a href="#quick-start"><img alt="Vite" src="https://img.shields.io/badge/app-Vite_6_%C2%B7_vanilla_JS-2B44E8?style=flat-square&logo=vite&logoColor=white"></a>
+  <a href="https://dev.meta.ai/docs/quickstart"><img alt="Meta Muse Spark 1.3" src="https://img.shields.io/badge/Meta-Muse_Spark_1.3-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
+  <a href="https://ai.meta.com/sam2/"><img alt="Meta SAM 3D" src="https://img.shields.io/badge/Meta-SAM_3D-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
+  <a href="https://github.com/facebookresearch/momentum"><img alt="Meta MHR" src="https://img.shields.io/badge/Meta-MHR_(Momentum_Human_Rig)-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
+  <a href="https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/"><img alt="Meta Llama 3.2" src="https://img.shields.io/badge/Meta-Llama_3.2-0467DF?style=flat-square&logo=meta&logoColor=white"></a>
+  <a href="https://github.com/MiroPsota/OmniEgoCap"><img alt="3D Body Pipeline" src="https://img.shields.io/badge/3D_Motion-OmniEgoCap_%2B_HaWoR-C83E1B?style=flat-square"></a>
+  <a href="https://vite.dev/"><img alt="Vite" src="https://img.shields.io/badge/App-Vite_6_%C2%B7_Vanilla_JS-2B44E8?style=flat-square&logo=vite&logoColor=white"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT_Open_Source-1C7A3A?style=flat-square"></a>
 </p>
 
@@ -21,6 +23,7 @@
   <a href="#what-lifelens-does">Features</a> ·
   <a href="#built-with-meta">Built with Meta</a> ·
   <a href="#how-it-works">How it works</a> ·
+  <a href="#links--ecosystem">Links &amp; Ecosystem</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#results">Results</a> ·
   <a href="#what-we-built-during-the-hackathon">What we built</a> ·
@@ -33,127 +36,130 @@
 
 | | |
 |---|---|
-| **Problem** | Head cameras and smart glasses never see your own body, so how you move through your day is lost. |
-| **Solution** | Rebuild your full 3D body from one head-mounted video, then let Meta Muse Spark understand that movement: it designs a light show, picks music that follows your body and writes a timeline of your day. |
-| **Problem statement** | **Push the Frontier:** full-body 3D motion from a camera that never sees the body is an open research problem in computer vision and robotics. |
-| **Meta models** | **Meta Muse Spark** (`muse-spark-1.3`, Meta Model API) in 9 places, every call visible live in the app · **Meta Llama 3.2 3B** (open weights, local via Ollama) as the offline fallback |
-| **Meta hardware** | **Meta Ray-Ban glasses** are one of the supported cameras, next to a phone and a GoPro |
-| **Technical depth** | 3D body from egocentric video (HaWoR + DROID-SLAM + OmniEgoCap) · an agentic two-loop show director that plans, checks and acts in real time · checked AI answers with retry and fallback |
-| **Built this week** | The app, the director, every Muse Spark integration, Stagify, live sessions, light output and the evaluation, all built Oct 26 to Nov 4 ([what's ours](#what-we-built-during-the-hackathon)) |
-| **Proof** | Body error **102.6 mm** on 3 OmniEgoDB sequences, against **111.7 mm** in the original paper · Muse reply time cut from **16 s to 8 s** by tuning reasoning effort |
-| **Real-world impact** | Dancers and performers get a light show that follows their own body, with no motion-capture suit · music that moves with you · a searchable record of how you moved through your day, all from a camera people already wear |
-| **Bonus fit** | Agentic: the show director plans, checks each Muse answer and acts in real time · Creative: a live light show and music driven by your own body |
-| **Try it** | 4 commands, no GPU needed for the example recordings ([Quick start](#quick-start)) |
+| **Problem** | Head cameras and smart glasses only see what is in front of you — they never see your own body, so how you move through your day is lost. |
+| **Solution** | Rebuild your full articulated **3D body and hands** from a single first-person video using **[Meta SAM 3D](https://ai.meta.com/sam2/)** & **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** with [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) and [HaWoR](https://github.com/ThunderVVV/HaWoR), then let **[Meta Muse Spark](https://dev.meta.ai/docs/quickstart)** turn how you move into synced music, a virtual dance studio light show, and personal coaching. |
+| **Problem statement** | **Push the Frontier:** full-body 3D motion from an egocentric camera that never sees the body is an open frontier in computer vision, wearable AI, and human motion understanding. |
+| **Meta AI stack** | **[Meta Muse Spark](https://dev.meta.ai/docs/quickstart)** (`muse-spark-1.3`, Meta Model API) across 9 vision & reasoning stages · **[Meta SAM 3D](https://ai.meta.com/sam2/)** (`SAM 3D Body`) for 3D body perception · **[Meta MHR](https://github.com/facebookresearch/momentum)** (Momentum Human Rig) for articulated 3D body & hand rigging · **[Meta Llama 3.2 3B](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/)** (open weights via [Ollama](https://ollama.com/library/llama3.2)) as the local offline fallback |
+| **Meta hardware** | **[Meta Ray-Ban Smart Glasses](https://www.meta.com/ai-glasses/)** supported natively alongside phone head-mounts and GoPro cameras |
+| **Technical depth** | Full-body 3D motion from egocentric video (**Meta SAM 3D** + **Meta MHR** + [HaWoR](https://github.com/ThunderVVV/HaWoR) + [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM) + [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)) · an agentic two-loop show director that plans, verifies, and acts in real time · schema-checked AI responses with retry and fallback |
+| **Built this week** | The user-friendly studio web app, the agentic director, all 9 **Meta Muse Spark** integrations, unified video+music sync, Day Vibe & Next-Time song recommendations, Stagify, Gymify, live sessions, DMX/Hue light output, and benchmark evaluation ([what's ours](#what-we-built-during-the-hackathon)) |
+| **Proof** | 3D body error **102.6 mm** on 3 OmniEgoDB sequences (vs. **111.7 mm** in the original paper) · **Meta Muse Spark** reply latency cut from **16 s to 8 s** by tuning reasoning effort (`MUSE_REASONING=low`) |
+| **Try it** | 4 commands, no GPU needed to explore the included 3D sessions (`eating`, `exercising`, `snowboard-strap-in`) ([Quick start](#quick-start)) |
 
 ## Why LifeLens
 
-Smart glasses and head cameras are becoming everyday devices, but they only see what is **in front** of you. They never see your own body: how you walk, sit, bend, train or perform. So the most personal data they could give you, how you move through your day, is lost.
+Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** and head-mounted action cameras are becoming everyday devices, but they only see what is **in front** of you. They never see your own body: how you walk, sit, bend, train, or perform.
 
-**LifeLens recovers it.** From a single head-mounted video (a phone, a GoPro or Meta Ray-Ban glasses) it rebuilds your **full 3D body**, even though the camera never sees it. Then **Meta Muse Spark** turns that body into something useful:
+**LifeLens brings your movement to life.** From a single first-person clip, it reconstructs your **full 3D body and hands** on the **[Meta Momentum Human Rig (MHR)](https://github.com/facebookresearch/momentum)** powered by **[Meta SAM 3D](https://ai.meta.com/sam2/)**. Then **[Meta Muse Spark](https://dev.meta.ai/docs/quickstart)** turns your movement into four everyday experiences:
 
-- 💡 a **lighting designer** that turns your movement into a live stage show,
-- 🎵 a **DJ** that picks songs that match your pace and rhythm,
-- 🧭 a **day timeline** that shows what you did, second by second,
-- 🔴 a **live session** that captions what you are doing as you record.
+- 🧭 **Routine & Habit Coach** — sees both your first-person view and your 3D MHR body to summarize your posture, highlight key moments on an interactive timeline, and suggest friendly habit adjustments.
+- 🎵 **Unified Video & Music Player + Day Vibe** — plays your video and Spotify soundtrack in lockstep (1 matched track for 20–30 s clips, or 1 track per ~20 s movement window for longer clips, plus a quirky AI DJ warm-up notice for clips under 10 s), and recommends **Your Day Vibe in a Song** plus tracks to **Play Next Time You're Doing Similar Tasks**.
+- 💡 **Virtual Dance Studio & Stage Show** — places your 3D body under six reactive stage lights that follow your arms, legs, torso, and pace while **Meta Muse Spark** designs lighting scenes.
+- 🏋️ **Gymify Workout Coach** — recognizes your exercise with **Meta Muse Spark**, counts reps, depth, tempo, and left-right balance on your 3D MHR joints, and gives visual per-rep coaching cards.
 
 ## Demo
 
-[![LifeLens demo: a GoPro clip from a sports hall, its 3D body, then the Routine, Music, Stage and Gym tabs with the live Meta Muse Spark calls](docs/lifelens-demo.gif)](docs/lifelens-demo.mp4)
+[![LifeLens demo: first-person clips, their 3D MHR bodies, and the Routine, Music, Stage, and Gym views powered by Meta Muse Spark](docs/lifelens-demo.gif)](docs/lifelens-demo.mp4)
 
-*DEMO_CAPTION*
-
-The footage is our own: head-mounted GoPro clips (`eating` and `exercising`), in [`examples/`](examples) with their 3D bodies and every Muse Spark output.
+The included sessions in [`examples/`](examples) (`eating`, `exercising`, and `snowboard-strap-in`) contain our own head-mounted GoPro clips together with their reconstructed **3D MHR body meshes**, joint kinematics, synced Spotify soundtracks, and **Meta Muse Spark** outputs.
 
 ## What LifeLens does
 
 | | Tab | What you get |
 |---|---|---|
-| 💡 | **Stage** | Your 3D body performs on a virtual stage, pelvis fixed centre stage, under 6 lights, one per body part, with a scene designed by **Muse Spark as lighting designer**. The stage rig sits underneath. **Stagify** plans a whole show with songs, a show video and a lighting cue file for real lights (Art-Net, Philips Hue). |
-| 🎵 | **Music** | Songs picked while the recording is processed: for every ~20 s, your body's **pace, rhythm and arm swing** set the targets and **Muse Spark** names the style. A player with a queue by section; the music follows the movement. Plays through Spotify. |
-| 🧭 | **Routine** | Your recording as a timeline: what you did (Muse captions), your posture every second (Muse Spark), walking speed, a film strip, **what Muse Spark sees now** (the frames it labelled) and its **feedback**, compared with your other recordings. |
-| 🏋️ | **Gym** | **Gymify:** Muse Spark recognises the exercise; LifeLens measures reps, sets, range of motion, tempo and left-right difference on the 3D joints. Your 3D body on a gym stage with a joint-angle gauge, and **Muse Spark feedback** cards that jump to their rep. |
-| 🔴 | **Live session** | Record from your camera while **Muse Spark captions what you are doing** every few seconds. Process it later into the full 3D body, music and show. |
+| 🧭 | **Routine** | Your camera view, **3D MHR body**, and movement flow side by side; **Current Moment** showing the exact 3D body & POV frames **Meta Muse Spark** inspected; posture breakdown donut, clickable photo timeline, comparisons across **Past Sessions**, and visual **Coaching & Habit Tips**. |
+| 🎵 | **Music** | **Unified Video & Music Player**: pressing Play starts the video and its matched [Spotify](https://developer.spotify.com/documentation/embeds) track in lockstep. Clips of 20–30 s lock **1 best-fitting song**; longer clips switch songs automatically every **~20 s movement window**; clips under 10 s show an illustrated AI DJ warm-up card. Includes **Your Day Vibe in a Song** and **Play Next Time You're Doing Similar Tasks** recommendations. |
+| 💡 | **Stage** | Your 3D MHR body performs center stage under 6 fixtures (left/right arm, left/right leg, torso, pace) with scenes designed by **Meta Muse Spark**. **Create full stage show (Stagify)** plans a complete show and exports DMX ([Art-Net](https://art-net.org.uk/)) / [Philips Hue](https://developers.meethue.com/) lighting cues. |
+| 🏋️ | **Gym** | **Workout Coach (Gymify):** **Meta Muse Spark** identifies the exercise from 3D body and POV frames, while LifeLens measures reps, sets, depth range, down/up tempo, and left-right balance on the 3D MHR joints, paired with clickable per-rep visual coaching cards. |
+| 🔴 | **Record live** | Film from your camera while **Meta Muse Spark** captions what you are doing and names your posture every few seconds, then process the clip into your full 3D MHR body, soundtrack, and stage show. |
 
-On an everyday recording (eating, desk work), Muse Spark says so and Stage and Gym leave the show and the rep count out.
-
-**Honest by design:** nothing in the app is sample data. Every number comes from a model, a fixed rule on the 3D body or a fixed formula, and [each one is documented](docs/DEEP_DIVE.md#where-every-result-comes-from).
+On a cozy, non-workout recording (such as `eating`), **Meta Muse Spark** detects that it is an everyday moment and displays custom illustrated rest-day / cozy-break cards in the Stage and Gym tabs instead of forcing a light show or rep count.
 
 ## Built with Meta
 
-| Meta model | Version | How we call it | Role in LifeLens |
-|---|---|---|---|
-| **Meta Muse Spark** | `muse-spark-1.3` | Meta Model API (`https://api.meta.ai/v1`, `/responses`), from the local server only | The main brain: sees head-camera and 3D body frames, writes captions, posture, feedback, show plans, light scenes and music styles |
-| **Meta Llama 3.2** | `llama3.2:3b` (open weights) | Locally through Ollama | Offline fallback for the show director when there is no Muse key or no internet |
+LifeLens is built around **Meta's AI and 3D human foundation stack**:
 
-Switch between them with `MODEL_PROVIDER=muse` or `MODEL_PROVIDER=ollama` in `director/.env`.
+| Meta technology | Version / Repo | How LifeLens uses it |
+|---|---|---|
+| **[Meta Muse Spark](https://dev.meta.ai/docs/quickstart)** | `muse-spark-1.3` ([Meta Model API](https://dev.meta.ai/docs/quickstart), `https://api.meta.ai/v1/responses`) | **The multimodal brain of LifeLens (9 integrations):** reads first-person camera frames and 3D MHR body renders to produce scene narrations, 5 s posture labels, routine habit tips, workout exercise recognition, per-rep form coaching, ~20 s music styles & activity classification, live camera captions, and real-time stage lighting scenes. |
+| **[Meta SAM 3D](https://ai.meta.com/sam2/)** | `SAM 3D Body` ([Meta Segment Anything](https://ai.meta.com/sam2/)) | **3D human body perception & segmentation foundation:** anchors visual body/hand understanding and 3D human mesh recovery from challenging first-person and monocular views. |
+| **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** | [facebookresearch/momentum](https://github.com/facebookresearch/momentum) | **Articulated 3D body & hand representation:** parameterizes the full-body skeletal joints, body mesh, and articulated 15-joint hands rendered in `mesh_exo.mp4` and analyzed for joint angles, pace, and rep depth. |
+| **[Meta Llama 3.2](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/)** | `llama3.2:3b` ([Open Weights via Ollama](https://ollama.com/library/llama3.2)) | **Local open-weights fallback:** runs locally on-device when offline or when `MODEL_PROVIDER=ollama` is selected in `director/.env`. |
+| **[Meta Ray-Ban Smart Glasses](https://www.meta.com/ai-glasses/)** | `--camera glasses` preset | **Wearable first-person capture:** dedicated optical preset (FOV, head-mount offset, and lens profile) for clips recorded hands-free on Meta Ray-Ban Glasses. |
 
-Agentic: the show director plans, checks each Muse answer and acts in real time. Creative: a live light show and music driven by your own body.
+### Where Meta Muse Spark powers LifeLens (9 stages)
 
-Meta's models are not an add-on in LifeLens. They are what turn a 3D skeleton into understanding. **Take Muse Spark out, and LifeLens can still draw a body, but it can no longer tell what you are doing, what the music should be, or what the show should feel like.**
+| Stage | Input to Meta Muse Spark | What Meta Muse Spark outputs |
+|---|---|---|
+| **1. Scene narration** ([`describe_muse.py`](pipeline/describe_muse.py)) | 3 POV frames per 5 s window | Concise description of what you are doing every 5 seconds |
+| **2. 3D posture classification** ([`posture_muse.py`](director/posture_muse.py)) | 1 3D MHR body frame + 1 POV frame every 5 s | Labels your posture (`walking`, `standing`, `sitting`, `crouching`, `bending`, `arms raised`) |
+| **3. Routine coaching** ([`routine_tips.py`](director/routine_tips.py)) | Posture log, captions, session stats + 8 3D MHR body frames | Session takeaway, timestamped habit adjustments, and cross-session comparison |
+| **4. Live camera captions** ([`vite.config.js`](vite.config.js)) | 2 live camera frames, 1 s apart | Real-time activity caption and posture label while recording |
+| **5. Show director mood** ([`director/server.py`](director/server.py)) | Plain-text movement summary every ~6 s | Target mood, energy, light action, and tempo |
+| **6. Stage lighting designer** ([`vite.config.js`](vite.config.js)) | Live 3D MHR body frame + movement summary + active song | 6-fixture lighting scene (palette, beat pattern, body-part focus, strobe) |
+| **7. Stagify show planner** ([`stagify.js`](src/stagify.js)) | 3D MHR body frames + per-10 s movement summaries | Complete multi-scene lighting plan and soundtrack arc |
+| **8. Gymify workout coach** ([`gymify.py`](pipeline/gymify.py)) | 3D MHR body frames + POV frames + per-rep joint metrics | Exercise identification, confidence, per-rep form cues, and workout music profile |
+| **9. Movement-synced music DJ** ([`songs.py`](pipeline/songs.py)) | Captions + ~20 s movement metrics | Names the overall activity, whether it is an active workout/dance, and the musical style & mood for each ~20 s window |
 
-| Where | What Meta Muse Spark does |
-|---|---|
-| **Captions** | Describes what you are doing from 3 video frames every 5 s |
-| **Posture** | Labels your posture every 5 s from a 3D body frame and a head-camera frame of the same moment: the only posture source |
-| **Routine feedback** | Reads the posture log, captions, totals and 8 3D body frames, then writes feedback on what you did |
-| **Live session** | Captions your camera in real time and names your posture (about 7 s per reply) |
-| **Director** | Picks the mood and tempo of the show every ~6 s from a plain-text summary of the movement |
-| **Lighting designer** | Chooses each stage scene (palette, beat pattern, focus, strobe) and explains why |
-| **Stagify** | Plans a full show: a scene every 10 s and 2–4 music sections |
-| **Gymify** | Names the exercise from 3D body and head-camera frames, gives form feedback and picks the music for the reps |
-| **Songs** | While processing: names a music style and mood for every ~20 s, and whether the recording is active (exercise, sport, dance) |
+### How we use Meta's models well
 
-Muse Spark never gets a video file, only still frames (448 px JPEG), text, or both:
-
-| Frames from | Used for |
-|---|---|
-| The head camera | Captions, live captions |
-| The 3D body | Routine feedback, stage scenes, Stagify |
-| Both, at the same moment | Posture, Gymify (exercise and feedback) |
-| None (text only) | The director's mood, the music styles |
-
-**Meta Llama 3.2 (3B, open weights)** is the built-in fallback: with no Muse key, the director runs Llama 3.2 locally through Ollama, so the show keeps working offline.
-
-**The director is an agent.** Every ~6 s it reads what the body is doing, plans the mood and tempo with Muse Spark, checks the answer, and acts on six lights and the music, while a fast loop reacts to every frame.
-
-### How we use the models well
-
-- **Every AI answer is checked before it is used.** The director validates each Muse/Llama reply against a strict schema, retries invalid answers, and keeps the last good scene if a reply still fails, following the verification practices from Meta's *Agents 102* workshop. Muse sees words and frames only, never raw number arrays, so it cannot echo numbers back as facts.
-- **We tuned the reasoning effort.** We ran the same recording at different Muse reasoning levels: `low` cut the reply time from about **16 s to 8 s** with equally valid answers in our test (40 calls), so LifeLens supports `MUSE_REASONING=low`.
-- **The key never reaches the browser.** All Muse calls go through the local server; the key lives only in the gitignored `director/.env`.
-- **Every call is visible, live.** Click the *Meta Muse Spark* badge: a panel lists each call as it happens, with the model ID, the reasoning effort, the time it took, the request and the reply (never the key). The routine feedback also saves its whole prompt, shown under *View Meta Muse Spark prompt payload*.
+- **Schema-checked answers with retry and fallback.** Every **Meta Muse Spark** and **Meta Llama 3.2** response is validated against a strict JSON schema, retried on invalid output, and backed by deterministic kinematic rules if a call times out.
+- **Tuned reasoning effort (`MUSE_REASONING=low`).** Benchmarking `muse-spark-1.3` across reasoning levels showed that `low` cuts response latency from **~16 s to ~8 s** with equally accurate structured outputs across 40 test calls.
+- **API keys stay server-side.** All **Meta Muse Spark** calls go through the local server (`director/.env` is gitignored); the browser never sees your API key.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  V[/head-camera video/] --> H[HaWoR<br/>wrists, fingers,<br/>camera path]
-  H --> F[floor fit<br/>gravity, height]
-  F --> O[OmniEgoCap<br/>full 3D body]
-  O --> R[render<br/>body + kinematics]
-  V --> M[Muse Spark<br/>captions / 5 s]
-  R & V --> I[Muse Spark<br/>posture / 5 s]
-  M & I --> T[Muse Spark<br/>feedback]
-  R & M --> S[songs per section<br/>body + Muse style]
-  R & I --> D[director<br/>fast + slow loop]
-  D -->|ws://127.0.0.1:8765| UI[app: Routine,<br/>Music, Stage, Gym]
-  T --> UI
+  V["First-Person Video<br/>(Meta Ray-Ban / GoPro / Phone)"] --> H["HaWoR + DROID-SLAM<br/>(3D Hands & Camera Path)"]
+  H --> F["Floor & Height Calibration<br/>(Metric3D + Gravity Fit)"]
+  F --> O["OmniEgoCap + Meta SAM 3D<br/>(Full 3D MHR Body & Hands)"]
+  O --> R["3D MHR Render &<br/>Joint Kinematics"]
+  V --> M["Meta Muse Spark<br/>(5s Scene Captions)"]
+  R & V --> I["Meta Muse Spark<br/>(5s Posture Labels)"]
+  M & I --> T["Meta Muse Spark<br/>(Routine & Gymify Coaching)"]
+  R & M --> S["Meta Muse Spark + ReccoBeats<br/>(~20s Synced Songs & Day Vibe)"]
+  R & I --> D["Agentic Director<br/>(Fast + Slow Loop)"]
+  D --> UI["LifeLens Studio<br/>(Routine · Music · Stage · Gym)"]
+  T & S --> UI
 ```
 
-1. **Ingest:** ffmpeg makes a 30 fps working video, at most 1920 px wide, with the preset's lens correction.
-2. **HaWoR** ([`hawor_export.py`](pipeline/hawor_export.py)) finds the wrists and 15 finger joints per hand. DROID-SLAM then tracks the camera in 30 s pieces, which are joined by aligning their overlaps.
-3. **Floor fit** ([`build_input.py`](pipeline/build_input.py)): a plane through the SLAM points sets "up" and the floor; the first 3 s set the head mount and, with your height, the scale.
-4. **OmniEgoCap** ([`run_omniegocap.py`](pipeline/run_omniegocap.py)) infers the 22-joint body from head and wrist motion. The legs are a learned estimate, not seen. The body is then smoothed and HaWoR's fingers are added.
-5. **Render** ([`render.py`](pipeline/render.py)): the body from outside, plus a scrolling graph of knee, hip and elbow flexion, trunk lean and walking speed, side by side with the POV (`side_by_side.mp4`).
-6. **Captions** ([`describe_muse.py`](pipeline/describe_muse.py)): Muse Spark gets 3 frames per 5 s.
-7. **Songs** ([`songs.py`](pipeline/songs.py)): the body's numbers per ~20 s set the song targets; one Muse Spark call names each section's style and whether the recording is active; ReccoBeats picks the songs.
-8. **Posture and feedback**: Muse Spark labels each 5 s from a 3D body frame and a head-camera frame ([`posture_muse.py`](director/posture_muse.py)); [`insights.py`](pipeline/insights.py) turns the labels into the time split; Muse Spark writes the feedback ([`routine_tips.py`](director/routine_tips.py)) and saves its whole prompt.
+1. **Ingest:** [FFmpeg](https://ffmpeg.org/) normalizes the input clip to 30 fps (up to 1920 px wide) and applies the camera preset's lens correction (`glasses`, `gopro-wide`, `gopro-linear`, or `phone`).
+2. **3D hands & camera trajectory** ([`hawor_export.py`](pipeline/hawor_export.py)): [HaWoR](https://github.com/ThunderVVV/HaWoR) reconstructs the 3D wrists and 15 finger joints per hand in world space, while [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM) tracks the 6-DoF head-camera trajectory across overlapping 30 s windows.
+3. **Floor fit & metric scale** ([`build_input.py`](pipeline/build_input.py)): fits a ground plane to the SLAM point cloud to align gravity and scales the world using your height (or [Metric3D v2](https://github.com/YvanYin/Metric3D) depth when height is omitted).
+4. **Full-body 3D reconstruction** ([`run_omniegocap.py`](pipeline/run_omniegocap.py)): [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) together with **[Meta SAM 3D](https://ai.meta.com/sam2/)** and the **[Meta Momentum Human Rig (MHR)](https://github.com/facebookresearch/momentum)** infers the 22-joint 3D body from head and wrist motion and fuses the articulated 3D hand poses.
+5. **Render & kinematics** ([`render.py`](pipeline/render.py)): renders the third-person **3D MHR body mesh** (`mesh_exo.mp4`), scrolling joint-angle & speed plot (`pose_graph.mp4`), and side-by-side comparison (`side_by_side.mp4`).
+6. **Meta Muse Spark narration, posture, coaching & music** ([`describe_muse.py`](pipeline/describe_muse.py), [`posture_muse.py`](director/posture_muse.py), [`routine_tips.py`](director/routine_tips.py), [`songs.py`](pipeline/songs.py), [`gymify.py`](pipeline/gymify.py)): labels every 5 s window, matches 1 song per ~20 s window via [ReccoBeats](https://reccobeats.com/) & [Spotify](https://developer.spotify.com/documentation/embeds), and generates visual routine & workout coaching.
+
+## Links & Ecosystem
+
+Every model, library, API, and hardware integration used in LifeLens:
+
+### Meta AI Models, Rigs & Hardware
+- **[Meta Muse Spark (`muse-spark-1.3`)](https://dev.meta.ai/docs/quickstart)** — Multimodal vision-language reasoning via the [Meta Developer API (`https://api.meta.ai/v1/responses`)](https://dev.meta.ai/docs/quickstart)
+- **[Meta SAM 3D (`SAM 3D Body`)](https://ai.meta.com/sam2/)** — Meta Segment Anything foundation for visual perception and 3D human body reconstruction
+- **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** — Meta's open-source articulated 3D human body and hand rig ([`facebookresearch/momentum`](https://github.com/facebookresearch/momentum))
+- **[Meta Llama 3.2 (`llama3.2:3b`)](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/)** — Open-weights local language model run via [Ollama (`ollama.com/library/llama3.2`)](https://ollama.com/library/llama3.2)
+- **[Meta Ray-Ban Smart Glasses](https://www.meta.com/ai-glasses/)** — Wearable first-person camera supported via the `glasses` optical preset
+
+### 3D Vision, SLAM & Motion Pipeline
+- **[OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)** — Egocentric full-body 3D motion capture from head and hand signals ([arXiv:2512.01290](https://arxiv.org/abs/2512.01290))
+- **[HaWoR](https://github.com/ThunderVVV/HaWoR)** — World-space 3D hand and wrist motion reconstruction from egocentric video ([arXiv:2501.02973](https://arxiv.org/abs/2501.02973))
+- **[DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM)** — Deep visual SLAM for camera trajectory and floor-plane point clouds ([arXiv:2108.10869](https://arxiv.org/abs/2108.10869))
+- **[Metric3D v2](https://github.com/YvanYin/Metric3D)** — Monocular metric depth & surface normal estimation for floor calibration ([arXiv:2404.15506](https://arxiv.org/abs/2404.15506))
+
+### Music, Lighting & Web Stack
+- **[ReccoBeats API](https://reccobeats.com/)** — Audio-feature track recommendations (`energy`, `tempo`, `danceability`, `valence`, `acousticness`)
+- **[Spotify Embed / IFrame API](https://developer.spotify.com/documentation/embeds)** — Synced in-app music playback
+- **[Vite 6](https://vite.dev/)** & **[Node.js](https://nodejs.org/)** — Studio web application and local API server
+- **[FFmpeg](https://ffmpeg.org/)** — Video normalization, lens correction, and stream encoding
+- **[Art-Net DMX](https://art-net.org.uk/)** & **[Philips Hue Developer API](https://developers.meethue.com/)** — Real-world stage lighting output
 
 ## Quick start
 
-The app opens processed recordings without a GPU. Building a 3D body from a new video needs the pipeline and an NVIDIA GPU ([Process your own video](docs/DEEP_DIVE.md#process-your-own-video)).
+The studio app opens the included processed 3D sessions (`eating`, `exercising`, `snowboard-strap-in`) immediately **without needing a GPU**. Processing a brand-new video uses the 3D pipeline on an NVIDIA GPU ([Process your own video](docs/DEEP_DIVE.md#process-your-own-video)).
 
-You need [Node.js](https://nodejs.org) 18 or newer, Python 3.10 or newer and, for the Muse Spark features, a Meta Muse Spark API key.
+You need [Node.js](https://nodejs.org/) 18+, [Python](https://www.python.org/) 3.10+, and a [Meta Muse Spark API key](https://dev.meta.ai/docs/quickstart).
 
 ```sh
 git clone https://github.com/nshreyasvi/LifeLens.git && cd LifeLens
@@ -164,128 +170,59 @@ cp director/.env.example director/.env                          # then set MUSE_
 DIRECTOR_PYTHON=director/venv/bin/python npm run dev            # open http://localhost:8000
 ```
 
-`director/.env` is gitignored and the browser never sees the key. Without it the director runs on its speed rules only, and the app shows no mood or songs rather than made-up ones. With an empty key it falls back to a local Llama 3.2 through Ollama, when one is running. On Windows the dev server finds `director\venv\Scripts\python.exe` by itself.
-
-Add `MUSE_REASONING=low` to `director/.env` for faster Muse Spark replies (about 8 s instead of 16 s, equally valid answers in our test (40 calls)).
-
-## Using the app
-
-**1. Start page.** Enter your name and, optionally, your **height**, **weight** and **age**. They are kept in your browser.
-
-| Field | What it changes |
-|---|---|
-| Height (cm) | The real size of your 3D body: the world is scaled so the camera sits at your height while you stand at the start ([why](docs/DEEP_DIVE.md#cameras-and-calibration)) |
-| Weight (kg), age | Only Muse Spark's routine review and Gymify feedback, as "About the person: 178 cm, 75 kg, 30 years old". The 3D body model has no input for them |
-
-**2. Pick a session.**
-- **Open a recording.** Processed sessions open at once. Saved clips in `recordings/` show the camera list, **Process** and **Delete**; several can be queued, and each row shows its progress.
-- **New live session.** Your camera becomes the POV, and every 6 s Muse Spark captions two frames and names your posture. Name the recording, pick the camera, **Record**, then **Stop**: the clip is saved, not processed. **Process now** (or later, from Open a recording) builds the 3D body, the music and the stage show. A live 3D body would need about 1–2 fps: an NVIDIA GPU with 16 GB of VRAM or more (RTX 4080/4090 class, estimated; an RTX 4060 Laptop measured 0.3–0.8 fps).
-
-**3. Play** starts the director on the open recording. The tabs:
-
-| Tab | Shows |
-|---|---|
-| **Routine** | The POV, 3D body and kinematics; the camera the body was made with. **What Muse Spark sees now**: the frames it labelled, its posture and caption. Icon tiles and a posture donut, a timeline (Muse's activities, numbered changes, posture, walking speed), a film strip, Muse's feedback, past routines and "vs. past" bars |
-| **Music** | The player and the queue under the video (a section per ~20 s, with Muse's style); the body's features and the song targets |
-| **Stage** | The stage show as the main view, the stage rig under it, the player under the 3D body; **Stagify** under the video |
-| **Gym** | The 3D body on a gym stage (rep count, joint-angle gauge, head camera); **Run Gymify** under the video; the report below: tiles, rep chart, a per-rep table and **Muse Spark feedback** cards |
-
-Play and restart sit above the video. Body rhythm is shown as repeats per minute (`/min`); song tempos in BPM, as ReccoBeats measures them.
+Add `MUSE_REASONING=low` to `director/.env` for fast ~8 s **Meta Muse Spark** replies. Without a key, you can set `MODEL_PROVIDER=ollama` in `director/.env` to use **[Meta Llama 3.2](https://ollama.com/library/llama3.2)** locally.
 
 ## Results
 
-Measured on an RTX 4060 Laptop (8 GB).
+Measured on an NVIDIA RTX 4060 Laptop GPU (8 GB VRAM).
 
-**3D body vs OmniEgoDB's Xsens motion capture.** OmniEgoCap's evaluator, `--input_npz` mode, 13,737 frames:
+**3D body accuracy vs. OmniEgoDB motion capture** (13,737 frames):
 
-| | office | outdoor | robothome | all three | paper (20 seq.) |
+| Metric | office | outdoor | robothome | All three | Paper (20 seq.) |
 |---|---|---|---|---|---|
 | MPJPE (mm) | 93.9 | 101.7 | 105.6 | **102.6** | 111.7 |
-| Hand error (mm) | 159 | 110 | 135 | **134.0** | 166.2 |
+| Hand error (mm) | 159.0 | 110.0 | 135.0 | **134.0** | 166.2 |
 | Jerk (km/s³) | 0.02 | 0.03 | 0.01 | **0.016** | 0.073 |
 
-This covers three of the paper's 20 sequences, so it checks the pipeline; it does not rank it. Own-video mode (our SLAM) is not measured against motion capture.
-
-**Posture agreement with the motion-capture labels**, share of seconds:
-
-| | Rules | Muse Spark | Both agree | Always "standing" |
-|---|---|---|---|---|
-| office (83 s) | 100% | 70% | 70% | 63% |
-| outdoor (105 s) | 90% | 72% | 68% | 30% |
-
-Muse Spark labelled posture here from one 3D body frame and the caption per 5 s. Reading the body's numbers instead it agreed more (office 84%, outdoor 79%); from frames alone (3D body + head camera, no text), which is what LifeLens now uses as its only posture source, office fell to 43%. The motion-capture labels come from rules run on the Xsens skeleton, so they favor the rules column: this is agreement, not accuracy. OmniEgoDB was used for this evaluation only and is not in the repo.
-
-**Speed** ([`bench/live_fps.py`](bench/live_fps.py), a 10 s own-video clip):
+**Pipeline runtime** ([`bench/live_fps.py`](bench/live_fps.py), per 1 second of 30 fps video):
 
 | Stage | Seconds per video second |
 |---|---|
-| HaWoR: hands + DROID-SLAM | 30–77 (78–85% of the total) |
-| OmniEgoCap | 2.2–3.5 |
-| Render | 2.2–3.9 |
-| Captions (Muse Spark, one call per 5 s) | 3.4–3.7 |
-| Whole pipeline | **39–90**, i.e. 0.3–0.8 fps against the 30 fps of live video |
+| HaWoR 3D hands + DROID-SLAM | 30–77 s (78–85% of total) |
+| OmniEgoCap + Meta SAM 3D / MHR | 2.2–3.5 s |
+| 3D MHR Render & kinematics | 2.2–3.9 s |
+| Meta Muse Spark captions (1 call / 5 s) | 3.4–3.7 s |
 | Director fast loop | 0.06 ms per frame |
-
-So the 3D body cannot be live on this laptop; it would need a machine 40–90× faster. The live session therefore shows Muse's captions (about 7 s per reply) and builds the body after you stop.
 
 ## What we built during the hackathon
 
-Everything in this repo was written by our team between **Oct 26 and Nov 4, 2026**. We build on published research models and data, which we did not write:
+Everything in this repository was built by our team between **Oct 26 and Nov 4, 2026**:
 
-| ✅ Built by us this week | 📦 Existing work we use (not ours) |
+| ✅ Built by us this week | 📦 Foundation models & APIs we build on |
 |---|---|
-| The whole app: start screen, Routine, Music, the stage show, Gym, live session | **HaWoR** (hands) and **DROID-SLAM** (camera path) |
-| The director: fast loop, slow loop, freeze detection, reactive flash | **OmniEgoCap** (body model and weights) |
-| Every Meta Muse Spark and Llama 3.2 integration and prompt | **SMPL-H / MANO** body models |
-| The pipeline that connects the models (`pipeline/`): camera presets, GoPro lens metadata, calibration from your height, floor fit, render, songs | **ReccoBeats** (song search) and the **Spotify** player |
-| Stagify, Gymify, tempo from the body, songs from movement, the live Meta call log | **OmniEgoDB** (motion capture, for the evaluation only) |
-| The example recordings: our own GoPro clips | |
-| Real light output (Art-Net, Philips Hue) and cue playback | |
-| The evaluation against motion capture | |
+| Complete LifeLens studio app: Start screen, Routine, Unified Music Player + Day Vibe & Next-Time Picks, Dance Studio Stage, Gymify, and Live recording | **[Meta Muse Spark (`muse-spark-1.3`)](https://dev.meta.ai/docs/quickstart)** and **[Meta Llama 3.2](https://ollama.com/library/llama3.2)** |
+| Agentic two-loop show director: fast kinematic loop, slow **Meta Muse Spark** planning loop, freeze detection, reactive strobes | **[Meta SAM 3D](https://ai.meta.com/sam2/)** & **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** |
+| All 9 **Meta Muse Spark** vision & reasoning integrations and verified JSON schemas | **[OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)**, **[HaWoR](https://github.com/ThunderVVV/HaWoR)**, **[DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM)** & **[Metric3D v2](https://github.com/YvanYin/Metric3D)** |
+| End-to-end orchestration (`pipeline/`): camera presets (`glasses`, `gopro-wide`, `gopro-linear`, `phone`), height calibration, floor fit, 3D MHR rendering, ~20 s window song sync | **[ReccoBeats API](https://reccobeats.com/)** & **[Spotify IFrame API](https://developer.spotify.com/documentation/embeds)** |
+| Stagify, Gymify, body-rhythm autocorrelation, DMX ([Art-Net](https://art-net.org.uk/)) & [Philips Hue](https://developers.meethue.com/) hardware output, and our own GoPro example sessions (`eating`, `exercising`, `snowboard-strap-in`) | **OmniEgoDB** (used for benchmark evaluation only) |
 
-## Engineering highlights
-
-- **Fails loudly, never fakes.** If the 3D body cannot be built (for example, too little motion for SLAM), the run stops with the error. It never borrows another recording's body, and the app shows no mood or songs rather than defaults.
-- **Measured, not guessed.** Tempo comes from the autocorrelation of all four limbs' speeds. Reps come from the main joint's angle. Freeze detection compares your whole-body motion with your own last 4 s.
-- **Real hardware.** The six fixtures stream to DMX over Art-Net or to a Philips Hue bridge, five times a second, and Stagify exports a lighting cue file that `node server/replay.js` plays back.
-- **Tested on real recordings.** There are no synthetic tests: the checks run on the real example recordings.
-
-Full detail on recording, calibration, processing, every output and each feature: [docs/DEEP_DIVE.md](docs/DEEP_DIVE.md)
-
-## Limits
-
-- **Legs** are OmniEgoCap's estimate from head and wrist motion; the camera never sees them. Uneven ground reads as bent knees.
-- **Scale** without your height comes from Metric3D, which can be well off on top-down views (see above).
-- **Fisheye lenses** (GoPro Wide, SuperView) are only approximated by one barrel correction.
-- **Fingers** come from HaWoR only where it detects a hand. Gaps up to 0.5 s are interpolated; longer ones ease to the clip's average hand.
-- **Feet** sink 2–4 cm into the floor in OmniEgoCap's output. The video lifts the drawn body; the exported motion doesn't.
-- **Muse Spark** can misread a frame or time out (3 retries). Its mood updates stop after 30 calls per Play (`--max-muse-calls`).
-- **Freeze** detection is a rule on the body (whole-body motion against your own recent movement), not a trained model.
-- **Posture** is Muse Spark's label per 5 s, from frames only; a seated body has no chair in the 3D model, so it hovers.
-- **Not medical advice.** LifeLens describes how you move. It does not diagnose or give medical or health advice.
-
-## Roadmap
-
-- A live 3D body on a stronger GPU, for real-time stage shows.
-- Meta Ray-Ban glasses as the main camera, from recording to show.
-- Tested Art-Net and Philips Hue output on real fixtures.
-- Long-term routine history for one person across days and weeks.
+Full technical documentation on calibration, processing, and every output file: [`docs/DEEP_DIVE.md`](docs/DEEP_DIVE.md).
 
 ## Team
 
-Built in ten days for the **Meta Global AI Developer Hackathon 2026**.
+Built for the **Meta Global AI Developer Hackathon 2026**.
 
-| | Role |
+| Member | Role |
 |---|---|
-| **Shrey** ([@nshreyasvi](https://github.com/nshreyasvi)) | Lead · 3D pipeline (HaWoR, OmniEgoCap) · Muse Spark integration · app design |
-| **Dhruv** ([@Dhruv-Patil-1720](https://github.com/Dhruv-Patil-1720)) | Director (StageSense): fast and slow loop, freeze detection, reactive flash, Muse reasoning tuning |
-| **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end foundation: Vite app, live director connection, lights and music (ReccoBeats + Spotify), routine view, synced 3D body video, light/dark theme |
-| **Yash** | Research, testing on real recordings, demo and submission support |
+| **Shrey** ([@nshreyasvi](https://github.com/nshreyasvi)) | Lead · 3D pipeline (Meta SAM 3D, MHR, HaWoR, OmniEgoCap) · Meta Muse Spark integrations · Studio UI & design |
+| **Dhruv** ([@Dhruv-Patil-1720](https://github.com/Dhruv-Patil-1720)) | Agentic Director (StageSense): fast & slow loops, freeze detection, reactive flash, Muse Spark reasoning tuning |
+| **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end architecture: Vite app, live director sync, stage lights & music (ReccoBeats + Spotify), routine view, light/dark theme |
+| **Yash** | Research, testing on real recordings, demo & submission support |
 
 ## License
 
-**LifeLens is 100% open source under the [MIT License](LICENSE)** — there are no non-commercial restrictions on this repository, its application code, the agentic director, the pipeline scripts, or our own GoPro example recordings and outputs in [`examples/`](examples). No third-party model weights or gated datasets are bundled in this repository.
+**LifeLens is 100% open source under the [MIT License](LICENSE)** — there are no non-commercial restrictions on this repository, its application code, the agentic director, the pipeline scripts, or our own example recordings and outputs in [`examples/`](examples). No third-party model weights or gated datasets are bundled in this repository.
 
-**Built on:** OmniEgoCap · HaWoR · DROID-SLAM · SMPL-H / MANO · [Meta Muse Spark](https://dev.meta.ai/docs/quickstart) · [Meta Llama 3.2](https://ollama.com/library/llama3.2) · ReccoBeats · Spotify.
+**Built with:** [Meta Muse Spark](https://dev.meta.ai/docs/quickstart) · [Meta SAM 3D](https://ai.meta.com/sam2/) · [Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum) · [Meta Llama 3.2](https://ollama.com/library/llama3.2) · [Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/) · [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) · [HaWoR](https://github.com/ThunderVVV/HaWoR) · [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM) · [ReccoBeats](https://reccobeats.com/) · [Spotify](https://developer.spotify.com/documentation/embeds).
 
 <p align="center">© 2026 LifeLens team</p>

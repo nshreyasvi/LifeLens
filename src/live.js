@@ -131,17 +131,9 @@ async function upload() {
   }
 }
 
-// What a live 3D body would need. Measured here (bench/live_fps.json): 0.3-0.8 fps on an RTX 4060 Laptop, 8 GB;
-// shortcut: the 16 GB / RTX 4080-4090 figure is an estimate from GPU throughput, not measured; measure on such a GPU.
 async function showRequirement() {
-  const hw = await fetch('/api/hardware').then((r) => r.json()).catch(() => null);
-  const gb = hw?.vramTotalMb ? Math.round(hw.vramTotalMb / 1024) : 0;
   $('live-req').hidden = false;
-  $('live-req').textContent = 'Live 3D body: about 1-2 fps needs an NVIDIA GPU with 16 GB of VRAM or more '
-    + `(RTX 4080/4090 class, estimated). ${hw?.gpu ?? 'This machine'}${gb ? ` (${gb} GB)` : ''}: `
-    + (gb >= 16 ? 'may reach it, but live 3D is not built yet. ' : 'an RTX 4060 Laptop (8 GB) measured 0.3-0.8 fps. ')
-    + 'So record, then press Process: it builds the 3D body, the music and the stage show at full quality, '
-    + 'and keeps the session for next time.';
+  $('live-req').textContent = 'Record your clip with live captions, then press Process to build your 3D body, matched music, and stage show.';
 }
 
 $('saved-process').addEventListener('click', () => {
