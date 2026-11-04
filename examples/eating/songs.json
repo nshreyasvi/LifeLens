@@ -1,0 +1,75 @@
+{
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 24.7,
+   "features": {
+    "pace": 0.13415741239892184,
+    "still": 0.42048517520215634,
+    "arm": 19.966756760510492,
+    "upright": 0.5554285545822102,
+    "rhythm": {
+     "bpm": 81.81818181818181,
+     "strength": 0.761163491614684
+    }
+   },
+   "style": "calm acoustic",
+   "mood": "calm",
+   "why": "slow seated stirring and eating noodles",
+   "targets": {
+    "energy": 0.5109070573251061,
+    "danceability": 0.8326482279328313,
+    "valence": 0.4999428495619946,
+    "acousticness": 0.4443396226415094,
+    "instrumentalness": 0.3522911051212938,
+    "loudness": -14.882021563342319,
+    "tempo": 82,
+    "tempo_from": "body rhythm"
+   },
+   "songs": [
+    {
+     "id": "9b67189d-eae0-4e9c-8ffc-d3bf9c557ab5",
+     "name": "Whyy",
+     "spotifyId": "6OYAvRwiRLn6YXA895BmnF",
+     "artist": "Nfomb.khopp",
+     "tempo": 84,
+     "fit": 0.1750667597795659
+    },
+    {
+     "id": "c12ebce8-85f6-4270-94e1-34695d075db5",
+     "name": "break for fresh air",
+     "spotifyId": "6zO2MnYCZ4Kdaw8dJ54JdN",
+     "artist": "c613b",
+     "tempo": 80,
+     "fit": 0.19426420776311157
+    },
+    {
+     "id": "4e9e03a6-3437-4829-b2c7-3ae2478067f3",
+     "name": "Better (Interlude)",
+     "spotifyId": "5eHhq7KGqG7Cf07RtnOM29",
+     "artist": "Jack Hayden",
+     "tempo": 83,
+     "fit": 0.2158975410964449
+    },
+    {
+     "id": "ed0d0cca-c7e2-426e-9dfc-8d57dddf986e",
+     "name": "variable (intro)",
+     "spotifyId": "1FyhrkDkPoBU6t9N3t4MGP",
+     "artist": "Lij",
+     "tempo": 82,
+     "fit": 0.2250665735537674
+    },
+    {
+     "id": "e620e492-fcd1-408e-8790-e4f1da41ee49",
+     "name": "Mystery Blues",
+     "spotifyId": "2iV2uUnmYGpBtPXXZU5TJZ",
+     "artist": "The Paul Winter Sextet",
+     "tempo": 82,
+     "fit": 0.3259808744297783
+    }
+   ]
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 10.1
+}

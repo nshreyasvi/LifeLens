@@ -1,0 +1,125 @@
+{
+  "clips": {
+    "eating": {
+      "duration_min": 0.4,
+      "minutes": {
+        "walking": 0.0,
+        "standing": 0.0,
+        "sitting": 0.32,
+        "crouching": 0.0,
+        "bending": 0.08,
+        "arms raised": 0.0,
+        "unknown": 0.0
+      },
+      "share": {
+        "walking": 0.0,
+        "standing": 0.0,
+        "sitting": 0.792,
+        "crouching": 0.0,
+        "bending": 0.208,
+        "arms raised": 0.0,
+        "unknown": 0.0
+      },
+      "sit_stand_transitions": 1,
+      "longest_sitting_min": 0.32,
+      "walking_distance_m": 3.3,
+      "bent_over_min": 0.08
+    }
+  },
+  "total": {
+    "duration_min": 0.4,
+    "minutes": {
+      "walking": 0.0,
+      "standing": 0.0,
+      "sitting": 0.32,
+      "crouching": 0.0,
+      "bending": 0.08,
+      "arms raised": 0.0,
+      "unknown": 0.0
+    },
+    "share": {
+      "walking": 0.0,
+      "standing": 0.0,
+      "sitting": 0.792,
+      "crouching": 0.0,
+      "bending": 0.208,
+      "arms raised": 0.0,
+      "unknown": 0.0
+    },
+    "sit_stand_transitions": 1,
+    "longest_sitting_min": 0.32,
+    "walking_distance_m": 3.3,
+    "bent_over_min": 0.08
+  },
+  "posture_from": "Meta Muse Spark",
+  "log": "Total 0.4 min: sitting 0.32 min, bending 0.08 min\n1 times sat or crouched down, longest sitting 0.32 min, walked 3.3 m, bent over 0.08 min.\nClip eating:\n  bending 5 s. The camera wearer sits down.\n  sitting 19 s. The camera wearer stirs noodles in a bowl with a spoon. The camera wearer eats food from a bowl. The camera wearer stirs noodles in a bowl. Stirs noodles in a bowl with a spoon.",
+  "runtime_s": 0.3,
+  "report": {
+    "summary": "This 0.4 min eating clip shows the camera wearer sitting down and then stirring and eating noodles from a bowl. Almost all time is sitting 0.32 min with 0.08 min bending at the start and only 3.3 m walked.",
+    "what_they_did": [
+      "0:00-0:05: sits down (bending)",
+      "0:05-0:10: stirs noodles in a bowl with a spoon (sitting)",
+      "0:10-0:15: eats food from a bowl (sitting)",
+      "0:15-0:20: stirs noodles in a bowl (sitting)",
+      "0:20-0:24: stirs noodles in a bowl with a spoon (sitting)"
+    ],
+    "posture_and_movement": [
+      "Spent 0.32 min sitting and 0.08 min bending out of 0.4 min total, so almost the whole clip was low and still.",
+      "Had 1 sit-down with longest sit 0.32 min, staying down from 0:05 through 0:20 while stirring and eating.",
+      "Walked only 3.3 m in 0.4 min, showing movement was just the sit-down at 0:00 then reaching to the bowl.",
+      "Bent over for 0.08 min at 0:00 when sitting down, and the 3D bodies at 0:05, 0:10, 0:15 and 0:20 show deep knee bend like a crouch."
+    ],
+    "compared_with_history": [
+      "Compared with exercising, this eating clip walked much less: 3.3 m versus 27.6 m in exercising.",
+      "Compared with exercising which had 0 sit-downs and longest sit 0.0 min, this eating clip had 1 sit-down and longest sit 0.32 min.",
+      "Compared with exercising which had 0.42 min walking, 0.25 min standing and 0.1 min arms raised, this eating clip had only 0.32 min sitting and 0.08 min bending."
+    ],
+    "improvements": [
+      {
+        "change": "Stand up briefly between stirring and eating",
+        "why": "1 sit-down with longest sit 0.32 min from 0:05 to 0:20 stirring and eating",
+        "how": "push up to standing to get water or a napkin between stirring at 0:05 and eating at 0:10"
+      },
+      {
+        "change": "Walk a few steps before settling to eat",
+        "why": "walked only 3.3 m in 0.4 min",
+        "how": "carry the bowl a few steps and set it down before sitting to stir noodles at 0:05"
+      },
+      {
+        "change": "Sit tall while stirring the bowl",
+        "why": "bent over 0.08 min at 0:00 when sitting down and leaning over the bowl at 0:05",
+        "how": "lift the bowl closer and keep chest open while stirring noodles at 0:15 and 0:20"
+      },
+      {
+        "change": "Shift feet and knee position while seated",
+        "why": "stayed in the same low position for 19 s sitting from 0:05 to 0:20",
+        "how": "move feet flat then shift weight left and right between stirs at 0:15 and 0:20"
+      }
+    ],
+    "went_well": [
+      "Settled with one sit-down at 0:00 and stayed settled to eat.",
+      "Kept hands busy stirring and eating from a bowl from 0:05 through 0:20."
+    ],
+    "caveats": [
+      "Posture labels can be wrong: 0:05 to 0:20 is called sitting but the 3D bodies look like a deep crouch, and the head camera never sees the legs so leg bend is estimated.",
+      "Muse captions every 5 s only describe the bowl and spoon and cannot tell chair height, table height, or effort."
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "history": [
+      "exercising"
+    ],
+    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (eating, 0.4 min)\nRecorded 0.4 min: sitting 0.32 min, bending 0.08 min. Walked 3.3 m, 1 sit-downs, longest sit 0.32 min, bent over 0.08 min.\nPosture bouts and what Muse saw:\nTotal 0.4 min: sitting 0.32 min, bending 0.08 min\n1 times sat or crouched down, longest sitting 0.32 min, walked 3.3 m, bent over 0.08 min.\nClip eating:\n  bending 5 s. The camera wearer sits down.\n  sitting 19 s. The camera wearer stirs noodles in a bowl with a spoon. The camera wearer eats food from a bowl. The camera wearer stirs noodles in a bowl. Stirs noodles in a bowl with a spoon.\nMuse's captions every 5 s:\n0:00 The camera wearer sits down.\n0:05 The camera wearer stirs noodles in a bowl with a spoon.\n0:10 The camera wearer eats food from a bowl.\n0:15 The camera wearer stirs noodles in a bowl.\n0:20 Stirs noodles in a bowl with a spoon.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, in order: use them for posture and movement.\n\nOTHER RECORDINGS\n- exercising: Recorded 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min. Walked 27.6 m, 0 sit-downs, longest sit 0.0 min, bent over 0.17 min. What they did: 0:00 The camera wearer walks forward.; 0:05 The camera wearer is walking forward.; 0:20 The camera wearer walks then squats down.; 0:25 The camera wearer stands and clasps hands together.; 0:30 The camera wearer unclasps their hands.; 0:35 The camera wearer stands up.; 0:40 The camera wearer spins in place.; 0:45 The camera wearer bends to touch their shoes.\n\nAbout the person: 178 cm."
+  },
+  "suggestions": {
+    "lines": [
+      "Stand up briefly between stirring and eating",
+      "Walk a few steps before settling to eat",
+      "Sit tall while stirring the bowl"
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "earlier_days": 1,
+    "sample_days": 0
+  }
+}

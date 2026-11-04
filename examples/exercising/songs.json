@@ -1,0 +1,210 @@
+{
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 18.9,
+   "features": {
+    "pace": 1.081998409893993,
+    "still": 0.0176678445229682,
+    "arm": 8.287291488435493,
+    "upright": 0.8493303180212014,
+    "rhythm": {
+     "bpm": 112.5,
+     "strength": 0.4924941430250433
+    }
+   },
+   "style": "upbeat indie pop",
+   "mood": "joyful",
+   "why": "steady rhythmic forward walking",
+   "targets": {
+    "energy": 0.7409435389157013,
+    "danceability": 0.5861823575597078,
+    "valence": 0.8821986431095407,
+    "acousticness": 0.16236749116607774,
+    "instrumentalness": 0.11060070671378093,
+    "loudness": -6.983346584216724,
+    "tempo": 112,
+    "tempo_from": "body rhythm"
+   },
+   "songs": [
+    {
+     "id": "1fc6a55c-3490-4a4f-84f6-83f3ffea1175",
+     "name": "Honky Tonk Uptown",
+     "spotifyId": "2sHwjF3NgwbUrtAFDUzxZJ",
+     "artist": "The Duvalls",
+     "tempo": 112,
+     "fit": 0.03187177086050594
+    },
+    {
+     "id": "34197d71-b25c-4931-9a5e-03753535a501",
+     "name": "Poor Boy",
+     "spotifyId": "7ehYnuRJWjwyxECk1tUOCl",
+     "artist": "Kerry Kearney",
+     "tempo": 113,
+     "fit": 0.06427551535857529
+    },
+    {
+     "id": "a162c44a-5242-4813-ae0e-ffaec3f9375f",
+     "name": "Entonces Mi Vida",
+     "spotifyId": "0eqQNi4kV1Pw97v0R4EPf9",
+     "artist": "Ruben Hernandez",
+     "tempo": 112,
+     "fit": 0.10602177086050593
+    },
+    {
+     "id": "9f0a5e4f-3540-4bd7-bc41-37a35d4d00ff",
+     "name": "Samson et Dalila",
+     "spotifyId": "2Mvk0dFtrT74hKtvx1C2GO",
+     "artist": "Sheila",
+     "tempo": 112,
+     "fit": 0.11595781797475814
+    },
+    {
+     "id": "0d8208da-450b-49cd-a818-07421eba957c",
+     "name": "Lucy Mae Blues",
+     "spotifyId": "02ScDDxhRLczvfDyzywnXV",
+     "artist": "Honey B & T-Bones",
+     "tempo": 113,
+     "fit": 0.1457884375271727
+    }
+   ]
+  },
+  {
+   "start_s": 18.9,
+   "end_s": 37.7,
+   "features": {
+    "pace": 0.22685865724381624,
+    "still": 0.09187279151943463,
+    "arm": 29.853469979022687,
+    "upright": 0.5851317093639576,
+    "rhythm": {
+     "bpm": 64.28571428571429,
+     "strength": 0.12052546725260525
+    }
+   },
+   "style": "gentle acoustic folk",
+   "mood": "curious",
+   "why": "slow squatting with hand gestures",
+   "targets": {
+    "energy": 0.5539768845700824,
+    "danceability": 0.30000000000000004,
+    "valence": 0.563309269213781,
+    "acousticness": 0.21431095406360423,
+    "instrumentalness": 0.1551236749116608,
+    "loudness": -14.109511189634866,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "0317eb99-2bf1-47ec-88e0-19036b234551",
+     "name": "Let Me Dream",
+     "spotifyId": "1OsdoauKXdu2kv3H3Ldk1J",
+     "artist": "The Dawn",
+     "tempo": 137,
+     "fit": 0.030332384643698473
+    },
+    {
+     "id": "4e6c90a1-957f-446d-b9bd-ed7813e9cbef",
+     "name": "Peaceful",
+     "spotifyId": "17a5Hy2dVGhQHpuiiUTqQC",
+     "artist": "Georgie Fame",
+     "tempo": 143,
+     "fit": 0.037667615356301365
+    },
+    {
+     "id": "f4cd2ec1-de68-46ed-88f3-0f55d648c4b4",
+     "name": "Un Poquito de M\u00ed y un Poquito de Ti (A Little Bit Me, a Little Bit You)",
+     "spotifyId": "15P72M0dHbCXTQc6Q7UEuW",
+     "artist": "Los Hermanos Castro",
+     "tempo": 146,
+     "fit": 0.09566761535630142
+    },
+    {
+     "id": "bb0c4947-7271-49f9-9b52-e5e790960906",
+     "name": "Totenschiff",
+     "spotifyId": "7tdGYaFEsLcyWMe91UdJ7b",
+     "artist": "D\u00f6delhaie",
+     "tempo": 138,
+     "fit": 0.11333238464369855
+    },
+    {
+     "id": "915d79a3-f110-4e0b-b17c-d0104e3c5eae",
+     "name": "Follow about me",
+     "spotifyId": "6aUJJTjxrs6loji48eZP8i",
+     "artist": "MOKAZ SHIMPHONYAS",
+     "tempo": 145,
+     "fit": 0.1547138462161366
+    }
+   ]
+  },
+  {
+   "start_s": 37.7,
+   "end_s": 56.6,
+   "features": {
+    "pace": 0.15275936395759718,
+    "still": 0.30212014134275617,
+    "arm": 31.476669041892862,
+    "upright": 0.34106212014134274,
+    "rhythm": null
+   },
+   "style": "calm ambient piano",
+   "mood": "calm",
+   "why": "slow bending spinning then stillness",
+   "targets": {
+    "energy": 0.5200147084805653,
+    "danceability": 0.30000000000000004,
+    "valence": 0.4034779540636042,
+    "acousticness": 0.3614840989399293,
+    "instrumentalness": 0.2812720848056537,
+    "loudness": -14.727005300353357,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "e7f4bd57-ea82-448b-b5ce-b2fa5452d0a3",
+     "name": "Comme un arbre",
+     "spotifyId": "3DzSddKBiniOvW8x8YUwr5",
+     "artist": "Maxime Le Forestier",
+     "tempo": 75,
+     "fit": 0.4414926625441695
+    },
+    {
+     "id": "c4423724-2dee-4f1d-b3e3-7c7a36187960",
+     "name": "Madeleine",
+     "spotifyId": "36kh4xoMxdJJoOW5tTSN1v",
+     "artist": "Oneul",
+     "tempo": 80,
+     "fit": 0.5755367544169612
+    },
+    {
+     "id": "b67b4574-b2fc-4b31-86cf-5432021cb41d",
+     "name": "Starshine",
+     "spotifyId": "6PCo3iOxcPBDpyh49uHEwl",
+     "artist": "The G",
+     "tempo": 82,
+     "fit": 0.5844926625441695
+    },
+    {
+     "id": "6823bbe7-8eea-4a14-aa1d-0c0cf8d86cd3",
+     "name": "At First Sight",
+     "spotifyId": "3VH6Q6LXFx9CAlhKiXXWov",
+     "artist": "John Surman, Nelson Ayres, Rob Waring",
+     "tempo": 77,
+     "fit": 0.6178926625441695
+    },
+    {
+     "id": "0609d07a-de84-49bd-8d20-c456dbd8a8d1",
+     "name": "Pater noster",
+     "spotifyId": "56wv7CBWSKqNnru2OeviUk",
+     "artist": "Anonymous, Ch\u0153ur De Moines B\u00e9nedictins De l'Abbaye Santo Domingo De Silos, Moines de Santo Domingo de Silos, Coro De La Abad\u00eda Benedictina De Santo Domingo De Silos",
+     "tempo": 79,
+     "fit": 0.6195926625441696
+    }
+   ]
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 25.0
+}

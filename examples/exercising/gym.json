@@ -1,0 +1,175 @@
+{
+ "exercise": {
+  "exercise": "squat",
+  "main_joint": "knee",
+  "confidence": 0.9,
+  "reason": "The 3D bodies show standing to deep bilateral knee flexion with upright torso and back to standing while the head view shows clasped hands over knees looking down.",
+  "source": "Meta Muse Spark",
+  "frames_at_s": [
+   15.7,
+   19.0,
+   22.3,
+   25.7,
+   29.0,
+   32.3
+  ]
+ },
+ "joint": "knee",
+ "reps": [
+  {
+   "start_s": 23.53,
+   "bottom_s": 24.37,
+   "end_s": 25.07,
+   "rom_deg": 123.5,
+   "down_s": 0.83,
+   "up_s": 0.7,
+   "asym_deg": 6.5
+  },
+  {
+   "start_s": 25.9,
+   "bottom_s": 26.6,
+   "end_s": 27.37,
+   "rom_deg": 125.9,
+   "down_s": 0.7,
+   "up_s": 0.77,
+   "asym_deg": 5.5
+  },
+  {
+   "start_s": 28.17,
+   "bottom_s": 28.9,
+   "end_s": 29.67,
+   "rom_deg": 135.5,
+   "down_s": 0.73,
+   "up_s": 0.77,
+   "asym_deg": 9.3
+  },
+  {
+   "start_s": 30.33,
+   "bottom_s": 31.0,
+   "end_s": 31.7,
+   "rom_deg": 133.8,
+   "down_s": 0.67,
+   "up_s": 0.7,
+   "asym_deg": 9.4
+  },
+  {
+   "start_s": 32.4,
+   "bottom_s": 33.07,
+   "end_s": 33.77,
+   "rom_deg": 135.4,
+   "down_s": 0.67,
+   "up_s": 0.7,
+   "asym_deg": 7.3
+  },
+  {
+   "start_s": 49.17,
+   "bottom_s": 50.37,
+   "end_s": 51.27,
+   "rom_deg": 50.7,
+   "down_s": 1.2,
+   "up_s": 0.9,
+   "asym_deg": 1.0
+  },
+  {
+   "start_s": 52.23,
+   "bottom_s": 53.27,
+   "end_s": 54.2,
+   "rom_deg": 44.5,
+   "down_s": 1.03,
+   "up_s": 0.93,
+   "asym_deg": 0.7
+  }
+ ],
+ "sets": [
+  {
+   "reps": 5,
+   "start_s": 23.53,
+   "end_s": 33.77,
+   "rest_after_s": 15.4
+  },
+  {
+   "reps": 2,
+   "start_s": 49.17,
+   "end_s": 54.2,
+   "rest_after_s": null
+  }
+ ],
+ "summary": {
+  "reps": 7,
+  "sets": 2,
+  "rom_mean_deg": 107.0,
+  "rom_min_deg": 44.5,
+  "rom_max_deg": 135.5,
+  "rom_change_pct": -61.8,
+  "down_mean_s": 0.83,
+  "up_mean_s": 0.78,
+  "tempo_cv_pct": 16.8,
+  "asym_mean_deg": 5.7,
+  "asym_max_deg": 9.4,
+  "reps_per_min": 37.1
+ },
+ "review": {
+  "summary": "You completed 7 reps across 2 sets with 5 deep squats at 123-135 deg followed by a 15.4 s rest and a drop to shallow hinges at 44-51 deg in reps 6-7 (-61.8% range). Pace was fast and bouncy at 37.1 reps/min with 0.83 s down / 0.78 s up and left-right differences up to 9.4 deg.",
+  "form": [
+   "Rep 1 start in image 1 to bottom in image 2 shows a full deep squat with 123.5 deg range and torso relatively upright at 0.83 s down / 0.70 s up.",
+   "Rep 4 start in image 3 to bottom in image 4 shows your deepest position at 133.8 deg, matched by head-camera image 7 showing hands clasped over knees, but left-right difference peaks at 9.4 deg.",
+   "Rep 7 start in image 5 to bottom in image 6 shows loss of squat pattern with only 44.5 deg range and torso folded over legs with arms reaching down, vs 123-135 deg in reps 1-5.",
+   "Tempo quickened then faded: reps 4-5 dropped to 0.67 s down from 0.83 s in rep 1 per numbers, then reps 6-7 slowed to 1.03-1.20 s down but with 50.7 and 44.5 deg range showing fatigue or set break after the 15.4 s rest."
+  ],
+  "improvements": [
+   {
+    "change": "Slow the descent to 2-3 seconds with a 1-second pause at bottom",
+    "why": "Reps 1-5 averaged 0.67-0.83 s down and 37.1 reps/min with 16.8% tempo variation, rushing the bottom in rep 4 image 4",
+    "how": "Cue '2-3 to the floor, pause, then stand' and count 'one-one-thousand, two-one-thousand' on the way down in the next set"
+   },
+   {
+    "change": "Hold depth to the same thigh-parallel target every rep",
+    "why": "Range fell -61.8% from first to last third, from 135.5 deg in rep 3 and 133.8 deg in rep 4 to 50.7 deg in rep 6 and 44.5 deg in rep 7 image 6",
+    "how": "Cue 'hips to same shelf' and stop the set when you feel you cannot reach that shelf instead of switching to a forward fold"
+   },
+   {
+    "change": "Set feet and press evenly through both feet",
+    "why": "Left-right difference averaged 5.7 deg and peaked at 9.3-9.4 deg in reps 3-4 bottoms in images 2 and 4",
+    "how": "Cue 'tripod feet, knees over second toe' and video from front to check knees track symmetrically"
+   },
+   {
+    "change": "Take a full reset after the mid-set rest",
+    "why": "15.4 s rest between rep 5 at 32.4-33.07 s and rep 6 at 49.17-50.37 s preceded the pattern change seen in images 5-6",
+    "how": "Cue 'breathe, feet, chest up, hands in front' and do one bodyweight rehearsal rep before restarting"
+   }
+  ],
+  "went_well": [
+   "Excellent depth and consistency in reps 1-5 at 123.5-135.5 deg, with rep 3 at 135.5 deg your best range",
+   "Quick turnarounds with 0.70-0.77 s up phases in reps 1-5 showing good drive to stand",
+   "Kept moving for two efforts totaling 7 reps and reset for a second set after the 15.4 s break"
+  ],
+  "caveats": [
+   "Legs are estimated from a head-mounted camera, so foot position, weight shift, and exact knee-over-toe tracking cannot be confirmed from the 3D alone",
+   "3D estimate cannot show load, effort, footwear/floor grip, or balance feel, only joint angles and timing"
+  ],
+  "music": {
+   "search": "steady hip hop groove",
+   "energy": 0.75,
+   "tempo": 90,
+   "valence": 0.7,
+   "danceability": 0.7,
+   "instrumentalness": 0.2,
+   "reason": "90 BPM lets you take ~2 beats down and ~2 beats up to slow your current ~37 reps/min pace to a more controlled rhythm."
+  },
+  "prompt": "You are a strength and fitness coach. The images show a person doing squat: their 3D body, reconstructed\nby LifeLens from a camera on their head (legs estimated), at the start and the bottom of reps 1, 4, 7, in that order,\nthen their head camera at the bottom of rep 4. Measured from the 3D body (knee flexion, degrees):\n7 reps in 2 set(s); range of motion 107.0 deg on average (44.5-135.5), -61.8% from the first to the last third; 0.83 s down and 0.78 s up per rep, tempo varies 16.8%; left-right difference 5.7 deg on average, up to 9.4; 37.1 reps per minute. Rests: [15.4] s.\nPer rep (start, bottom, range of motion, seconds down and up, left-right difference at the bottom):\nrep 1: 23.53-24.37 s, 123.5 deg, 0.83/0.7 s, 6.5 deg\nrep 2: 25.9-26.6 s, 125.9 deg, 0.7/0.77 s, 5.5 deg\nrep 3: 28.17-28.9 s, 135.5 deg, 0.73/0.77 s, 9.3 deg\nrep 4: 30.33-31.0 s, 133.8 deg, 0.67/0.7 s, 9.4 deg\nrep 5: 32.4-33.07 s, 135.4 deg, 0.67/0.7 s, 7.3 deg\nrep 6: 49.17-50.37 s, 50.7 deg, 1.2/0.9 s, 1.0 deg\nrep 7: 52.23-53.27 s, 44.5 deg, 1.03/0.93 s, 0.7 deg\nCoach them from what the images show and the numbers. Answer with one JSON object only:\n{\"summary\": 2 sentences, \"form\": 3-5 observations, each naming the rep and image or number it rests on,\n\"improvements\": 3-5 objects {\"change\": short instruction starting with a verb, \"why\": the image or number behind it,\n\"how\": a cue they can use in the next set}, \"went_well\": 2-3 strings, \"caveats\": 1-2 strings on what the 3D estimate\ncannot show, \"music\": {\"search\": 2-4 words of genre or style for a seed song, \"energy\": 0-1, \"tempo\": BPM to train to,\n\"valence\": 0-1, \"danceability\": 0-1, \"instrumentalness\": 0-1, \"reason\": one sentence}}. No medical diagnosis.\nAbout the person: 178 cm.",
+  "images": {
+   "body_at_s": [
+    23.53,
+    24.37,
+    30.33,
+    31.0,
+    52.23,
+    53.27
+   ],
+   "pov_at_s": [
+    31.0
+   ]
+  }
+ },
+ "runtime_s": 48.8
+}

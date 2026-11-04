@@ -1,0 +1,23 @@
+{
+ "exercise": {
+  "exercise": "none",
+  "main_joint": "none",
+  "confidence": 0.99,
+  "reason": "Egocentric views show the person seated at a desk eating noodles from a bowl in front of a keyboard, not exercising.",
+  "source": "Meta Muse Spark",
+  "frames_at_s": [
+   1.7,
+   5.0,
+   8.3,
+   11.7,
+   15.0,
+   18.3
+  ]
+ },
+ "joint": "elbow",
+ "reps": [],
+ "sets": [],
+ "summary": {},
+ "review": null,
+ "runtime_s": 10.7
+}

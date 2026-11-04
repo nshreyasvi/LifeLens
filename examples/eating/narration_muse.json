@@ -1,0 +1,27 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "text": "The camera wearer sits down."
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "text": "The camera wearer stirs noodles in a bowl with a spoon."
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "text": "The camera wearer eats food from a bowl."
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "text": "The camera wearer stirs noodles in a bowl."
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 24.73,
+  "text": "Stirs noodles in a bowl with a spoon."
+ }
+]

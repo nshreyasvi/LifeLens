@@ -1,0 +1,27 @@
+[
+ {
+  "start_s": 0.0,
+  "end_s": 5.0,
+  "label": "bending"
+ },
+ {
+  "start_s": 5.0,
+  "end_s": 10.0,
+  "label": "sitting"
+ },
+ {
+  "start_s": 10.0,
+  "end_s": 15.0,
+  "label": "sitting"
+ },
+ {
+  "start_s": 15.0,
+  "end_s": 20.0,
+  "label": "sitting"
+ },
+ {
+  "start_s": 20.0,
+  "end_s": 24.73,
+  "label": "sitting"
+ }
+]

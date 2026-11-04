@@ -1,0 +1,9 @@
+{
+ "camera": "gopro-linear",
+ "lens": "GoPro, Linear lens",
+ "focal_px": 1001.4,
+ "focal_from": "the GoPro's metadata (95.4 deg diagonal)",
+ "horizontal_fov_deg": 87.6,
+ "gopro_diagonal_fov_deg": 95.4,
+ "label": "GoPro, Linear lens \u00b7 88\u00b0 across \u00b7 focal from the GoPro's metadata (95.4 deg diagonal)"
+}
