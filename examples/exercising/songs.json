@@ -1,4 +1,6 @@
 {
+ "activity": "walking and stretching",
+ "active": true,
  "sections": [
   {
    "start_s": 0.0,
@@ -28,12 +30,20 @@
    },
    "songs": [
     {
-     "id": "1fc6a55c-3490-4a4f-84f6-83f3ffea1175",
-     "name": "Honky Tonk Uptown",
-     "spotifyId": "2sHwjF3NgwbUrtAFDUzxZJ",
-     "artist": "The Duvalls",
+     "id": "7a6505e6-e6fc-4654-a810-475f34548280",
+     "name": "El Senor De La Milicia",
+     "spotifyId": "0unP16UrokHoLmnV8te7h0",
+     "artist": "Impacto Efectivo",
+     "tempo": 111,
+     "fit": 0.041392182025242
+    },
+    {
+     "id": "5e9220a3-5561-4312-b93b-8ab847abd0f2",
+     "name": "Revoluci\u00f3n",
+     "spotifyId": "33Z4HsKc1bpMjriCwXL3fU",
+     "artist": "Miguel Alberte",
      "tempo": 112,
-     "fit": 0.03187177086050594
+     "fit": 0.05119218202524201
     },
     {
      "id": "34197d71-b25c-4931-9a5e-03753535a501",
@@ -44,20 +54,12 @@
      "fit": 0.06427551535857529
     },
     {
-     "id": "a162c44a-5242-4813-ae0e-ffaec3f9375f",
-     "name": "Entonces Mi Vida",
-     "spotifyId": "0eqQNi4kV1Pw97v0R4EPf9",
-     "artist": "Ruben Hernandez",
+     "id": "0368fa2b-3ecb-463a-a208-2919f3310ad6",
+     "name": "Ghammar Ghoto Hath Bala",
+     "spotifyId": "4Mk68xoGchl18lOzdkYBWL",
+     "artist": "Jagdish Vaishnav",
      "tempo": 112,
-     "fit": 0.10602177086050593
-    },
-    {
-     "id": "9f0a5e4f-3540-4bd7-bc41-37a35d4d00ff",
-     "name": "Samson et Dalila",
-     "spotifyId": "2Mvk0dFtrT74hKtvx1C2GO",
-     "artist": "Sheila",
-     "tempo": 112,
-     "fit": 0.11595781797475814
+     "fit": 0.08850781797475805
     },
     {
      "id": "0d8208da-450b-49cd-a818-07421eba957c",
@@ -82,61 +84,62 @@
      "strength": 0.12052546725260525
     }
    },
-   "style": "gentle acoustic folk",
+   "style": "steady hip hop groove",
    "mood": "curious",
-   "why": "slow squatting with hand gestures",
+   "why": "90 BPM lets you take ~2 beats down and ~2 beats up to slow your current ~37 reps/min pace to a more controlled rhythm.",
    "targets": {
-    "energy": 0.5539768845700824,
-    "danceability": 0.30000000000000004,
-    "valence": 0.563309269213781,
+    "energy": 0.75,
+    "danceability": 0.7,
+    "valence": 0.7,
     "acousticness": 0.21431095406360423,
-    "instrumentalness": 0.1551236749116608,
+    "instrumentalness": 0.2,
     "loudness": -14.109511189634866,
-    "tempo": null,
-    "tempo_from": ""
+    "tempo": 90,
+    "tempo_from": "Gymify"
    },
    "songs": [
     {
-     "id": "0317eb99-2bf1-47ec-88e0-19036b234551",
-     "name": "Let Me Dream",
-     "spotifyId": "1OsdoauKXdu2kv3H3Ldk1J",
-     "artist": "The Dawn",
-     "tempo": 137,
-     "fit": 0.030332384643698473
+     "id": "260fd40e-83ac-4003-b5bc-bbafd630cffd",
+     "name": "Ta' Te Mansa",
+     "spotifyId": "4wGdLsOE09rdP5kskPjNj0",
+     "artist": "Amarfis y La Banda De Atakke",
+     "tempo": 93,
+     "fit": 0.19448333333333326
     },
     {
-     "id": "4e6c90a1-957f-446d-b9bd-ed7813e9cbef",
-     "name": "Peaceful",
-     "spotifyId": "17a5Hy2dVGhQHpuiiUTqQC",
-     "artist": "Georgie Fame",
-     "tempo": 143,
-     "fit": 0.037667615356301365
+     "id": "9554b4bd-c874-4ef5-9e4d-ebf969ded049",
+     "name": "Vi flyger",
+     "spotifyId": "1X7qMssPQ9oeQXKBrlFKav",
+     "artist": "Noice",
+     "tempo": 91,
+     "fit": 0.2564833333333333
     },
     {
-     "id": "f4cd2ec1-de68-46ed-88f3-0f55d648c4b4",
-     "name": "Un Poquito de M\u00ed y un Poquito de Ti (A Little Bit Me, a Little Bit You)",
-     "spotifyId": "15P72M0dHbCXTQc6Q7UEuW",
-     "artist": "Los Hermanos Castro",
-     "tempo": 146,
-     "fit": 0.09566761535630142
+     "id": "cf2f33be-e4ab-4935-9cd1-1cfac85097c5",
+     "name": "La Raza Avanza",
+     "spotifyId": "5mHvEPfWMcK6f4dyTWGO1Y",
+     "artist": "AKA Helesmagra, Zabotage Music, Dj Salamart, dj jazz",
+     "tempo": 90,
+     "fit": 0.2705666666666667
     },
     {
-     "id": "bb0c4947-7271-49f9-9b52-e5e790960906",
-     "name": "Totenschiff",
-     "spotifyId": "7tdGYaFEsLcyWMe91UdJ7b",
-     "artist": "D\u00f6delhaie",
-     "tempo": 138,
-     "fit": 0.11333238464369855
+     "id": "2f0820af-2c1d-4f09-8c41-29e6e5102352",
+     "name": "Jangalene - Live",
+     "spotifyId": "1nmkEPcXwvFohJvQWgOxLB",
+     "artist": "Golden Earring",
+     "tempo": 95,
+     "fit": 0.31420000000000003
     },
     {
-     "id": "915d79a3-f110-4e0b-b17c-d0104e3c5eae",
-     "name": "Follow about me",
-     "spotifyId": "6aUJJTjxrs6loji48eZP8i",
-     "artist": "MOKAZ SHIMPHONYAS",
-     "tempo": 145,
-     "fit": 0.1547138462161366
+     "id": "b59709a0-3686-41f5-989e-4889810bcbc7",
+     "name": "Este Fronteo",
+     "spotifyId": "7waZ6saV9wwGGHiCcvGPob",
+     "artist": "Endo",
+     "tempo": 86,
+     "fit": 0.35795
     }
-   ]
+   ],
+   "source": "Gymify"
   },
   {
    "start_s": 37.7,
@@ -148,63 +151,64 @@
     "upright": 0.34106212014134274,
     "rhythm": null
    },
-   "style": "calm ambient piano",
+   "style": "steady hip hop groove",
    "mood": "calm",
-   "why": "slow bending spinning then stillness",
+   "why": "90 BPM lets you take ~2 beats down and ~2 beats up to slow your current ~37 reps/min pace to a more controlled rhythm.",
    "targets": {
-    "energy": 0.5200147084805653,
-    "danceability": 0.30000000000000004,
-    "valence": 0.4034779540636042,
+    "energy": 0.75,
+    "danceability": 0.7,
+    "valence": 0.7,
     "acousticness": 0.3614840989399293,
-    "instrumentalness": 0.2812720848056537,
+    "instrumentalness": 0.2,
     "loudness": -14.727005300353357,
-    "tempo": null,
-    "tempo_from": ""
+    "tempo": 90,
+    "tempo_from": "Gymify"
    },
    "songs": [
     {
-     "id": "e7f4bd57-ea82-448b-b5ce-b2fa5452d0a3",
-     "name": "Comme un arbre",
-     "spotifyId": "3DzSddKBiniOvW8x8YUwr5",
-     "artist": "Maxime Le Forestier",
-     "tempo": 75,
-     "fit": 0.4414926625441695
+     "id": "14bc6df9-c780-4759-98f5-339d57a1adee",
+     "name": "The Lord Will Provide",
+     "spotifyId": "64zcZCTS4XZzQz2WqJiN8G",
+     "artist": "Allan Wachs",
+     "tempo": 87,
+     "fit": 0.27968333333333323
     },
     {
-     "id": "c4423724-2dee-4f1d-b3e3-7c7a36187960",
-     "name": "Madeleine",
-     "spotifyId": "36kh4xoMxdJJoOW5tTSN1v",
-     "artist": "Oneul",
-     "tempo": 80,
-     "fit": 0.5755367544169612
+     "id": "057d99a6-5170-4647-8f27-881a49339e22",
+     "name": "El Manicero",
+     "spotifyId": "5kdxTSR6hWubyrEGvu4t3t",
+     "artist": "His Exotic Sounds, Bo Axelzon, Bo Axelzon & His Exotic Sounds",
+     "tempo": 92,
+     "fit": 0.31115
     },
     {
-     "id": "b67b4574-b2fc-4b31-86cf-5432021cb41d",
-     "name": "Starshine",
-     "spotifyId": "6PCo3iOxcPBDpyh49uHEwl",
-     "artist": "The G",
-     "tempo": 82,
-     "fit": 0.5844926625441695
+     "id": "08387034-86a2-4905-a4fa-f403881e8aa5",
+     "name": "1 Juan 1:9",
+     "spotifyId": "3Yk37Q52FxtRFNLx7Qh1Rs",
+     "artist": "Nathan Aanderud",
+     "tempo": 92,
+     "fit": 0.33055000000000007
     },
     {
-     "id": "6823bbe7-8eea-4a14-aa1d-0c0cf8d86cd3",
-     "name": "At First Sight",
-     "spotifyId": "3VH6Q6LXFx9CAlhKiXXWov",
-     "artist": "John Surman, Nelson Ayres, Rob Waring",
-     "tempo": 77,
-     "fit": 0.6178926625441695
+     "id": "8ac97ace-262a-482d-b08c-5b3e8bde8a1a",
+     "name": "Listen DJ",
+     "spotifyId": "5uXt85B5b3J0UL4IJ0VpEh",
+     "artist": "Sandra Cross",
+     "tempo": 89,
+     "fit": 0.37358333333333316
     },
     {
-     "id": "0609d07a-de84-49bd-8d20-c456dbd8a8d1",
-     "name": "Pater noster",
-     "spotifyId": "56wv7CBWSKqNnru2OeviUk",
-     "artist": "Anonymous, Ch\u0153ur De Moines B\u00e9nedictins De l'Abbaye Santo Domingo De Silos, Moines de Santo Domingo de Silos, Coro De La Abad\u00eda Benedictina De Santo Domingo De Silos",
-     "tempo": 79,
-     "fit": 0.6195926625441696
+     "id": "bf4a5744-450e-4776-b3f6-5596f941cd96",
+     "name": "Chevrolet",
+     "spotifyId": "5Wme6jItP1L9LmGWSBpLlE",
+     "artist": "Geoff Muldaur, Jim Kweskin, Maria Muldaur",
+     "tempo": 88,
+     "fit": 0.4330500000000001
     }
-   ]
+   ],
+   "source": "Gymify"
   }
  ],
  "model": "muse-spark-1.3",
- "runtime_s": 25.0
+ "runtime_s": 30.2
 }

@@ -1,4 +1,6 @@
 {
+ "activity": "eating noodles",
+ "active": false,
  "sections": [
   {
    "start_s": 0.0,
@@ -15,7 +17,7 @@
    },
    "style": "calm acoustic",
    "mood": "calm",
-   "why": "slow seated stirring and eating noodles",
+   "why": "sitting still eating noodles",
    "targets": {
     "energy": 0.5109070573251061,
     "danceability": 0.8326482279328313,
@@ -28,6 +30,22 @@
    },
    "songs": [
     {
+     "id": "8711a49a-7a6b-4d39-bd54-eefcef90d081",
+     "name": "Africa",
+     "spotifyId": "2oqEQBlkZ9Tr2tkO6sUARh",
+     "artist": "Miriam Makeba",
+     "tempo": 81,
+     "fit": 0.16631420776311148
+    },
+    {
+     "id": "8c9337db-878e-4056-b2dd-80cc0e104d7c",
+     "name": "Sal a Luchar",
+     "spotifyId": "6wnauIl8CIEOQSphPRDLv2",
+     "artist": "Chino Kanalla, Flow SobreNatural, kilowattes, The Crazyk",
+     "tempo": 80,
+     "fit": 0.17136657355376728
+    },
+    {
      "id": "9b67189d-eae0-4e9c-8ffc-d3bf9c557ab5",
      "name": "Whyy",
      "spotifyId": "6OYAvRwiRLn6YXA895BmnF",
@@ -36,40 +54,24 @@
      "fit": 0.1750667597795659
     },
     {
-     "id": "c12ebce8-85f6-4270-94e1-34695d075db5",
-     "name": "break for fresh air",
-     "spotifyId": "6zO2MnYCZ4Kdaw8dJ54JdN",
-     "artist": "c613b",
-     "tempo": 80,
-     "fit": 0.19426420776311157
-    },
-    {
-     "id": "4e9e03a6-3437-4829-b2c7-3ae2478067f3",
-     "name": "Better (Interlude)",
-     "spotifyId": "5eHhq7KGqG7Cf07RtnOM29",
-     "artist": "Jack Hayden",
-     "tempo": 83,
-     "fit": 0.2158975410964449
-    },
-    {
-     "id": "ed0d0cca-c7e2-426e-9dfc-8d57dddf986e",
-     "name": "variable (intro)",
-     "spotifyId": "1FyhrkDkPoBU6t9N3t4MGP",
-     "artist": "Lij",
+     "id": "646e42e9-4131-45b5-8000-b3f643363320",
+     "name": "Dreh die Zeit zur\u00fcck",
+     "spotifyId": "3JcUB0xenzxnJDqWMu7jAH",
+     "artist": "Viz",
      "tempo": 82,
-     "fit": 0.2250665735537674
+     "fit": 0.18201657355376744
     },
     {
-     "id": "e620e492-fcd1-408e-8790-e4f1da41ee49",
-     "name": "Mystery Blues",
-     "spotifyId": "2iV2uUnmYGpBtPXXZU5TJZ",
-     "artist": "The Paul Winter Sextet",
-     "tempo": 82,
-     "fit": 0.3259808744297783
+     "id": "685a5540-d22a-4116-a1db-cf1d314efc7a",
+     "name": "Bright Paintings",
+     "spotifyId": "1jG3rnH1Xe2XDdPY1l6A9g",
+     "artist": "Pete Marinovich, Doris Justis",
+     "tempo": 84,
+     "fit": 0.2116665735537673
     }
    ]
   }
  ],
  "model": "muse-spark-1.3",
- "runtime_s": 10.1
+ "runtime_s": 9.0
 }

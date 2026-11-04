@@ -118,9 +118,10 @@ The pipeline never borrows another recording's body: if the 3D body fails, the r
 | The head-camera video | Your 3D body (with 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → OmniEgoCap (body) |
 | The video, every 5 s | A caption of what you are doing | Meta Muse Spark, from 3 frames |
 | The 3D body and the head camera, every 5 s | A posture label | Meta Muse Spark, from the two frames |
-| The 3D body, every second | Posture: walking, standing, sitting, crouching, bending, arms raised | Fixed rules on the body (below) |
+| Muse's labels, every second | Posture: walking, standing, sitting, crouching, bending, arms raised, and the time split | [`insights.py`](../pipeline/insights.py) from Muse's 5 s labels |
+| The body's numbers per ~20 s + the captions | Songs per section, the activity and whether it is active | ReccoBeats; Muse Spark names the style ([`songs.py`](../pipeline/songs.py)) |
 | All of the above + 8 3D body frames | A review: what you did, what to change and why, compared with your other recordings | Meta Muse Spark |
-| **Gymify:** the 3D body's reps | The exercise, reps, sets and rests, range of motion, tempo, left-right difference; form feedback; music to train to | Measured on the joints; Muse Spark names the exercise and gives form feedback from 3D body frames |
+| **Gymify:** the 3D body's reps | The exercise, reps, sets and rests, range of motion, tempo, left-right difference; form feedback; the music for the reps (into the queue) | Measured on the joints; Muse Spark names the exercise and gives form feedback from 3D body frames |
 | **Stagify:** the whole recording | A planned show: a scene every 10 s, songs per section, the show video and a lighting cue file | Muse Spark plans from each segment's numbers and a 3D body frame; ReccoBeats |
 | The 3D body, live | Mood (every ~6 s), light level and flashes (every frame) | Director: Muse Spark + speed rules |
 | The last 10 s of the body | 5 songs that fit your pace, rhythm and arm swing | ReccoBeats, Spotify |
@@ -136,12 +137,10 @@ fixed formula, as listed here.
 | 3D body, joint angles, speed | HaWoR + OmniEgoCap on your video | Smoothing σ = 2 frames; the lens offset from the head comes from the camera preset |
 | Body scale | Your height (when given), else Metric3D | The lens sits 7 cm below the top of the head |
 | Captions | Muse Spark, 3 frames per 5 s | Muse can misread a frame |
-| Posture "Rules" | [`insights.py`](../pipeline/insights.py) on the 3D body | Walking > 0.5 m/s; a low posture held 8 s or more counts as sitting |
-| Posture "Muse Spark" | Muse, from two frames per 5 s: the 3D body and the head camera ([`posture_muse.py`](../director/posture_muse.py)) | Frames only: no numbers and no text. Shows unknown where Muse gave no label |
-| Posture "Both agree" | The seconds where the rules and Muse name the same posture | Grey where they differ |
+| Posture | Muse, from two frames per 5 s: the 3D body and the head camera ([`posture_muse.py`](../director/posture_muse.py)) | Frames only: no numbers and no text. Shows unknown where Muse gave no label |
 | Review | Muse Spark, from the posture log, captions, totals, 8 3D body frames and your profile | Compares with every other processed recording |
 | Mood | Muse Spark every ~6 s | |
-| Tempo | The body's rhythm: the lag (60–180 BPM) at which all four limbs' speeds over the last 8 s best repeat ([`session.js`](../src/session.js) `rhythmBpm`) | Used when the match is 0.3 or more; otherwise Muse's tempo for the mood ([`music_map.py`](../director/music_map.py)) |
+| Body rhythm (/min) | The lag (60–180 per minute) at which all four limbs' speeds over the last 8 s best repeat ([`session.js`](../src/session.js) `rhythmBpm`) | Used when the match is 0.3 or more; otherwise Muse's tempo for the mood ([`music_map.py`](../director/music_map.py)) |
 | Light level, flashes, freeze | Speed rules ([`fast_loop.py`](../director/fast_loop.py)); freeze from the whole body ([`anticipation.py`](../director/anticipation.py)) | Flash at ≥ 0.5 m/s and 0.3 m/s above the last 4 s; freeze is measured against your own last 4 s |
 | Each light | Its body part plus poses, jumps, crouches, turns and arm hits ([`stage.js`](../src/stage.js)) | Fixed scales and thresholds, listed under [Music and stage](#music-and-stage) |
 | Scene (palette, beat pattern, focus, strobe) | Muse Spark, from the body's numbers, a 3D body frame and the song, with its reason ([`vite.config.js`](../vite.config.js) `/api/stage/scene`) | Until the first answer, the rules run with the director's colour |
@@ -183,15 +182,15 @@ Every body part has its own colour. 10 s after each answer, **Muse Spark, as lig
 (pace, rhythm, hands up, spread, turning, hits, jumps, crouches, the mood and the playing song) and returns the next
 scene with its reason. The director sets the overall level and flashes from speed on top.
 
-**Show view** (Stage tab): a full-screen stage where the 3D body, keyed out of its render, performs under six beams
-that follow it around the floor, with Muse's scene and reason, the cue timeline and the POV. **Sound FX** switches the
+**The stage show** (the Stage tab's main view): the 3D body, keyed out of its render, performs centre stage with its
+pelvis fixed, under six beams, with Muse's scene and reason and the POV; the stage rig sits underneath. **Sound FX** switches the
 effects (generated in the browser).
 
 **Real lights:** the six fixtures go to the dev server five times a second ([`server/lights.js`](../server/lights.js)).
 
 | `LIGHTS_OUTPUT` | Sends to | Settings |
 |---|---|---|
-| `sim` (default) | nothing; the Show view shows what would go out | |
+| `sim` (default) | nothing; the stage show shows what would go out | |
 | `artnet` | DMX over Art-Net (UDP 6454), 4 channels per fixture: dimmer, red, green, blue | `ARTNET_HOST`, `ARTNET_UNIVERSE`, `ARTNET_START` |
 | `hue` | A Philips Hue bridge, changed lights only, 2× a second (the bridge's limit) | `HUE_BRIDGE`, `HUE_KEY`, `HUE_LIGHTS` (ids in fixture order) |
 
@@ -201,8 +200,8 @@ Art-Net and Hue are written to their specs but not yet tested on hardware.
 
 Gymify (Gym tab, [`pipeline/gymify.py`](../pipeline/gymify.py)) analyses an exercise in a processed recording:
 
-1. **Exercise:** Muse Spark names it from 6 frames of the 3D body over the most active 20 s (plus 2 POV frames), or you
-   pick it from the list. When Muse sees no exercise, no reps are counted.
+1. **Exercise:** Muse Spark names it from 6 frames of the 3D body over the most active 20 s plus 2 POV frames. When
+   Muse sees no exercise, no reps are counted.
 2. **Reps** are measured on the exercise's main joint (knee, hip, elbow, or hand height): every bend of at least 15°,
    or 35% of the joint's range, is a rep. Reps more than 8 s apart start a new set.
 
@@ -214,7 +213,7 @@ Gymify (Gym tab, [`pipeline/gymify.py`](../pipeline/gymify.py)) analyses an exer
    | Fatigue | Change in range from the first to the last third of the reps |
 3. **Form feedback:** Muse sees the 3D body at the start and the bottom of the first, middle and last rep, plus a POV frame,
    with the measured numbers and your profile. It returns form observations, changes (what, why, how), what went
-   well, and a music profile. **Play gym music** finds songs for that profile on ReccoBeats.
+   well, and a music style, which replaces the queue's songs for the sections the reps fall in.
 
 A public workout clip (WEAR, a wide-lens GoPro tilted 45° down, no still start) failed the camera calibration twice;
 the pipeline stopped instead of making a body.
@@ -225,8 +224,8 @@ the pipeline stopped instead of making a body.
 
 - **Plan:** for every 10 s segment the page measures the body's numbers and takes a 3D body frame. Muse Spark plans a
   scene per segment and 2–4 music sections at once, and ReccoBeats picks each section's song. Saved as `stage.json`;
-  the Stage tab and Show view then play the planned scenes and switch songs at the sections.
-- **Show video:** the Show view is replayed from 0:00 and recorded with its sound effects (`stage_show.webm`, not
+  the stage show then plays the planned scenes and switches songs at the sections.
+- **Show video:** the stage show is replayed from 0:00 and recorded with its sound effects (`stage_show.webm`, not
   committed). Spotify's audio can't be recorded from its embed.
 - **Lighting cues:** the 6 lights are sampled 10 times a second into `stage_cues.csv` (time, fixture, red, green, blue,
   level). `node server/replay.js <recording>/stage_cues.csv` plays them to Art-Net or Hue.
