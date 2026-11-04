@@ -136,7 +136,7 @@ def _muse(prompt: str, max_calls: int, images: list[bytes] | None = None) -> str
         with urlopen(request, timeout=120, context=tls_context) as response:
             print(f"MUSE_HTTP_STATUS {response.status}", flush=True)
             payload = json.loads(response.read())
-    except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError) as exc:  # URLError, timeouts and dropped connections (RemoteDisconnected)
         raise RuntimeError(f"Muse request failed: {exc}") from exc
     text = payload.get("output_text")
     if not isinstance(text, str):

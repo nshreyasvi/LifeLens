@@ -181,6 +181,16 @@
             <span>Creator / wearer name</span>
             <input id="user-name" type="text" maxlength="40" autocomplete="given-name" placeholder="Enter your name (optional)">
           </label>
+          <div class="field-row">
+            <label class="field"><span>Height (cm)</span>
+              <input id="user-height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="e.g. 175"></label>
+            <label class="field"><span>Weight (kg)</span>
+              <input id="user-weight" type="number" min="25" max="300" step="1" inputmode="numeric" placeholder="optional"></label>
+            <label class="field"><span>Age</span>
+              <input id="user-age" type="number" min="5" max="110" step="1" inputmode="numeric" placeholder="optional"></label>
+          </div>
+          <p class="field-hint">Your height sets the real size of your 3D body, so stand upright for the first 3&nbsp;s of a
+            recording. Weight and age only reach Meta Muse Spark's coaching; the 3D body doesn't use them.</p>
 
           <div class="choices">
             <button class="choice" id="choose-live" type="button">
@@ -201,7 +211,7 @@
                 </svg>
               </span>
               <span class="choice-name">Open a recording</span>
-              <span class="choice-sub">Select a benchmark session or process a raw recording</span>
+              <span class="choice-sub">Open a processed session or process a raw recording</span>
             </button>
           </div>
 

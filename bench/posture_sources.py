@@ -50,7 +50,7 @@ def run_sources(run: str) -> dict:
 
 
 def main(argv):
-    targets = argv or ['examples/office', 'examples/outdoor']
+    targets = argv or [os.path.join('examples', d) for d in sorted(os.listdir('examples'))]
     for run in targets:
         if os.path.isdir(run) and os.path.exists(f'{run}/activity.csv'):
             json.dump(run_sources(run), open(f'{run}/postures.json', 'w', encoding='utf-8'), separators=(',', ':'))

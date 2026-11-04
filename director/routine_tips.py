@@ -1,6 +1,6 @@
 """Routine review from Meta Muse Spark for one processed recording, compared with earlier recordings.
 
-python -m director.routine_tips examples/robothome --history examples/office examples/outdoor
+python -m director.routine_tips examples/exercising --history examples/stretching examples/eating
 
 Reads <run>/insights.json (totals and the posture log: posture bouts with Muse's caption of them),
 <run>/postures.json (posture from the rules and Muse) and <run>/narration_muse.json (Muse's captions) when
@@ -132,9 +132,10 @@ def main(argv: list[str] | None = None) -> dict:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('run', help='Processed recording: insights.json, activity.csv (postures.json optional).')
     parser.add_argument('--history', nargs='*', default=[], help='Earlier processed recordings to compare with.')
+    parser.add_argument('--person', default='', help="The wearer, e.g. '178 cm, 75 kg, 30 years old': for the coaching.")
     a = parser.parse_args(argv)
     run, history = Path(a.run), [Path(h) for h in a.history]
-    prompt = build_prompt(run, history)
+    prompt = build_prompt(run, history) + (f'\n\nAbout the person: {a.person}.' if a.person else '')
     review = parse(_muse(prompt, max_calls=1, images=[j for _, j in frames_of(run)] or None))
     review.update(provider='Meta Muse Spark', model=os.getenv('MUSE_MODEL', 'muse-spark-1.3'),
                   history=[h.name for h in history], prompt=prompt)  # the page shows what Muse read

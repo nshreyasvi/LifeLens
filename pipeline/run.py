@@ -13,9 +13,12 @@ gravity and floor from the floor plane in that SLAM's points. No GeoCalib, no le
 
 import argparse
 import json
+import math
 import os
+import re
 import shutil
 import subprocess
+import struct
 import sys
 import time
 
@@ -49,15 +52,31 @@ def iphone_focal(video: str, work_mp4: str):
     return float(f35) / 36 * max(s['width'], s['height'])     # 35 mm film: 36 mm across the frame's long side
 
 
+GOPRO_LENS = {b'L': 'Linear', b'W': 'Wide', b'S': 'SuperView', b'N': 'Narrow', b'H': 'HyperView', b'X': 'Max SuperView'}
+
+
+def gopro_lens(video: str):
+    """(lens mode, diagonal field of view in deg) from the GoPro's own metadata (GPMF VFOV, ZFOV), or None."""
+    with open(video, 'rb') as f:                     # GoPro writes the lens settings once, in the moov box at the end
+        head = f.read(16 << 20)
+        f.seek(max(0, os.path.getsize(video) - (16 << 20)))
+        head += f.read()
+    lens = re.search(rb'VFOVc\x01\x00\x01([A-Z])', head)
+    fov = re.search(rb'ZFOVf\x04\x00\x01(.{4})', head, re.S)
+    if not (lens and fov):
+        return None
+    return GOPRO_LENS.get(lens.group(1), lens.group(1).decode()), struct.unpack('>f', fov.group(1))[0]
+
+
 # Head cameras: horizontal field of view (deg; the focal length follows from the working video's width), the lens
-# position in the head frame (m: x left, y up, z forward from the head joint) and an ingest lens filter.
+# position in the head frame (m: x left, y up, z forward from the head joint), an ingest lens filter and a name.
 # shortcut: only gopro-linear is measured (OmniEgoDB's GoPro HERO10, ~92 deg); the others are estimates from typical
 # specs, check calibration.json (camera height) on your first recording and pass --focal when you know it.
 CAMERAS = {
-    'gopro-linear': (92.0, (0.0, 0.16, 0.12), ''),
-    'gopro-wide': (116.0, (0.0, 0.16, 0.12), 'lenscorrection=cx=0.5:cy=0.5:k1=-0.227:k2=-0.022,'),
-    'phone': (69.4, (0.0, 0.14, 0.13), ''),           # main 1x lens, ~26 mm equivalent; iPhone metadata wins
-    'glasses': (80.0, (0.07, 0.06, 0.10), ''),        # Meta Ray-Ban: camera at the left temple, near the eyes
+    'gopro-linear': (92.0, (0.0, 0.16, 0.12), '', 'GoPro, Linear lens'),
+    'gopro-wide': (116.0, (0.0, 0.16, 0.12), 'lenscorrection=cx=0.5:cy=0.5:k1=-0.227:k2=-0.022,', 'GoPro, Wide lens'),
+    'phone': (69.4, (0.0, 0.14, 0.13), '', 'Phone'),  # main 1x lens, ~26 mm equivalent; iPhone metadata wins
+    'glasses': (80.0, (0.07, 0.06, 0.10), '', 'Meta Ray-Ban glasses'),  # camera at the left temple, near the eyes
 }
 
 
@@ -83,6 +102,8 @@ def main():
     parser.add_argument("--device", default=None, help="Device name (e.g. gopro).")
     parser.add_argument("--camera", choices=sorted(CAMERAS), default=None,
                         help="Head camera preset: field of view (focal), lens position in the head, lens correction.")
+    parser.add_argument("--height", type=float, default=None,
+                        help="The wearer's height (m): sets the 3D world's scale from the upright start (build_input).")
     parser.add_argument("--opt", action="store_true", help="Enable OmniEgoCap wrist guidance optimization.")
     parser.add_argument("--smooth", type=float, default=2.0,
                         help="Body smoothing sigma in frames; 0 keeps OmniEgoCap's raw output (paper-comparable).")
@@ -127,17 +148,32 @@ def main():
 
     try:
         # 2. HaWoR: wrists and finger poses, plus the SLAM camera path unless the input comes ready
+        size = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height',
+                                          '-of', 'json', input_mp4], capture_output=True, text=True, check=True).stdout)['streams'][0]
+        w, h = size['width'], size['height']
+        gopro = gopro_lens(video_path)
+        source = 'the --focal option' if args.focal else None
         if not args.focal:
             args.focal = iphone_focal(video_path, input_mp4)
-            if args.focal:
-                print(f"== focal: {args.focal:.1f} px from the iPhone's lens metadata", flush=True)
+            source = "the iPhone's lens metadata" if args.focal else None
+        if not args.focal and gopro and gopro[0] == 'Linear':   # rectilinear: the diagonal field of view gives the focal
+            args.focal = math.hypot(w, h) / 2 / math.tan(math.radians(gopro[1] / 2))
+            source = f"the GoPro's metadata ({gopro[1]:.1f} deg diagonal)"
         if not args.focal and args.camera:          # the preset's field of view at the working video's width
-            w = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width',
-                                           '-of', 'json', input_mp4], capture_output=True, text=True, check=True).stdout)['streams'][0]['width']
             args.focal = (w / 2) / np.tan(np.radians(CAMERAS[args.camera][0] / 2))
-            print(f"== focal: {args.focal:.1f} px from the {args.camera} preset ({CAMERAS[args.camera][0]:g} deg)", flush=True)
-        if not args.focal:
-            print("== focal: unknown, HaWoR assumes 600 px. Pick the device or pass --focal, or SLAM may fail", flush=True)
+            source = f"the {args.camera} preset"
+        print(f"== focal: {args.focal:.1f} px from {source}" if args.focal else
+              "== focal: unknown, HaWoR assumes 600 px. Pick the device or pass --focal, or SLAM may fail", flush=True)
+        # what the app shows next to the recording: which camera, lens and field of view the 3D body was made with
+        lens = f"GoPro, {gopro[0]} lens" if gopro else CAMERAS[args.camera][3] if args.camera else 'Unknown camera'
+        lens += ', fisheye corrected' if args.camera and CAMERAS[args.camera][2] else ''
+        hfov = math.degrees(2 * math.atan(w / 2 / args.focal)) if args.focal else None
+        with open(os.path.join(run_dir, 'camera.json'), 'w') as f:
+            json.dump({'camera': args.camera, 'lens': lens, 'focal_px': args.focal and round(args.focal, 1),
+                       'focal_from': source, 'horizontal_fov_deg': hfov and round(hfov, 1),
+                       'gopro_diagonal_fov_deg': gopro and round(gopro[1], 1),
+                       'label': f"{lens} · {hfov:.0f}° across · focal from {source}" if hfov else f"{lens} · focal unknown"},
+                      f, indent=1)
         hawor_cmd = [py_hawor, os.path.join(PIPELINE, 'hawor_export.py'), '--video', input_mp4, '--out_dir', run_dir]
         if args.focal:
             hawor_cmd.extend(['--focal', str(args.focal)])
@@ -154,6 +190,8 @@ def main():
                 build_cmd.extend(['--device', args.device])
             if args.camera:
                 build_cmd.extend(['--cam_in_head', *map(str, CAMERAS[args.camera][1])])
+            if args.height:
+                build_cmd.extend(['--height', str(args.height)])
             run_stage('build_input', 'omniegocap_input.npz', build_cmd, run_dir)
 
         # 4. OmniEgoCap (SMPL-H generation with articulated hands)

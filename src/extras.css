@@ -175,7 +175,6 @@ body.show-open { overflow: hidden; }
 
 /* ---------- Recording: name, saved bar, live requirement (live.js), raw clips with Delete (start.js) ---------- */
 
-.rec:has(> button + button) { grid-template-columns: minmax(0, 1fr) auto auto auto; }
 .rec-name-input {
   min-height: 40px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border-strong);
   background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.88rem; width: min(220px, 40vw);
@@ -239,4 +238,13 @@ body.show-open { overflow: hidden; }
   min-height: 34px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-strong);
   background: var(--surface-2); color: var(--text); font: inherit; font-size: 0.82rem;
 }
-.rec:has(> select) { grid-template-columns: minmax(0, 1fr) auto auto auto auto; }
+/* Wearer profile on the start page: height, weight, age in one row */
+.field-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.field-hint { margin: -4px 0 0; font-size: 0.8rem; line-height: 1.45; color: var(--muted); }
+
+/* Session rows (start.js): the name with its status or camera under it; a saved clip's camera and buttons get a line */
+#rec-processed .rec { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; }
+#rec-processed .rec-meta { grid-row: 2; justify-self: start; }
+#rec-processed .rec > button { grid-column: 2; grid-row: 1 / 3; }
+#rec-raw .rec { grid-template-columns: minmax(0, 1fr) auto auto; row-gap: 6px; }
+#rec-raw .rec-name, #rec-raw .rec-meta { grid-column: 1 / -1; justify-self: start; }

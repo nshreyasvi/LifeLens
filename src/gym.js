@@ -5,6 +5,7 @@
 
 import { media } from './extras.js';
 import { session } from './session.js';
+import { profile } from './start.js';
 
 const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -143,7 +144,7 @@ async function gymify() {
   btn.disabled = true;
   $('gym-status').textContent = 'Running…';
   const res = await fetch('/api/gymify', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ run: session.rec.base, exercise: $('gym-exercise').value }) });
+    body: JSON.stringify({ run: session.rec.base, exercise: $('gym-exercise').value, ...profile() }) });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) { $('gym-status').textContent = body.error || `Error ${res.status}`; btn.disabled = false; return; }
   const poll = setInterval(async () => {

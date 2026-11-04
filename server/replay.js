@@ -1,4 +1,4 @@
-// Replay Stagify's lighting cues to real lights: node server/replay.js examples/office/stage_cues.csv
+// Replay Stagify's lighting cues to real lights: node server/replay.js examples/snowboarding/stage_cues.csv
 // Sends each 0.1 s frame of the 6 fixtures through server/lights.js at the time it was recorded; set LIGHTS_OUTPUT
 // (artnet or hue) and its settings as for the dev server. With the default (sim) it only prints what it would send.
 import { readFileSync } from 'node:fs';

@@ -1,6 +1,6 @@
 """Posture labels from Meta Muse Spark: one label per 5 s window of a processed clip, from frames only.
 
-python -m director.posture_muse examples/office examples/outdoor
+python -m director.posture_muse examples/exercising examples/eating
 
 For each clip: Muse sees two images per 5 s window, the rendered 3D body and the head camera at the window's middle
 (<clip>/frames/body_<start>.jpg and pov_<start>.jpg, made by pipeline/body_frames.py), 4 windows per call, and answers

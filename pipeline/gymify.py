@@ -243,7 +243,7 @@ def main(a):
         table = '\n'.join(f"rep {k + 1}: {r['start_s']}-{r['bottom_s']} s, {r['rom_deg']} deg, {r['down_s']}/{r['up_s']} s, "
                           f"{r['asym_deg']} deg" for k, r in enumerate(reps[:30]))
         prompt = COACH.format(exercise=ex['exercise'], rep_list=', '.join(str(k + 1) for k in picks), mid=len(reps) // 2 + 1,
-                              joint=joint, numbers=numbers, table=table)
+                              joint=joint, numbers=numbers, table=table) + (f'\nAbout the person: {a.person}.' if a.person else '')
         review = ask(key, prompt, imgs + povs)
         review['prompt'] = prompt
         review['images'] = {'body_at_s': [t for k in picks for t in (reps[k]['start_s'], reps[k]['bottom_s'])],
@@ -260,4 +260,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--run', required=True)
     parser.add_argument('--exercise', default='', help=f"Skip recognition: one of {', '.join(EXERCISES)}.")
+    parser.add_argument('--person', default='', help="The wearer, e.g. '178 cm, 75 kg, 30 years old': for the coaching.")
     main(parser.parse_args())

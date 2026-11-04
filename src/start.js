@@ -5,6 +5,7 @@
 import { fetchRecordings, openLive, openRecording, session } from './session.js';
 
 const NAME_KEY = 'lifelens-name';
+const PROFILE = ['height', 'weight', 'age'];      // start-page fields user-height, ... sent with each processing job
 const $ = (id) => document.getElementById(id);
 const nameInput = $('user-name');
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -31,8 +32,16 @@ function updateGreeting() {
 function remember() {
   session.user = nameInput.value.trim();
   updateGreeting();
-  try { localStorage.setItem(NAME_KEY, session.user); } catch { /* private window */ }
+  try {
+    localStorage.setItem(NAME_KEY, session.user);
+    for (const k of PROFILE) localStorage.setItem(`lifelens-${k}`, $(`user-${k}`).value);
+  } catch { /* private window */ }
 }
+
+// the wearer's height (cm), weight (kg) and age as typed; the server range-checks them
+export const profile = () => Object.fromEntries(PROFILE.map((k) => [k, $(`user-${k}`)?.value ?? '']));
+try { for (const k of PROFILE) $(`user-${k}`).value = localStorage.getItem(`lifelens-${k}`) ?? ''; } catch { /* private window */ }
+for (const k of PROFILE) $(`user-${k}`)?.addEventListener('change', remember);
 
 export function enter() {
   remember();
@@ -149,7 +158,7 @@ function item(name, meta, action, onClick) {
   const li = Object.assign(document.createElement('li'), { className: 'rec' });
   const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-small-text btn-primary', textContent: action });
   btn.addEventListener('click', () => onClick(btn));
-  li.append(Object.assign(document.createElement('span'), { className: 'rec-name', textContent: name }),
+  li.append(Object.assign(document.createElement('span'), { className: 'rec-name', textContent: name.replace(/[-_]+/g, ' ') }),
     Object.assign(document.createElement('span'), { className: 'rec-meta', textContent: meta }), btn);
   return li;
 }
@@ -161,7 +170,8 @@ export async function showRecordings() {
     const { processed, raw } = await fetchRecordings();
     const countChip = $('rec-count-chip');
     if (countChip) countChip.textContent = `${processed.length} ready${raw.length ? ` · ${raw.length} raw` : ''}`;
-    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, clock(rec.seconds), 'Open', async (btn) => {
+    $('rec-processed').replaceChildren(...processed.map((rec) => item(rec.name, [clock(rec.seconds), rec.camera?.lens,
+      rec.camera?.horizontal_fov_deg && `${Math.round(rec.camera.horizontal_fov_deg)}°`].filter(Boolean).join(' · '), 'Open', async (btn) => {
       btn.disabled = true;
       await openRecording(rec);
       enter();
@@ -170,15 +180,15 @@ export async function showRecordings() {
     const running = status.done || status.error ? '' : status.name;
     $('rec-raw').replaceChildren(...raw.map((r) => {
       const at = (status.queue ?? []).indexOf(r.name);
-      const state = r.name === running ? `processing ${status.percent ?? 0}%` : at >= 0 ? `queued #${at + 1}` : 'saved, not processed';
+      const busy = r.name === running || at >= 0;
+      const state = r.name === running ? `Processing ${status.percent ?? 0}%` : busy ? `Queued #${at + 1}` : 'Saved, not processed';
       const cam = cameraSelect(Object.assign(document.createElement('select'), { className: 'rec-camera' }));
       cam.setAttribute('aria-label', `Camera used for ${r.name}`);
-      const li = item(r.name, `${Math.max(1, Math.round(r.size / 2 ** 20))} MB · ${state}`, 'Process',
+      const li = item(r.name, state, 'Process',
         (btn) => processVideo(r.file, btn, note, undefined, '', cam.value));
       li.insertBefore(cam, li.querySelector('button'));
-      li.querySelector('button').disabled = r.name === running || at >= 0;
       const del = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-small-text', textContent: 'Delete' });
-      del.disabled = r.name === running || at >= 0;
+      cam.hidden = li.querySelector('button').hidden = del.hidden = busy;   // processing or queued: just the status
       del.setAttribute('aria-label', `Delete ${r.name}`);
       del.addEventListener('click', async () => {
         if (!window.confirm(`Delete the saved clip "${r.name}"? This can't be undone.`)) return;
@@ -225,7 +235,7 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
   const res = await fetch('/api/process', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file, camera }),
+    body: JSON.stringify({ file, camera, ...profile() }),
   });
   const body = await res.json().catch(() => ({}));
   if (res.status === 202) {                                 // the pipeline is busy: queued, it starts by itself

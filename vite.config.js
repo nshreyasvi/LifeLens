@@ -180,6 +180,7 @@ function lifelensApi() {
           base: `${dir}/${name}`,
           seconds: Math.max(1, Math.round(frames / 30)),
           processed: statSync(run).mtime.toISOString(),
+          camera: existsSync(join(run, 'camera.json')) ? JSON.parse(readFileSync(join(run, 'camera.json'), 'utf8')) : null,
           pov: url('input.mp4') ?? small(`input/${name}.mp4`) ?? prev?.pov ?? null,
           body: (dir === 'runs' ? url('mesh_exo.mp4') : null) ?? small(`${name}-body.mp4`) ?? url('mesh_exo.mp4'),
           graph: (dir === 'runs' ? url('pose_graph.mp4') : null) ?? small(`${name}-graph.mp4`) ?? url('pose_graph.mp4'),
@@ -195,14 +196,23 @@ function lifelensApi() {
     return { processed: [...found.values()].sort((a, b) => a.name.localeCompare(b.name)), raw };
   }
 
-  function processSteps(file, name, camera = '') {
+  // the wearer from the start page: height (cm) sets the 3D body's scale; weight and age only reach Muse's coaching.
+  // Numbers only, range-checked: the text built here goes into shell commands.
+  const profileOf = ({ height, weight, age } = {}) => {
+    const n = (v, lo, hi) => (Number.isFinite(+v) && +v >= lo && +v <= hi ? Math.round(+v) : null);
+    const [h, w, y] = [n(height, 100, 230), n(weight, 25, 300), n(age, 5, 110)];
+    return { height: h && h / 100, person: [h && `${h} cm`, w && `${w} kg`, y && `${y} years old`].filter(Boolean).join(', ') };
+  };
+
+  function processSteps(file, name, camera = '', profile = {}) {
     const history = recordings().processed.filter((r) => r.name !== name).map((r) => r.base).join(' ');
     return [
-      ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'${camera ? ` --camera ${camera}` : ''}`)],
+      ['3D body & Meta Muse Spark narration', true, ...wsl(`PATH=${env('omniegocap')}:$PATH ${env('omniegocap')}/python pipeline/run.py '${file}' '${name}'${camera ? ` --camera ${camera}` : ''}${profile.height ? ` --height ${profile.height}` : ''}`)],
       ['3D body frames', false, ...wsl(`${env('vlm')}/python pipeline/body_frames.py --run runs/${name}`)],   // what Muse sees
       ['Meta Muse Spark posture', false, python(), ['-m', 'director.posture_muse', `runs/${name}`]],
       ['Posture sources', false, ...wsl(`${env('mhr')}/python bench/posture_sources.py runs/${name}`)],
-      ['Meta Muse Spark routine coaching', false, python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean)]],
+      ['Meta Muse Spark routine coaching', false, python(), ['-m', 'director.routine_tips', `runs/${name}`, '--history', ...history.split(' ').filter(Boolean),
+      ...(profile.person ? ['--person', profile.person] : [])]],
     ];
   }
 
@@ -231,7 +241,7 @@ function lifelensApi() {
   // Clips waiting for the pipeline, in order: the next starts when a job finishes or fails.
   const queue = [];
   const busy = () => job && !job.done && !job.error;
-  function startJob(file, name, camera) {
+  function startJob(file, name, camera, profile) {
     const now = Date.now();
     job = {
       file, name, step: PIPELINE_STAGES[0].label, index: 0, stageIndex: 0, stageAt: now, startedAt: now, percent: 0,
@@ -239,9 +249,9 @@ function lifelensApi() {
       failed: new Set(), // optional stages that failed or were skipped
       done: false,
     };
-    runSteps(processSteps(file, name, camera));
+    runSteps(processSteps(file, name, camera, profile));
   }
-  const nextJob = () => { const q = queue.shift(); if (q) startJob(q.file, q.name, q.camera); };
+  const nextJob = () => { const q = queue.shift(); if (q) startJob(q.file, q.name, q.camera, q.profile); };
 
   function runSteps(steps, i = 0) {
     if (i === steps.length) {
@@ -350,17 +360,19 @@ function lifelensApi() {
 
       server.middlewares.use('/api/process', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
-        const { file, camera = '' } = await readBody(req);
+        const body = await readBody(req);
+        const { file, camera = '' } = body;
+        const profile = profileOf(body);
         if (camera && !CAMERAS.includes(camera)) return send(res, 400, { error: 'Unknown camera.' });
         const name = typeof file === 'string' ? basename(file, extname(file)) : '';
         if (!file?.startsWith('recordings/') || !VIDEO.test(file) || !NAME.test(name) || !existsSync(join(root, file))) {
           return send(res, 400, { error: 'Pick a video from recordings/.' });
         }
         if (busy()) {                                       // the pipeline is busy: wait in the queue
-          if (job.file !== file && !queue.some((q) => q.file === file)) queue.push({ file, name, camera });
+          if (job.file !== file && !queue.some((q) => q.file === file)) queue.push({ file, name, camera, profile });
           return send(res, 202, { queued: queue.findIndex((q) => q.file === file) + 1, running: job.name });
         }
-        startJob(file, name, camera);
+        startJob(file, name, camera, profile);
         send(res, 200, statusPayload());
       });
 
@@ -444,13 +456,15 @@ function lifelensApi() {
       server.middlewares.use('/api/gymify', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
         if (gym && !gym.done && !gym.error) return send(res, 409, { error: `Gymify is running on ${gym.run}.` });
-        const { run, exercise = '' } = await readBody(req);
+        const body = await readBody(req);
+        const { run, exercise = '' } = body;
+        const { person } = profileOf(body);
         const known = recordings().processed.find((r) => r.base === run);
         if (!known) return send(res, 400, { error: 'Unknown recording.' });
         if (exercise && !GYM_EXERCISES.includes(exercise)) return send(res, 400, { error: 'Unknown exercise.' });
         if (!existsSync(join(root, 'director', '.env'))) return send(res, 503, { error: 'Gymify needs a Muse key (director/.env).' });
         gym = { run, exercise, log: '', error: '', done: false, startedAt: Date.now() };
-        const [cmd, args] = wsl(`${env('vlm')}/python pipeline/gymify.py --run '${run}'${exercise ? ` --exercise '${exercise}'` : ''}`);
+        const [cmd, args] = wsl(`${env('vlm')}/python pipeline/gymify.py --run '${run}'${exercise ? ` --exercise '${exercise}'` : ''}${person ? ` --person '${person}'` : ''}`);
         const proc = spawn(cmd, args, { cwd: root, env: { ...process.env, PYTHONUNBUFFERED: '1' } });
         const job = gym;
         const keep = (d) => { job.log = (job.log + d).slice(-1200); };
@@ -525,6 +539,7 @@ function lifelensApi() {
 
 export default defineConfig({
   plugins: [lifelensApi()],
-  server: { port: 8000, strictPort: true },
+  // recordings/ and runs/ hold big videos the pipeline writes: watching them crashes the server (EBUSY) mid-copy
+  server: { port: 8000, strictPort: true, watch: { ignored: ['**/recordings/**', '**/runs/**'] } },
   preview: { port: 8000, strictPort: true },
 });

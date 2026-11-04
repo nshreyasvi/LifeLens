@@ -452,7 +452,7 @@ async function load(rec) {
   pickSource('rules');
   renderReview(report);
   drawSpeed();
-  $('day-status').textContent = `${rec.name} · ${clock(view.rows.length)}`;
+  $('day-status').textContent = [rec.name, clock(view.rows.length), rec.camera?.label].filter(Boolean).join(' · ');
   await renderHistory(rec);
 }
 

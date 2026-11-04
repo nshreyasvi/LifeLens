@@ -1,12 +1,15 @@
 """
 SLAM trajectory + wrists -> OmniEgoCap input: gravity-aligned z-up world, floor at z = 0, calibrated head mount.
 
-python pipeline/build_input.py --run runs/x [--calib_seconds 3] [--cam_in_head 0 0.16 0.12] [--device gopro]
+python pipeline/build_input.py --run runs/x [--calib_seconds 3] [--cam_in_head 0 0.16 0.12] [--device gopro] [--height 1.78]
 
 OmniEgoCap's trajectory adapter needs a metric world with z up and the floor height, and the repo leaves both to the
 user. Both come from the floor plane in HaWoR's own SLAM points (points.npy): its normal is up, its height the floor.
 For the first --calib_seconds, stand upright, look straight ahead and keep still: that window gives the mount, the
 camera's tilt and roll relative to the head (the head is assumed level and facing the camera's horizontal forward).
+SLAM's metric scale comes from Metric3D depth, which runs short on top-down views of a floor (a GoPro looking at the
+floor came out at ~0.6x). With --height (the wearer's height), the world is scaled so the camera sits at that height
+minus 7 cm, a head-strap lens, during the upright start; calibration.json keeps the SLAM height and the factor.
 
 Reads runs/x/{trajectory,wrist}.npz and points.npy. Writes omniegocap_input.npz, trajectory_aligned.npz,
 points_aligned.npy (for OmniEgoCap's viewer), cam_to_head.txt and calibration.json (quality numbers).
@@ -19,6 +22,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from omniegocap.adapters.trajectory import load_trajectory
+
+LENS_BELOW_TOP = 0.07     # a head-strap camera's lens below the top of the head (m); shortcut: no per-mount value
 
 
 def floor_plane(points: np.ndarray, cams: np.ndarray, iters: int = 1000, tol: float = 0.03):
@@ -41,7 +46,7 @@ def floor_plane(points: np.ndarray, cams: np.ndarray, iters: int = 1000, tol: fl
         raise SystemExit('No floor found 0.9-2.2 m below the camera in the SLAM points: keep some floor in view '
                          '(tilt the camera 20-30 deg down) and record while moving around.')
     center = points[best].mean(0)
-    n = np.linalg.svd(points[best] - center)[2][-1]     # least-squares refit on the inliers
+    n = np.linalg.svd(points[best] - center, full_matrices=False)[2][-1]     # least-squares refit on the inliers
     return (n if np.median((cams - center) @ n) > 0 else -n), center, float(best.mean())
 
 
@@ -60,6 +65,11 @@ def main(a):
     window = time_s - time_s[0] < a.calib_seconds
     if window.sum() < 10:
         window = np.ones(len(time_s), dtype=bool)
+    slam_height = float(np.median(T[window, 2, 3])) - floor_z
+    scale = (a.height - LENS_BELOW_TOP) / slam_height if a.height else 1.0   # the wearer's height sets the metric scale
+    T[:, :3, 3] *= scale
+    points *= scale
+    floor_z *= scale
     R_wc = T[window, :3, :3]
 
     # head during calibration: y up (world z), z forward = camera forward projected on the floor, x left
@@ -93,6 +103,9 @@ def main(a):
         'floor_inlier_fraction': round(inlier_frac, 3),
         'floor_z_slam': round(floor_z, 3),
         'cam_height_m': round(cam_height, 3),
+        'slam_cam_height_m': round(slam_height, 3),
+        'scale_from_height': round(scale, 3) if a.height else None,
+        'wearer_height_m': a.height,
         'mount_pitch_down_deg': round(float(np.degrees(np.arcsin(-cam_fwd_in_head[1]))), 1),
         'calib_window_motion_m': round(float(np.ptp(T[window, :3, 3], axis=0).max()), 3),
         'head_height_median_m': round(float(np.median(seq.head[:, 2, 3])), 3),
@@ -119,4 +132,6 @@ if __name__ == '__main__':
                         help='Camera lens position in the SMPL-H head-joint frame (x left, y up, z forward), meters. '
                              'Default: forehead mount, ~16 cm above and ~12 cm in front of the head joint.')
     parser.add_argument('--device', default='', help="'gopro' draws the GoPro mesh in OmniEgoCap's viewer.")
+    parser.add_argument('--height', type=float, default=None,
+                        help="The wearer's height (m): sets the metric scale from the upright start, instead of Metric3D.")
     main(parser.parse_args())
