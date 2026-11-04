@@ -1,22 +1,36 @@
-/* LifeLens front-end: Activity and Stage views with demo mode */
+/* LifeLens front-end: Activity, Routine, Music and Stage views with demo and live modes */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
 :root {
   color-scheme: light;
   --bg: #FFFFFF;
-  --surface: #F5F7FA;
+  --surface: #F4F7FC;
   --surface-2: #FFFFFF;
-  --surface-solid: #E4E6EB;
-  --surface-hover: #D8DADF;
-  --border: #DADDE1;
-  --border-strong: #BCC0C4;
-  --text: #1C1E21;
-  --muted: #606770;
-  --faint: #8A8D91;
-  --accent: #0866FF;
-  --accent-hover: #0654D1;
-  --accent-soft: #E7F0FF;
-  --accent-line: #A9C8FF;
+  --surface-solid: #E6EBF3;
+  --surface-hover: #DAE0EA;
+  --border: #DCE2EC;
+  --border-strong: #B8C1CF;
+  --text: #10131A;
+  --muted: #555E6E;
+  --faint: #7D8697;
+  --accent: #165DFF;
+  --accent-hover: #0B4FD9;
+  --accent-soft: #E8F0FF;
+  --accent-line: #A9C6FF;
+  --accent-text: #0B4FD9; /* accent text on --accent-soft: 4.5:1 or more in both themes */
+  --rec: #C43A17;           /* coral deep: white text on it 5.3:1; record and live only */
+  --glow-a: rgba(22, 93, 255, 0.16);
+  --glow-b: rgba(255, 90, 54, 0.10);
   --radius: 20px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --p-walking: #1C7A3A;
+  --p-standing: #029AC1;
+  --p-sitting: #254DEB;
+  --p-crouching: #A512B9;
+  --p-bending: #DC1126;
+  --p-arms: #CC7D1B;
+  --coral: #FF5A36;
 }
 
 * { box-sizing: border-box; }
@@ -31,7 +45,7 @@ body {
   padding: 24px clamp(16px, 4vw, 40px) 32px;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -39,8 +53,11 @@ body {
 
 h1, h2, p { margin: 0; }
 
+::selection { background: var(--accent-soft); color: var(--text); }
+
 code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: anywhere;
   font-size: 0.92em;
   padding: 1px 6px;
   border-radius: 6px;
@@ -54,25 +71,27 @@ code {
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    "brand"
-    "tabs"
-    "buttons"
-    "progress";
+    "brand theme"
+    "tabs tabs"
+    "controls controls"
+    "progress progress";
   align-items: center;
-  gap: 16px;
+  gap: 14px 16px;
 }
 
-@media (min-width: 760px) {
+@media (min-width: 960px) {
   .topbar {
-    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "brand buttons"
-      "tabs progress";
-    gap: 20px 24px;
+      "brand theme"
+      "tabs controls"
+      ". progress";
+    gap: 16px 24px;
   }
 }
+
+.theme-toggle { grid-area: theme; justify-self: end; }
 
 .brand {
   grid-area: brand;
@@ -98,7 +117,7 @@ h1 {
 }
 
 .badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -106,14 +125,14 @@ h1 {
   border-radius: 999px;
   background: var(--accent-soft);
   border: 1px solid var(--accent-line);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
-.buttons {
-  grid-area: buttons;
+.controls {
+  grid-area: controls;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -135,17 +154,18 @@ h1 {
   overflow: hidden;
 }
 
+/* Fills grow with transform, not width, so they don't re-lay out the page every frame. */
 .progress-fill {
   height: 100%;
-  width: 0;
   background: var(--accent);
-  border-radius: inherit;
-  transition: width 0.6s var(--ease);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease);
 }
 
-@media (min-width: 760px) {
-  .buttons { justify-content: flex-end; }
-  .progress { width: 240px; justify-self: end; }
+@media (min-width: 960px) {
+  .controls { justify-content: flex-end; }
+  .progress { width: 280px; justify-self: end; }
 }
 
 /* ---------- Buttons ---------- */
@@ -181,17 +201,19 @@ h1 {
 .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
 .btn-primary:active:not(:disabled) { background: var(--accent-hover); }
 
-/* Paused: Resume is outlined in blue so the state stands out. */
-.btn[data-state="resume"] {
+/* Square icon button (Restart, the Routine player, closing the recorder); it carries an aria-label. */
+.btn-icon { width: 44px; padding: 0; }
+.btn-small { width: 36px; min-height: 36px; }
+
+/* Start live run while the director plays. */
+.btn.is-live:disabled {
   background: var(--accent-soft);
-  border: 1px solid;
-  border-color: var(--accent-line);
+  color: var(--accent-text);
 }
 
-.btn[data-state="resume"]:hover:not(:disabled) {
-  background: rgba(8, 102, 255, 0.24);
-  border-color: var(--accent);
-}
+.icon-rec { fill: var(--rec); }
+
+.btn:active:not(:disabled) { transform: translateY(1px); }
 
 .btn:focus-visible {
   outline: 2px solid var(--accent);
@@ -206,10 +228,9 @@ h1 {
 
 .btn span { white-space: nowrap; }
 
-/* Phone: Play demo gets its own row; Pause and Restart share the next. */
+/* Phone: the controls share one row. */
 @media (max-width: 759px) {
-  .btn { flex: 1 1 0; min-width: 0; padding-inline: 12px; }
-  .btn-primary { flex-basis: 100%; }
+  .controls .btn:not(.btn-icon) { flex: 1 1 auto; min-width: 0; padding-inline: 12px; }
 }
 
 .icon {
@@ -219,8 +240,10 @@ h1 {
   fill: currentColor;
 }
 
-.btn[data-state="pause"] .icon-resume,
-.btn[data-state="resume"] .icon-pause {
+/* One button plays and pauses: it shows the icon of what a press will do. */
+[data-state="play"] > .icon-pause,
+[data-state="pause"] > .icon-play,
+.btn:not([data-state]) > .icon-pause {
   display: none;
 }
 
@@ -275,6 +298,11 @@ h1 {
   .tab { flex: none; min-height: 38px; }
 }
 
+/* Phone: four tabs share the width. */
+@media (max-width: 759px) {
+  .tab { min-width: 0; padding-inline: 8px; gap: 6px; }
+}
+
 .tab:hover { background: var(--surface-hover); }
 
 .tab[aria-selected="true"] {
@@ -314,6 +342,8 @@ h1 {
 .views {
   max-width: 1280px;
   margin: 20px auto 0;
+  display: grid;
+  gap: 20px;
 }
 
 .view { animation: view-in 150ms ease-out; }
@@ -323,55 +353,187 @@ h1 {
   to   { opacity: 1; transform: none; }
 }
 
-/* Activity: video placeholder with the energy and timeline cards on top */
+/* ---------- Videos: POV, 3D body, kinematics (media.js) ---------- */
 
-.view-activity {
-  position: relative;
+.media { gap: 16px; }
+
+.media-head { align-items: flex-start; flex-wrap: wrap; }
+.media-head .panel-sub { margin-top: 4px; }
+
+/* One row of pills; on a narrow screen it moves under the heading and scrolls sideways if it must. */
+.toggles {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-solid);
+}
+
+.toggle {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.toggle:hover:not(:disabled) { color: var(--text); }
+
+.toggle[aria-pressed="true"] {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(28, 30, 33, 0.12);
+}
+
+.toggle:disabled { opacity: 0.45; cursor: not-allowed; }
+.toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Shell: the POV on the left, the 3D body and the tab's details in the rail (media.js) ---------- */
+
+.shell {
   display: grid;
   gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
 }
 
-.video-box {
+.shell-rail { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* The POV, never hidden: a 16:9 stage; on wide screens it fills what the column leaves. */
+.media-stage {
   position: relative;
+  width: 100%;
   aspect-ratio: 16 / 9;
-  display: grid;
-  place-items: center;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: 14px;
+  background: #15171B;
+}
+
+.media-pane { margin: 0; }
+.media-pane video { display: block; width: 100%; height: 100%; }
+.media-base { position: absolute; inset: 0; }
+.media-base video { object-fit: contain; }
+.media-base video[data-stand-in] { background: #FFFFFF; } /* the 3D render standing in for a missing POV */
+
+/* Kinematics: a strip under the POV, the graph's own 1400:162 shape. */
+.media-graph {
+  aspect-ratio: 1400 / 162;
+  overflow: hidden;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: #FFFFFF;
+  animation: pane-in 220ms var(--ease);
 }
 
-.video-box::before {
-  content: "";
+/* 3D body: at the top of the rail, beside the POV; it keeps its size and the rail scrolls instead. */
+.media-side {
+  flex: none;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  animation: pane-in 220ms var(--ease);
+}
+
+.media-side video { object-fit: cover; }
+
+/* Routine: the 3D body as a small window in the POV's top-right corner. */
+.media-window {
   position: absolute;
-  inset: 14px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 12px;
+  top: 12px;
+  right: 12px;
+  width: 32%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(11, 13, 18, 0.38);
+  animation: pane-in 220ms var(--ease);
 }
 
-.video-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+@keyframes pane-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Laptop and wider: one screen. The page doesn't scroll; the POV takes the height the rest leaves, and the rail
+   (3D body, then the tab's details) scrolls on its own if it must. */
+@media (min-width: 1100px) and (min-height: 640px) {
+  body {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 12px;
+  }
+
+  .topbar, .foot, .error { flex: none; width: 100%; }
+  .foot { margin-top: 12px; }
+
+  /* A flex column, so the shell gets a definite height to share out; Routine (taller) scrolls in here. */
+  .views {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .view-day { flex: none; }
+
+  .shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) clamp(340px, 30vw, 420px);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .shell-main { min-height: 0; gap: 14px; }
+  /* The POV keeps its 16:9 shape: its height comes from the space left, its width from that. */
+  .shell-main .media-stage { flex: 1 1 0; min-height: 200px; width: auto; max-width: 100%; align-self: center; }
+  .shell-main .media-head > div:first-child { flex: 1 1 260px; min-width: 0; }
+
+  .shell-rail {
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .shell-rail .view { grid-template-columns: minmax(0, 1fr); }
+  .shell-rail .panel { padding: 18px; gap: 16px; }
+}
+
+.media-caption {
+  font-size: 0.8rem;
   color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
 }
 
-.video-label svg {
-  width: 28px;
-  height: 28px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  opacity: 0.6;
+.media-note {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
-.activity-cards {
+/* Activity: Energy next to the director's cues */
+
+.view-activity {
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1fr);
@@ -379,38 +541,65 @@ h1 {
 }
 
 @media (min-width: 760px) {
-  .activity-cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+  .view-activity { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
 }
 
-@media (min-width: 1100px) {
-  .view-activity {
-    display: block;
-    min-height: 640px;
-    padding: 24px;
-  }
+/* Music: the chain from pace to songs, next to the tempo and songs */
 
-  .video-box {
-    position: absolute;
-    inset: 0;
-    aspect-ratio: auto;
-  }
-
-  .activity-cards {
-    grid-template-columns: 320px 400px;
-    justify-content: space-between;
-  }
-
-  .glass {
-    background: rgba(255, 255, 255, 0.9);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .panel-timeline .timeline { max-height: 470px; }
+.view-music {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
 }
 
-/* Stage: lights and music side by side */
+@media (min-width: 900px) {
+  .view-music { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* Each step reads the one above it: a rail with a node per step shows the flow. */
+.chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chain li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-areas: "name value" "name how";
+  column-gap: 14px;
+  padding: 0 0 18px 26px;
+}
+
+.chain li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.chain li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 20px;
+  bottom: 2px;
+  width: 1px;
+  background: var(--accent-line);
+}
+
+.chain-name { grid-area: name; padding-top: 1px; font-size: 0.86rem; font-weight: 600; color: var(--muted); }
+.chain-value { grid-area: value; font-size: 1.2rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.chain-how { grid-area: how; font-size: 0.84rem; color: var(--muted); }
+
+/* Stage: lights and the music now, side by side */
 
 .view-stage {
   display: grid;
@@ -419,9 +608,6 @@ h1 {
   align-items: start;
 }
 
-@media (min-width: 760px) {
-  .view-stage { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
-}
 
 /* ---------- Panels ---------- */
 
@@ -445,18 +631,27 @@ h1 {
 
 .panel-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
 h2 {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* One line under the heading that says what the panel shows. */
+.panel-sub {
+  max-width: 62ch;
+  font-size: 0.86rem;
   color: var(--muted);
 }
+
+.panel-head + .panel-sub { margin-top: -14px; }
 
 .chip {
   font-size: 0.78rem;
@@ -473,7 +668,7 @@ h2 {
 .chip.is-active {
   background: var(--accent-soft);
   border-color: var(--accent-line);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ---------- Energy readout ---------- */
@@ -504,7 +699,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-top: 6px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
@@ -594,7 +789,7 @@ h2 {
 }
 
 .stats dt {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -650,9 +845,9 @@ h2 {
 }
 
 @keyframes pulse {
-  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(8, 102, 255, 0.45); }
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.45); }
   12%  { transform: scale(1.3); }
-  100% { transform: scale(1);    box-shadow: 0 0 0 20px rgba(8, 102, 255, 0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 20px rgba(22, 93, 255, 0); }
 }
 
 .tempo-value {
@@ -688,17 +883,17 @@ h2 {
 
 .meter-fill {
   height: 100%;
-  width: 0;
-  border-radius: inherit;
   background: var(--accent);
-  transition: width 0.7s var(--ease);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s var(--ease);
 }
 
 .meter-scale {
   display: flex;
   justify-content: space-between;
   margin-top: 6px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -722,11 +917,9 @@ h2 {
 
 h3 {
   margin: 0;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--text);
 }
 
 .songs-mood {
@@ -741,7 +934,7 @@ h3 {
 
 .songs-mood[data-mood] {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .song-list {
@@ -809,18 +1002,53 @@ h3 {
   border-radius: 999px;
   border: 1px solid var(--accent);
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-text);
   cursor: pointer;
 }
 
+.song-play:hover { background: var(--accent-line); }
+
 .song-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.song-embed {
-  flex: 1 1 100%;
-  width: 100%;
-  border: 0;
+.song.is-playing { border-color: var(--accent); background: var(--accent-soft); }
+.song.is-playing .song-play { background: var(--accent); color: #FFFFFF; }
+
+/* ---------- Player: one Spotify embed for Music and Stage (main.js) ---------- */
+
+.panel-player { gap: 12px; }
+.player-embed { min-height: 80px; border-radius: 12px; background: var(--surface-solid); overflow: hidden; }
+.player-embed iframe { display: block; width: 100%; border: 0; }
+
+/* ---------- Live session: Muse's caption and posture over the camera (live.js) ---------- */
+
+.live-overlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
   border-radius: 12px;
+  background: rgba(11, 13, 18, 0.72);
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  backdrop-filter: blur(6px);
 }
+.live-posture {
+  flex: none;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--rec);
+  font-weight: 650;
+  text-transform: capitalize;
+}
+.live-caption { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- Header: which model captions the video ---------- */
+
+.toggles-small .toggle { min-height: 28px; padding: 3px 10px; font-size: 0.8rem; }
 
 /* ---------- Timeline ---------- */
 
@@ -880,7 +1108,7 @@ h3 {
 
 .tl-item.is-current .tl-dot {
   background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(8, 102, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(22, 93, 255, 0.2);
 }
 
 .tl-row {
@@ -919,9 +1147,142 @@ h3 {
 .energy-medium { color: var(--text); }
 
 .energy-high {
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
   border-color: var(--accent-line);
+}
+
+/* ---------- Start screen (start.js): your name, then a live session or a recording ---------- */
+
+.start { display: none; }
+
+body.is-starting { overflow: hidden; }
+body.is-starting .topbar, body.is-starting .views, body.is-starting .error { visibility: hidden; }
+
+body.is-starting .start {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+  background:
+    radial-gradient(900px 500px at 15% -10%, var(--glow-a), transparent 60%),
+    radial-gradient(800px 500px at 110% 110%, var(--glow-b), transparent 60%),
+    var(--bg);
+}
+
+.start-card {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgba(11, 13, 18, 0.16);
+}
+
+.start-logo { width: 72px; height: 72px; }
+.start-title { display: flex; align-items: center; gap: 10px; font-size: 2rem; letter-spacing: -0.03em; }
+.start-sub { color: var(--muted); }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; font-weight: 600; color: var(--muted); }
+.field input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+}
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+.choice {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+.choice:hover { border-color: var(--accent); box-shadow: 0 6px 18px var(--accent-soft); }
+.choice:active { transform: translateY(1px); }
+.choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choice .icon { width: 22px; height: 22px; fill: var(--accent); }
+#choose-live .icon { fill: var(--rec); }
+.choice-name { font-weight: 650; }
+.choice-sub { font-size: 0.82rem; color: var(--muted); }
+
+.rec-list { display: grid; gap: 10px; }
+.rec-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.rec-name { font-weight: 600; overflow-wrap: anywhere; }
+.rec-meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rec-note { min-height: 1.3em; font-size: 0.86rem; color: var(--muted); }
+
+.btn-small-text { min-height: 34px; padding: 6px 14px; font-size: 0.84rem; }
+
+/* ---------- Header extras ---------- */
+
+.brand-logo { width: 28px; height: 28px; flex: none; }
+.who { font-size: 0.86rem; font-weight: 500; color: var(--muted); }
+.chip-btn {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip-btn:hover { background: var(--surface-hover); }
+.chip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.btn-record { background: var(--rec); color: #FFFFFF; }
+.btn-record .icon-rec { fill: #FFFFFF; }
+.btn-record[data-recording] { animation: blink 1.2s ease-in-out infinite; }
+body.is-live-session #play-btn, body.is-live-session #restart-btn { display: none; }
+
+/* ---------- Music: from the body ---------- */
+
+.features { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 0; }
+.feat { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+.feat dt { font-size: 0.75rem; color: var(--muted); }
+.feat dd { margin: 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.feat-out { border-color: var(--accent-line); background: var(--accent-soft); }
+.feat-out dd { color: var(--accent-text); }
+
+.light-value { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.media-clock {
+  white-space: nowrap;
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Footer ---------- */

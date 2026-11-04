@@ -1,7 +1,15 @@
 # LifeLens
 
-A head-mounted **phone or GoPro** video goes in. The wearer's whole body comes out in 3D, although the camera never
-sees it, together with what they do and how they move over the day.
+[![Release](https://img.shields.io/badge/release-demos--v1-0866FF?style=flat-square&logo=github)](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1)
+[![Python](https://img.shields.io/badge/python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](#1-set-up-linux-or-wsl2-nvidia-gpu-with-8-gb-cuda-126)
+[![CUDA](https://img.shields.io/badge/CUDA-12.6-76B900?style=flat-square&logo=nvidia&logoColor=white)](#1-set-up-linux-or-wsl2-nvidia-gpu-with-8-gb-cuda-126)
+[![Vite](https://img.shields.io/badge/frontend-Vite_6_%7C_Vanilla_JS-646CFF?style=flat-square&logo=vite&logoColor=white)](#front-end-lifelens-live-panel)
+[![Meta AI](https://img.shields.io/badge/Meta_AI-Muse_Spark_1.3_%7C_Llama_3.2-0467DF?style=flat-square&logo=meta&logoColor=white)](#director-stagesense)
+[![3D Pose](https://img.shields.io/badge/3D_Motion-OmniEgoCap_+_HaWoR_(SMPL--H)-FF6F59?style=flat-square)](#how-the-end-to-end-workflow-operates)
+[![Director Tests](https://img.shields.io/badge/tests-62_passed-2EA44F?style=flat-square&logo=pytest&logoColor=white)](director/TESTING.md)
+[![Dataset & Weights](https://img.shields.io/badge/weights_%26_data-CC_BY--NC_4.0-6E7681?style=flat-square)](#licenses)
+
+A head-mounted **phone, smart glasses, or GoPro** video goes in. The wearer's whole body comes out in 3D—even though the camera never sees it—together with what they do, how they move over the day, and live stage lighting and music cues driven by their movement.
 
 ![The 3D body sits down on a chair (not drawn) and stands up again; the pose graph underneath scrolls with it](docs/robothome_sit.gif)
 
@@ -12,10 +20,11 @@ dataset's footage can't be redistributed.*
 
 | Output | What it is |
 |---|---|
-| **3D motion** | SMPL-H body with fingers, 30 fps, as `.npy` / `.csv` / AMASS `.npz` |
+| **3D motion** | SMPL-H body with 30 articulated finger joints, 30 fps, as `.npy` / `.csv` / AMASS `.npz` |
 | **Side-by-side video** | camera \| 3D body, live pose graph underneath |
 | **Descriptions** | every 5 s: Qwen3-VL-2B narrates the activity; optionally Describe Anything describes a region |
-| **Activity insights** | posture per second, time split, breaks, a short summary with suggestions (below) |
+| **Activity insights** | posture per second, time split, breaks, and daily routine coaching (Qwen3-VL + Meta Muse Spark) |
+| **Live stage & music** | WebSocket director (`FastLoop` + `SlowLoop`) driving 6 virtual room lights, BPM tempo, and ReccoBeats/Spotify tracks |
 
 ![Posture per second over the three demo clips: mostly standing (gray) and walking (green), with sitting, bending and arms-raised bouts](examples/day/activity.png)
 
@@ -27,22 +36,54 @@ on these same clips, which the sitting rule was tuned on).*
 `robothome`, and `day`, a report over all three), also as zips in
 [Releases → demos-v1](https://github.com/nshreyasvi/LifeLens/releases/tag/demos-v1).
 
-## How it works
+---
+
+## How the End-to-End Workflow Operates
+
+LifeLens is organized into **three connected layers**:
+1. **3D Body & Activity Pipeline (`pipeline/`)** — Reconstructs 3D full-body + finger kinematics, renders videos, narrates 5 s windows, and classifies second-by-second posture.
+2. **StageSense Director (`director/`)** — Replays or streams processed kinematics through a dual-speed architecture (**Fast Loop** for sub-30 ms reactive lighting + **Slow Loop** powered by **Meta Muse Spark 1.3** or **Llama 3.2 3B** for mood, tempo, and routine coaching).
+3. **LifeLens Live Panel (`index.html`, `src/`)** — A Vite web application with **Activity**, **Stage**, and **Day** views that visualizes the 3D body, live director cues, reactive room lights, ReccoBeats/Spotify music recommendations, and multi-clip daily posture timelines.
 
 ```mermaid
 flowchart TD
-  V[/Head-mounted video/] --> H[HaWoR<br/>hands, fingers,<br/>camera path]
-  H --> F[Floor fit<br/>gravity up,<br/>camera height]
-  F --> O[OmniEgoCap<br/>head + wrists<br/>→ full body]
-  O --> R[Render<br/>3D body,<br/>pose graph]
-  V --> Q[Qwen3-VL<br/>narration]
-  V & R --> D[Describe Anything<br/>camera view / body]
-  O & Q --> I[Insights<br/>posture timeline,<br/>summary]
+  subgraph P["1. Egocentric 3D Body & Routine Pipeline (pipeline/)"]
+    V[/Head-mounted POV video/] --> ING[Ingest<br/>30 fps CFR, <=1920 px]
+    ING --> H[HaWoR<br/>3D wrists, 30 finger joints,<br/>chunked SLAM camera path]
+    H --> F[Floor fit & Calibration<br/>RANSAC ground plane,<br/>gravity +Z up, cam height]
+    F --> O[OmniEgoCap + Finger Splice<br/>head + wrists -> 52-joint<br/>SMPL-H 3D body mesh]
+    O --> R[Render & Kinematics<br/>side_by_side.mp4, mesh_exo.mp4,<br/>pose_timeseries.csv, joints_world.csv]
+    ING --> Q[Qwen3-VL-2B<br/>5 s activity narration]
+    ING & R -.-> D[Describe Anything DAM<br/>optional ego / body region captioning]
+    R & Q --> I[Insights Engine<br/>per-second posture labels,<br/>activity.csv, insights.json]
+  end
+
+  subgraph DIR["2. StageSense AI Director (director/)"]
+    R & I --> REP[Clip Replay & 3-Zone Floor K-Means]
+    REP --> FL[Fast Loop <30 ms<br/>pelvis speed -> brightness, zone color,<br/>speed-jump flash, freeze blackout]
+    REP --> SL[Slow Loop ~6 s<br/>Meta Muse Spark 1.3 / Llama 3.2 3B<br/>-> mood, clamped BPM tempo, scene]
+    I --> RT[Routine Tips<br/>Meta Muse Spark 1.3<br/>multi-day coaching]
+    FL & SL --> WS([WebSocket Server<br/>ws://127.0.0.1:8765])
+  end
+
+  subgraph UI["3. LifeLens Live Panel (src/ + index.html)"]
+    WS --> ACT[Activity View<br/>synced 3D body video,<br/>energy meter, cue timeline]
+    WS --> STG[Stage View<br/>6 reactive room lights,<br/>BPM beat meter, ReccoBeats + Spotify]
+    I & RT --> DAY[Day View<br/>posture bars, 1 s interactive<br/>scrubber, AI routine suggestions]
+  end
 ```
 
-[HaWoR](https://github.com/ThunderVVV/HaWoR) finds the hands and the camera's path in the video. Only the head (the
-camera) and the wrists are tracked. [OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) infers a full body
-that fits them. The legs are therefore a plausible guess, not an observation.
+### Stage-by-Stage Pipeline Breakdown (`pipeline/run.py`)
+
+When you run `python pipeline/run.py <video> <run_name>`, each stage writes to `runs/<run_name>/` and is automatically skipped on re-runs if its target output file already exists:
+
+1. **Ingest (`input.mp4`)**: Transcodes the raw input video via `ffmpeg` to a constant 30 fps, `<=1920` px width, `yuv420p` working video (or slices exact frames matching `raw_time_s` when `--input_npz` is supplied).
+2. **Hand & SLAM Tracking ([`pipeline/hawor_export.py`](pipeline/hawor_export.py) → `wrist.npz`, `slam.npz`)**: Runs [HaWoR](https://github.com/ThunderVVV/HaWoR) to detect 3D left/right wrists and 15-joint MANO finger rotations (`hand_pose` `(N, 90)`), and runs chunked DROID-SLAM (`hawor_slam`) stitched via Umeyama similarity alignment to recover the 6-DoF camera trajectory.
+3. **Floor Plane & Gravity Alignment ([`pipeline/build_input.py`](pipeline/build_input.py) → `omniegocap_input.npz`, `calibration.json`)**: Fits a RANSAC ground plane to the SLAM point cloud so world $+Z$ points opposite gravity with the floor at $z = 0$, validating that the head camera sits 0.9–2.2 m above the floor.
+4. **Full-Body 3D Reconstruction ([`pipeline/run_omniegocap.py`](pipeline/run_omniegocap.py) → `smplh_canonical.npz`, `smplh.npz`, `kinematics/`)**: Runs [OmniEgoCap](https://github.com/KyungWonCho/OmniEgoCap) to infer the 22-joint full-body trajectory from head + wrist motion (legs are a learned plausible estimate, not directly observed), applies Gaussian smoothing (`--smooth 2.0`), and splices in HaWoR's 30 finger joints (interpolating gaps $\le 0.5\text{ s}$ and easing longer gaps toward the clip mean).
+5. **3D Mesh & Pose Graph Rendering ([`pipeline/render.py`](pipeline/render.py) → `side_by_side.mp4`, `mesh_exo.mp4`, `pose_timeseries.csv`)**: Renders the 3D SMPL-H body from a smooth exocentric camera on a 0.5 m checkerboard floor alongside a scrolling biomechanical telemetry graph (left/right knee, hip, and elbow flexion, trunk lean, and walking speed).
+6. **Video Description ([`pipeline/describe.py`](pipeline/describe.py) & [`pipeline/describe_anything.py`](pipeline/describe_anything.py) → `narration.json`, `dam_*.json`)**: Runs `Qwen3-VL-2B-Instruct` over 5 s windows (8 frames/window) to narrate what the wearer is doing (`--describe qwen`, default), and optionally runs NVIDIA `DAM-3B-Video` + SAM 2.1 (`--describe dam`) on the ego view, 3D body render, and composite view.
+7. **Posture & Daily Insights ([`pipeline/insights.py`](pipeline/insights.py) & [`director/routine_tips.py`](director/routine_tips.py) → `activity.csv`, `activity.png`, `insights.json`, `insights.md`)**: Applies biomechanical rules normalized by the wearer's leg length to label every second (`walking`, `standing`, `sitting`, `crouching`, `bending`, `arms raised`), pairs posture bouts with Qwen narrations, and generates routine coaching via Qwen3-VL-2B and **Meta Muse Spark 1.3**.
 
 ## 1. Set up (Linux or WSL2, NVIDIA GPU with 8 GB, CUDA 12.6)
 
@@ -206,15 +247,21 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
   long real crouch will read as sitting. The summary is a 2B model's reading of the labels, not advice, and it mixes
   up numbers (the demo day report gives the day's 149 m walked as one walk).
 
-## Front-end (Avi)
+## Front-end: LifeLens Live Panel
 
-- Latest commit: `0d2e433` "Add live director connection and director-driven lights" (merged into `main` as `48f55c4`).
-- Files: `index.html`, `styles.css`, `app.js`, `sample-data.json`.
-- Activity and Stage screens, light cues, a timeline, and a music box with sample songs.
-- Connects to Dhruv's director at `ws://127.0.0.1:8765`. The badge shows **Live** when the director runs, and **Demo** with sample data otherwise.
-- Run it: `python3 -m http.server 8000` in the project folder, then open `localhost:8000`.
-- Models: the director's slow loop uses Muse Spark (Meta Model API) and Llama 3.2 (Meta open weights). The front-end calls no models itself.
-- Planned: Node.js build (branch `feature/node-frontend`), buttons over the POV feed, ReccoBeats song recommendations, Spotify playback for Premium users.
+The interactive web interface runs on **Vite** (`index.html`, `src/main.js`, `src/day.js`, `src/extras.js`, `src/media.js`, `src/styles.css`, `src/day.css`, `src/extras.css`). See [`NODE-FRONTEND.md`](NODE-FRONTEND.md) for build details.
+
+- **Run it:**
+  ```sh
+  npm install
+  npm run dev     # opens http://localhost:8000 (legacy plain-HTML copy remains in legacy/)
+  ```
+- **Three Views:**
+  - **Activity Tab:** Plays the 3D body video (`public/video/office-body.mp4`) time-synced to the director (`src/extras.js`), alongside a live energy meter (`low` / `medium` / `high`) and scrolling director cue log.
+  - **Stage Tab:** Simulates 6 smart room/stage lights (`Living room`, `Kitchen`, `Desk`, `Hallway`, `Bedroom`, `Porch`) whose brightness and color follow performer energy, speed-jump flashes, and freeze blackouts; includes a live BPM beat indicator and dynamic song recommendations via **ReccoBeats** with embedded **Spotify** track players (`src/main.js`).
+  - **Day Tab (`src/day.js`):** Reads `public/day/insights.json` and `public/day/activity.csv` to display whole-day and per-clip posture breakdowns, an interactive second-by-second scrubbable posture strip across `office`, `outdoor`, and `robothome`, and AI routine suggestions.
+- **Connection modes:** Automatically connects to the StageSense Director at `ws://127.0.0.1:8765` (**Live** badge, retrying every 5 s); when no director is running, falls back to `public/sample-data.json` (**Demo** badge).
+- **Models & Privacy:** No API keys or model calls reside in the browser. The AI badge reflects the state of the director's slow loop (**Meta Muse Spark 1.3** or **Llama 3.2 3B**).
 
 **Screenshots and demo video (Avi)**
 
@@ -223,37 +270,41 @@ two DAM runs the body renders also changed slightly (smoothing, floor lift), so 
 
 Short screen recording of the demo running on the Activity screen: [docs/avi-demo.mp4](docs/avi-demo.mp4)
 
-## Director
+## Director (StageSense)
 
-The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints_world.csv` from a processed LifeLens clip. It sends JSON over `ws://127.0.0.1:8765` to the front-end.
+The director ([`director/server.py`](director/server.py)) reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints_world.csv` from a processed LifeLens clip and streams JSON stage & music cues over `ws://127.0.0.1:8765` to the front-end.
 
-- Slow loop (Muse/Llama, every ~6 s) sets mood, tempo and the base light colour; the fast loop handles flashes, dims and blackouts on top.
-
-- Latest work: see the reactive-flash PR.
-- Run the director from the repository root:
+- **Dual-loop architecture:**
+  - **Fast loop ([`director/fast_loop.py`](director/fast_loop.py), <30 ms/frame):** Maps pelvis speed and deterministic 3-zone floor `k-means` (`A`, `B`, `C`) to light intensity and zone color, triggers a white **flash** on sudden pelvis speed jumps ($\ge 0.5\text{ m/s}$ and $\ge 0.3\text{ m/s}$ above the prior 4 s mean), and pre-arms a **dim** $\to$ **blackout** when the wearer freezes (`StubPredictor` / `AnticipationWebSocketPredictor`).
+  - **Slow loop ([`director/slow_loop.py`](director/slow_loop.py), every ~6 s):** Sends a compact (<80-word) biomechanical + narration summary to **Meta Muse Spark 1.3** (Meta Model API) or local **Llama 3.2 3B** (via Ollama) to update semantic `mood`, clamped `music_tempo` (bounded to the mood's BPM range in [`director/music_map.py`](director/music_map.py) and $\le 10\text{ BPM}$ change per step), and base color.
+- **Daily Routine Coaching with Meta Muse Spark ([`director/routine_tips.py`](director/routine_tips.py)):**
+  ```sh
+  python -m director.routine_tips public/day --history public/day/history.json
+  ```
+  Reads `<day>/insights.json` and optional multi-day history (`public/day/history.json`), queries **Meta Muse Spark**, and writes 3 concrete, data-grounded routine suggestions back into `insights.json`.
+- **Run the live director from the repository root:**
 
   ```sh
   MODEL_PROVIDER=muse director/venv/bin/python -m director.server examples/office --start 42 --describe qwen
   ```
 
-  This replays office from 42 s to the clip's end (83 s). The slow loop asks for a new mood every 6 s but waits for the previous reply; Muse replies took 9–22 s in two runs, so expect about 3 mood/tempo updates, the first 14–22 s in; the last can land after the final frame and arrives with the end message.
-  Then run `npm run dev` and use Live mode in the front-end.
+  This replays `office` from 42 s to the clip's end (83 s). The slow loop asks for a new mood every 6 s but waits for the previous reply; Muse replies took 9–22 s in two runs, so expect about 3 mood/tempo updates, the first 14–22 s in; the last can land after the final frame and arrives with the end message.
+  Then run `npm run dev` and use **Live** mode in the front-end.
   Offline: use `MODEL_PROVIDER=ollama` (replies take about 2 s).
-- Message format: JSON fields are `id`, `time`, `energy`, `action`, `music_tempo`, `phase`, `cue`, `intensity`, `color`, `zone`, `mood`, `source`, `reason`, `log`, `speed`, `posture_label`, `prediction_event`, `prediction_prob`, `scene`, `stem`, `shader`, `model_summary`, and `model_decision`. Example message:
+- **Message format:** JSON fields are `id`, `time`, `energy`, `action`, `music_tempo`, `phase`, `cue`, `intensity`, `color`, `zone`, `mood`, `source`, `reason`, `log`, `speed`, `posture_label`, `prediction_event`, `prediction_prob`, `scene`, `stem`, `shader`, `model_summary`, and `model_decision`. Example message:
 
   ```json
   {"id":1,"time":"0:00:42.000","energy":"medium","action":"dim","music_tempo":90,"phase":"set","cue":"dim","intensity":0.04,"color":"#3977FF","zone":"A","mood":"curious","source":"fast","reason":"Energy is medium; the level follows the performer.","log":"Energy is medium; the level follows the performer.","speed":0.4,"posture_label":"walking","prediction_event":"none","prediction_prob":0.0,"scene":"wash","stem":"ambient","shader":"soft_glow","model_summary":"","model_decision":"Holding a calm starting scene."}
   ```
 
-- Models: Muse Spark (Meta Model API) sets mood and tempo in the slow loop; Llama 3.2 3B (Meta open-weight, via Ollama) is the offline fallback. Narration comes from Qwen-VL output already in activity.csv. Built on top: clip replay, reactive cue logic, validated mood/tempo updates, and the JSON WebSocket.
-- Narration: `--describe qwen` reads the Qwen-VL activity narration already in the clip's `activity.csv` (from the LifeLens pipeline); the director only reads it.
-- Checklist:
+- **Checklist:**
   - [x] Reactive flash
   - [x] Blackout on freeze
   - [x] Tempo from slow loop
+  - [x] Meta Muse Spark daily routine tips (`director/routine_tips.py`)
   - [ ] Run on the real daily-routine recording
   - [ ] Swap the stand-in predictor for the real freeze model
-- Footnotes: flashes use pelvis walking speed and can miss upper-body movement; replay smoothing can make them appear about 0.25 s early. The freeze predictor is a stand-in and the camera is not live. Tempo stays inside the chosen mood's range from `music_map.py` and moves at most 10 BPM per update. See [director/README.md](director/README.md) for details.
+- **Footnotes:** flashes use pelvis walking speed and can miss upper-body movement; replay smoothing can make them appear about 0.25 s early. The freeze predictor is a stand-in and the camera is not live. Tempo stays inside the chosen mood's range from `music_map.py` and moves at most 10 BPM per update. See [director/README.md](director/README.md) and [director/TESTING.md](director/TESTING.md) (62 passing unit tests) for details.
 
 **Live run on `examples/office` (Muse, `--start 42`)**
 
@@ -262,13 +313,12 @@ The director reads `pose_timeseries.csv`, `activity.csv`, and `kinematics/joints
 ## Team checklist
 
 - [x] Front-end on `main` (PR #2, merged)
-- [x] Front-end README section (PR #3, waiting for review)
+- [x] Front-end README section (PR #3)
 - [x] Front-end screenshots and a short screen recording
-- [ ] Node.js front-end (branch `feature/node-frontend`)
-- [ ] Buttons over the POV camera feed
-- [ ] Music recommendations (ReccoBeats)
-- [ ] Music playback (Spotify, Premium users)
-- [ ] Daily routine analytics view
+- [x] Node.js / Vite front-end (`index.html`, `src/`, `vite.config.js`)
+- [x] Synchronized 3D body video & media switcher (`src/extras.js`, `src/media.js`)
+- [x] Music recommendations (ReccoBeats) & embedded Spotify playback (`src/main.js`)
+- [x] Daily routine analytics view (`src/day.js` + `director/routine_tips.py`)
 - [ ] 3-minute demo video
 - [ ] Final submission (Nov 4, 9 PM ET)
 

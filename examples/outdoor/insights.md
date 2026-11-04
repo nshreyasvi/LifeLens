@@ -7,9 +7,7 @@
 | outdoor | 0.9 min | 0.6 min | 0.2 min | 0.0 min | 0.0 min | 0.0 min | 3 | 0.2 min | 67 m |
 | **total** | 0.9 min | 0.6 min | 0.2 min | 0.0 min | 0.0 min | 0.0 min | 3 | 0.2 min | 67 m |
 
-The individual began with a brief walk (0.95 min), followed by standing (0.6 min) and then sitting for 0.17 min—totaling 1.75 minutes of seated activity. They moved through various tasks including walking on a wooden deck, interacting with a vending machine, and adjusting furniture. Their movements included frequent transitions between standing, walking, and sitting, with prolonged periods of sitting at a desk-like position.
 
-To improve this routine, consider increasing movement throughout the day—aim for at least 10–15 minutes of active engagement per session. Reduce sedentary time by taking regular breaks every 45 minutes; during these, stand up and stretch for 30 seconds. Additionally, ensure proper posture when sitting—avoid slouching by using ergonomic chairs and maintaining a neutral spine. These adjustments will support better circulation, reduce strain, and enhance overall well-being.
 
 <details><summary>Log given to the model</summary>
 

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import csv
+import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from .features import FrameFeatures, fit_zones, zone_for
@@ -113,4 +114,11 @@ def load_clip(path: str | Path) -> Clip:
     deltas = [b.time_s - a.time_s for a, b in zip(frames, frames[1:]) if b.time_s > a.time_s]
     fps = 1.0 / (sum(deltas) / len(deltas)) if deltas else 30.0
     return Clip(name=clip_dir.name, fps=fps, frames=frames, source_dir=clip_dir)
+
+
+def with_captions(clip: Clip, path: Path) -> Clip:
+    """The clip with each frame's narration taken from a captions file [{start_s, end_s, text}], e.g. Muse's."""
+    caps = [c for c in json.loads(Path(path).read_text(encoding="utf-8")) if not c["text"].startswith("[")]
+    at = lambda t: next((c["text"] for c in caps if c["start_s"] <= t < c["end_s"]), "")
+    return replace(clip, frames=[replace(f, narration=at(f.time_s)) for f in clip.frames])
 

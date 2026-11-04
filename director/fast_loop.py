@@ -73,7 +73,8 @@ class FastLoop:
         return make_message(msg_id=self.msg_id, time_s=f.time_s, energy=f.energy, phase=phase,
                             cue=cue, intensity=message_intensity, zone=f.zone, mood=self.mood,
                             bpm=self.bpm, source=source, reason=reason, color=color,
-                            scene=self.scene, stem=self.stem, shader=self.shader)
+                            scene=self.scene, stem=self.stem, shader=self.shader,
+                            speed=f.speed_m_s, posture_label=f.posture_label)
 
     def slow_message(self, features: FrameFeatures, state: Any) -> dict[str, Any]:
         """Publish a validated slow update; throttle color scene changes to 4 seconds."""

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>LifeLens</title>
+  <defs>
+    <linearGradient id="lifelens-favicon-g" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3D8BFF"/>
+      <stop offset="1" stop-color="#165DFF"/>
+    </linearGradient>
+  </defs>
+  <!-- The LifeLens mark without the faint lens rim, which blurs at 16 px. -->
+  <circle cx="32" cy="32" r="32" fill="url(#lifelens-favicon-g)"/>
+  <path d="M21.4 19.8 L32 27.6 L42.6 19.2 M32 27.6 L31.4 36 L24.4 46.2 M31.4 36 L38.4 40.6 L38.4 49" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="14.2" r="5.5" fill="#FFFFFF"/>
+  <circle cx="32" cy="14.2" r="2.9" fill="#FF5A36"/>
+</svg>

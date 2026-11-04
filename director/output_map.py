@@ -41,7 +41,7 @@ def make_message(
     *, msg_id: int, time_s: float, energy: float, phase: str, cue: str, intensity: float,
     zone: str, mood: str, bpm: int, source: str, reason: str, color: str | None = None,
     scene: str = "wash", stem: str = "ambient", shader: str = "soft_glow",
-    model_summary: str = "", model_decision: str = "",
+    model_summary: str = "", model_decision: str = "", speed: float = 0.0, posture_label: str = "unknown",
 ) -> dict[str, Any]:
     color = color or ZONE_COLORS.get(zone, ZONE_COLORS["A"])
     clock = str(timedelta(seconds=max(0, int(time_s))))
@@ -62,8 +62,8 @@ def make_message(
         OUTPUT_FIELDS["source"]: source,
         OUTPUT_FIELDS["reason"]: reason,
         OUTPUT_FIELDS["log"]: reason,
-        OUTPUT_FIELDS["speed"]: 0.0,
-        OUTPUT_FIELDS["posture_label"]: "unknown",
+        OUTPUT_FIELDS["speed"]: round(float(speed), 3),
+        OUTPUT_FIELDS["posture_label"]: posture_label,
         OUTPUT_FIELDS["prediction_event"]: "none",
         OUTPUT_FIELDS["prediction_prob"]: 0.0,
         OUTPUT_FIELDS["scene"]: scene,

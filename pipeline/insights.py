@@ -17,7 +17,8 @@ wearer's own leg length:
 plus the Qwen narration of that second (narration.json, if the run has it).
 
 Writes activity.csv (second, clip, label, narration), insights.json (minutes per label, transitions, longest sitting
-bout, walking distance, time bent over, summary), insights.md and activity.png (a timeline band per clip).
+bout, walking distance, time bent over, summary, and the log the summary model read), insights.md and activity.png (a
+timeline band per clip). Meta Muse Spark suggestions are added afterwards by `python -m director.routine_tips <out>`.
 """
 
 import argparse
@@ -179,7 +180,7 @@ def main(a):
     summary = summarize(log, a.model) if a.model else ''
 
     report = {'clips': {c['name']: c['stats'] for c in clips}, 'total': day, 'summary': summary, 'model': a.model,
-              'runtime_s': round(time.time() - t0, 1)}
+              'log': log, 'runtime_s': round(time.time() - t0, 1)}     # log: also read by director/routine_tips.py
     json.dump(report, open(f'{out}/insights.json', 'w'), indent=2)
     with open(f'{out}/insights.md', 'w') as f:
         f.write(f"# Activity insights: {', '.join(c['name'] for c in clips)}\n\n![timeline](activity.png)\n\n"

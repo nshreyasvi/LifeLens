@@ -48,7 +48,7 @@ The office clip, 23–53 s, ran with Llama 3.2 3B: `ollama ps` showed 2.2 GB, th
 The office clip, 23–53 s, previously ran with Muse Spark: HTTP 200, 4/4 valid replies, and about 8 s mean reply time. In the full robothome clip at 2× speed, Muse returned 16/16 valid replies with 8.56 s mean and 16.08 s maximum latency; the screen mood counts were 415 calm and 425 curious.
 
 Freeze thresholds were tuned on the office 23–53 s window. These replay results do not measure a live performance.
-The current local test suite passes 62 tests.
+The current local test suite passes 68 tests.
 
 A no-model fast-loop pass over the full clips produced reactive flashes and blackouts:
 

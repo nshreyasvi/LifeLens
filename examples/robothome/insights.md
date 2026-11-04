@@ -7,9 +7,7 @@
 | robothome | 0.3 min | 3.4 min | 0.7 min | 0.0 min | 0.1 min | 0.0 min | 2 | 0.6 min | 50 m |
 | **total** | 0.3 min | 3.4 min | 0.7 min | 0.0 min | 0.1 min | 0.0 min | 2 | 0.6 min | 50 m |
 
-The individual began by walking around a room (49.8 m), then stood for 67 seconds while performing tasks like watering plants, pouring water, and handling items such as a water bottle and cleaning supplies. They also sat for 33 seconds on a couch, adjusted pillows, and held a pillow. Afterward, they stood again for 60 seconds while cooking on the stove, opened a cabinet, and adjusted wrist guards. During this period, they bent over briefly to pick up a tray and placed it on a shelf. Finally, they walked around a lab and stood near a table for several seconds before ending the session.
 
-To improve their schedule, consider increasing movement throughout the day—aim for at least 10 minutes of active engagement every hour. Breaks should include stretching or light activity; the current log shows only brief moments of standing and walking. For posture improvement, avoid prolonged sitting by taking regular breaks to stand and move. Additionally, ensure proper ergonomics during seated work by using a supportive chair and maintaining a neutral spine. These adjustments could reduce strain and support overall well-being.
 
 <details><summary>Log given to the model</summary>
 

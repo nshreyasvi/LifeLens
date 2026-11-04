@@ -1,67 +1,5 @@
-/* LifeLens front-end: POV video, director reason line, AI badge and the light/dark theme.
+/* LifeLens front-end: director reason line, AI badge and the light/dark theme.
    Kept apart from styles.css so the base look can change without touching these parts. */
-
-/* ---------- POV video (Activity) ---------- */
-
-.video-box.has-video::before { content: none; }
-
-.video-box.has-video {
-  background: #FFFFFF; /* the 3D render has a white floor and sky */
-}
-
-.pov-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-credit {
-  position: absolute;
-  left: 12px;
-  bottom: 10px;
-  z-index: 1;
-  max-width: calc(100% - 24px);
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(28, 30, 33, 0.62);
-  color: #FFFFFF;
-  font-size: 0.72rem;
-}
-
-/* Wide screens: video on the left, Energy above Timeline in a column on the right, so
-   nothing covers the person. (#view-activity outranks the rules in styles.css.) */
-@media (min-width: 1100px) {
-  #view-activity {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    gap: 20px;
-    align-items: start;
-    min-height: 0;
-    padding: 0;
-  }
-
-  #view-activity .video-box {
-    position: relative;
-    inset: auto;
-    aspect-ratio: 4 / 3;
-  }
-
-  #view-activity .activity-cards {
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-  }
-
-  #view-activity .glass {
-    background: var(--surface);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: none;
-  }
-
-  #view-activity .panel-timeline .timeline { max-height: 340px; }
-}
 
 /* ---------- Director reason (Stage lights) ---------- */
 
@@ -153,19 +91,28 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0B0D12;
-  --surface: #151922;
-  --surface-2: #1C212B;
-  --surface-solid: #272D38;
-  --surface-hover: #313845;
-  --border: #2A303B;
-  --border-strong: #404855;
-  --text: #E9ECF1;
-  --muted: #A3AAB6;
-  --faint: #7D8592;
-  --accent: #3D86FF;
-  --accent-hover: #5B9AFF;
-  --accent-soft: rgba(61, 134, 255, 0.16);
-  --accent-line: #2D5BB0;
+  --surface: #141824;
+  --surface-2: #1B2130;
+  --surface-solid: #252C3D;
+  --surface-hover: #2F3749;
+  --border: #283044;
+  --border-strong: #3E4860;
+  --text: #ECF0F7;
+  --muted: #A3ADBF;
+  --faint: #7A8498;
+  --accent: #165DFF;           /* white text on it: 5.2:1 */
+  --accent-hover: #2563FF;
+  --accent-soft: #16264A;
+  --accent-line: #2F4E8F;
+  --accent-text: #8DB8FF;
+  --glow-a: rgba(22, 93, 255, 0.26);
+  --glow-b: rgba(255, 90, 54, 0.14);
+  --p-walking: #46A865;
+  --p-standing: #00A1D1;
+  --p-sitting: #0960FF;
+  --p-crouching: #B61FC7;
+  --p-bending: #DB0005;
+  --p-arms: #D57900;
 }
 
 /* Colors that styles.css writes directly instead of through the tokens above. */
@@ -177,6 +124,5 @@
 
 :root[data-theme="dark"] .ai-badge[data-mode="on"] .ai-state { color: #6FD58A; }
 
-/* The 3D render is white; dim it a little so it doesn't glare on the dark page. */
-:root[data-theme="dark"] .pov-video { filter: brightness(0.82); }
-:root[data-theme="dark"] .video-box.has-video { background: #D0D2D6; }
+/* The 3D render and the graph are white; dim them a little so they don't glare on the dark page. */
+:root[data-theme="dark"] .media-pane:not([data-pane="pov"]) video { filter: brightness(0.82); }

@@ -7,9 +7,7 @@
 | office | 0.5 min | 0.9 min | 0.1 min | 0.0 min | 0.0 min | 0.0 min | 1 | 0.1 min | 32 m |
 | **total** | 0.5 min | 0.9 min | 0.1 min | 0.0 min | 0.0 min | 0.0 min | 1 | 0.1 min | 32 m |
 
-The individual began by walking for 0.45 minutes while adjusting gloves, then stood for 4 seconds before beginning to walk again—this was followed by another 14-second walk as they moved through the office. They sat briefly for 3 seconds after entering the office, picked up a plastic bag, and continued walking toward a table. After this, they stood for 21 seconds while pouring liquid into a cup, turned on the water dispenser, and walked toward the table. They stood for another 22 seconds, opened a refrigerator, and later walked to the table again. Finally, they stood for 5 seconds and walked around the office before raising their arms for 1 second.
 
-To improve this schedule, consider increasing movement throughout the day—aim for at least 10–15 minutes of active rest every hour. Reduce prolonged sitting; the person spent only 0.05 minutes sitting, so suggest taking a 5-minute break every hour to stand, stretch, or walk. Additionally, encourage more frequent use of the water dispenser and avoid unnecessary bending (which occurred 0.0 minutes). By incorporating these changes, the individual can reduce strain and support better posture and overall well-being.
 
 <details><summary>Log given to the model</summary>
 

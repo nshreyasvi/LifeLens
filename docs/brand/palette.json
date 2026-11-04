@@ -1,0 +1,857 @@
+{
+  "name": "LifeLens palette",
+  "version": 1,
+  "method": "WCAG 2.x contrast from sRGB relative luminance; OKLab/OKLCH; Machado-Oliveira-Fernandes 2009 CVD simulation at severity 1.0.",
+  "rules": {
+    "body_text_min": 4.5,
+    "ui_and_large_text_min": 3.0,
+    "white_on_accent_min": 4.5
+  },
+  "brand": {
+    "accent": {
+      "hex": "#165DFF",
+      "name": "Lens Blue",
+      "note": "Main accent. Meta-blue family (#0866FF) pushed slightly more electric: OKLCH chroma 0.249 vs 0.240, hue 263 vs 261, and more headroom for white text (5.19:1 vs 4.82:1). Same value in both themes."
+    },
+    "accent-bright": {
+      "hex": "#3D8BFF",
+      "name": "Lens Blue Bright",
+      "note": "Gradient start and non-text highlights only (white on it is 3.31:1, below the text minimum)."
+    },
+    "secondary": {
+      "hex": "#FF5A36",
+      "name": "Signal Coral",
+      "note": "Secondary accent for the lights/music side and 'live' moments (also the pupil in the logo). Put dark ink (#10131A) on it, never white (3.10:1)."
+    },
+    "secondary-strong": {
+      "hex": "#C43A17",
+      "name": "Signal Coral Deep",
+      "note": "Use when white text must sit on coral, and for coral text on light backgrounds."
+    },
+    "gradient": {
+      "css": "linear-gradient(135deg, #3D8BFF 0%, #165DFF 100%)",
+      "note": "Logo disc and hero moments. White text on it only as large text (>= 24px, or >= 18.66px bold), or keep it over the #165DFF end."
+    }
+  },
+  "themes": {
+    "light": {
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F4F7FC",
+        "surface-2": "#FFFFFF",
+        "surface-solid": "#E6EBF3",
+        "surface-hover": "#DAE0EA",
+        "border": "#DCE2EC",
+        "border-strong": "#B8C1CF",
+        "text": "#10131A",
+        "muted": "#555E6E",
+        "faint": "#7D8697",
+        "accent": "#165DFF",
+        "accent-hover": "#0B4FD9",
+        "accent-soft": "#E8F0FF",
+        "accent-line": "#A9C6FF",
+        "accent-text": "#0B4FD9",
+        "on-accent": "#FFFFFF",
+        "secondary": "#FF5A36",
+        "secondary-hover": "#F24A25",
+        "secondary-soft": "#FFECE6",
+        "secondary-text": "#C43A17",
+        "secondary-strong": "#C43A17",
+        "on-secondary": "#10131A",
+        "on-secondary-strong": "#FFFFFF"
+      },
+      "contrast": [
+        {
+          "fg": "text",
+          "bg": "bg",
+          "fgHex": "#10131A",
+          "bgHex": "#FFFFFF",
+          "ratio": 18.58,
+          "min": 4.5,
+          "use": "body text",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface",
+          "fgHex": "#10131A",
+          "bgHex": "#F4F7FC",
+          "ratio": 17.31,
+          "min": 4.5,
+          "use": "body text on cards",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface-solid",
+          "fgHex": "#10131A",
+          "bgHex": "#E6EBF3",
+          "ratio": 15.52,
+          "min": 4.5,
+          "use": "text on chips/inputs",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface-hover",
+          "fgHex": "#10131A",
+          "bgHex": "#DAE0EA",
+          "ratio": 14.01,
+          "min": 4.5,
+          "use": "text on hovered rows",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "bg",
+          "fgHex": "#555E6E",
+          "bgHex": "#FFFFFF",
+          "ratio": 6.54,
+          "min": 4.5,
+          "use": "secondary text",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "surface",
+          "fgHex": "#555E6E",
+          "bgHex": "#F4F7FC",
+          "ratio": 6.09,
+          "min": 4.5,
+          "use": "secondary text on cards",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "surface-solid",
+          "fgHex": "#555E6E",
+          "bgHex": "#E6EBF3",
+          "ratio": 5.46,
+          "min": 4.5,
+          "use": "secondary text on chips",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "bg",
+          "fgHex": "#0B4FD9",
+          "bgHex": "#FFFFFF",
+          "ratio": 6.7,
+          "min": 4.5,
+          "use": "links / accent text",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "surface",
+          "fgHex": "#0B4FD9",
+          "bgHex": "#F4F7FC",
+          "ratio": 6.24,
+          "min": 4.5,
+          "use": "links on cards",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "accent-soft",
+          "fgHex": "#0B4FD9",
+          "bgHex": "#E8F0FF",
+          "ratio": 5.85,
+          "min": 4.5,
+          "use": "accent text on soft accent chip",
+          "pass": true
+        },
+        {
+          "fg": "on-accent",
+          "bg": "accent",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#165DFF",
+          "ratio": 5.19,
+          "min": 4.5,
+          "use": "white on primary button",
+          "pass": true
+        },
+        {
+          "fg": "on-accent",
+          "bg": "accent-hover",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#0B4FD9",
+          "ratio": 6.7,
+          "min": 4.5,
+          "use": "white on hovered primary button",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary",
+          "bg": "secondary",
+          "fgHex": "#10131A",
+          "bgHex": "#FF5A36",
+          "ratio": 5.99,
+          "min": 4.5,
+          "use": "dark ink on coral",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary",
+          "bg": "secondary-hover",
+          "fgHex": "#10131A",
+          "bgHex": "#F24A25",
+          "ratio": 5.12,
+          "min": 4.5,
+          "use": "dark ink on hovered coral",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary-strong",
+          "bg": "secondary-strong",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#C43A17",
+          "ratio": 5.3,
+          "min": 4.5,
+          "use": "white on deep coral",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "bg",
+          "fgHex": "#C43A17",
+          "bgHex": "#FFFFFF",
+          "ratio": 5.3,
+          "min": 4.5,
+          "use": "coral text",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "surface",
+          "fgHex": "#C43A17",
+          "bgHex": "#F4F7FC",
+          "ratio": 4.93,
+          "min": 4.5,
+          "use": "coral text on cards",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "secondary-soft",
+          "fgHex": "#C43A17",
+          "bgHex": "#FFECE6",
+          "ratio": 4.64,
+          "min": 4.5,
+          "use": "coral text on soft coral chip",
+          "pass": true
+        },
+        {
+          "fg": "faint",
+          "bg": "bg",
+          "fgHex": "#7D8697",
+          "bgHex": "#FFFFFF",
+          "ratio": 3.67,
+          "min": 3.0,
+          "use": "non-body only: icons, placeholders, large text",
+          "pass": true
+        },
+        {
+          "fg": "accent",
+          "bg": "bg",
+          "fgHex": "#165DFF",
+          "bgHex": "#FFFFFF",
+          "ratio": 5.19,
+          "min": 3.0,
+          "use": "accent as a UI mark (focus ring, active tab)",
+          "pass": true
+        },
+        {
+          "fg": "secondary",
+          "bg": "bg",
+          "fgHex": "#FF5A36",
+          "bgHex": "#FFFFFF",
+          "ratio": 3.1,
+          "min": 3.0,
+          "use": "coral as a UI mark (live dot)",
+          "pass": true
+        }
+      ]
+    },
+    "dark": {
+      "tokens": {
+        "bg": "#0B0D12",
+        "surface": "#141824",
+        "surface-2": "#1B2130",
+        "surface-solid": "#252C3D",
+        "surface-hover": "#2F3749",
+        "border": "#283044",
+        "border-strong": "#3E4860",
+        "text": "#ECF0F7",
+        "muted": "#A3ADBF",
+        "faint": "#7A8498",
+        "accent": "#165DFF",
+        "accent-hover": "#2563FF",
+        "accent-soft": "#16264A",
+        "accent-line": "#2F4E8F",
+        "accent-text": "#8DB8FF",
+        "on-accent": "#FFFFFF",
+        "secondary": "#FF5A36",
+        "secondary-hover": "#FF6A47",
+        "secondary-soft": "#3A1C16",
+        "secondary-text": "#FF7A57",
+        "secondary-strong": "#C43A17",
+        "on-secondary": "#10131A",
+        "on-secondary-strong": "#FFFFFF"
+      },
+      "contrast": [
+        {
+          "fg": "text",
+          "bg": "bg",
+          "fgHex": "#ECF0F7",
+          "bgHex": "#0B0D12",
+          "ratio": 17.0,
+          "min": 4.5,
+          "use": "body text",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface",
+          "fgHex": "#ECF0F7",
+          "bgHex": "#141824",
+          "ratio": 15.49,
+          "min": 4.5,
+          "use": "body text on cards",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface-2",
+          "fgHex": "#ECF0F7",
+          "bgHex": "#1B2130",
+          "ratio": 14.06,
+          "min": 4.5,
+          "use": "body text on raised cards",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface-solid",
+          "fgHex": "#ECF0F7",
+          "bgHex": "#252C3D",
+          "ratio": 12.2,
+          "min": 4.5,
+          "use": "text on chips/inputs",
+          "pass": true
+        },
+        {
+          "fg": "text",
+          "bg": "surface-hover",
+          "fgHex": "#ECF0F7",
+          "bgHex": "#2F3749",
+          "ratio": 10.42,
+          "min": 4.5,
+          "use": "text on hovered rows",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "bg",
+          "fgHex": "#A3ADBF",
+          "bgHex": "#0B0D12",
+          "ratio": 8.59,
+          "min": 4.5,
+          "use": "secondary text",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "surface",
+          "fgHex": "#A3ADBF",
+          "bgHex": "#141824",
+          "ratio": 7.83,
+          "min": 4.5,
+          "use": "secondary text on cards",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "surface-2",
+          "fgHex": "#A3ADBF",
+          "bgHex": "#1B2130",
+          "ratio": 7.11,
+          "min": 4.5,
+          "use": "secondary text on raised cards",
+          "pass": true
+        },
+        {
+          "fg": "muted",
+          "bg": "surface-solid",
+          "fgHex": "#A3ADBF",
+          "bgHex": "#252C3D",
+          "ratio": 6.17,
+          "min": 4.5,
+          "use": "secondary text on chips",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "bg",
+          "fgHex": "#8DB8FF",
+          "bgHex": "#0B0D12",
+          "ratio": 9.66,
+          "min": 4.5,
+          "use": "links / accent text",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "surface",
+          "fgHex": "#8DB8FF",
+          "bgHex": "#141824",
+          "ratio": 8.8,
+          "min": 4.5,
+          "use": "links on cards",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "surface-2",
+          "fgHex": "#8DB8FF",
+          "bgHex": "#1B2130",
+          "ratio": 7.98,
+          "min": 4.5,
+          "use": "links on raised cards",
+          "pass": true
+        },
+        {
+          "fg": "accent-text",
+          "bg": "accent-soft",
+          "fgHex": "#8DB8FF",
+          "bgHex": "#16264A",
+          "ratio": 7.4,
+          "min": 4.5,
+          "use": "accent text on soft accent chip",
+          "pass": true
+        },
+        {
+          "fg": "on-accent",
+          "bg": "accent",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#165DFF",
+          "ratio": 5.19,
+          "min": 4.5,
+          "use": "white on primary button",
+          "pass": true
+        },
+        {
+          "fg": "on-accent",
+          "bg": "accent-hover",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#2563FF",
+          "ratio": 4.88,
+          "min": 4.5,
+          "use": "white on hovered primary button",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary",
+          "bg": "secondary",
+          "fgHex": "#10131A",
+          "bgHex": "#FF5A36",
+          "ratio": 5.99,
+          "min": 4.5,
+          "use": "dark ink on coral",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary",
+          "bg": "secondary-hover",
+          "fgHex": "#10131A",
+          "bgHex": "#FF6A47",
+          "ratio": 6.55,
+          "min": 4.5,
+          "use": "dark ink on hovered coral",
+          "pass": true
+        },
+        {
+          "fg": "on-secondary-strong",
+          "bg": "secondary-strong",
+          "fgHex": "#FFFFFF",
+          "bgHex": "#C43A17",
+          "ratio": 5.3,
+          "min": 4.5,
+          "use": "white on deep coral",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "bg",
+          "fgHex": "#FF7A57",
+          "bgHex": "#0B0D12",
+          "ratio": 7.56,
+          "min": 4.5,
+          "use": "coral text",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "surface",
+          "fgHex": "#FF7A57",
+          "bgHex": "#141824",
+          "ratio": 6.89,
+          "min": 4.5,
+          "use": "coral text on cards",
+          "pass": true
+        },
+        {
+          "fg": "secondary-text",
+          "bg": "secondary-soft",
+          "fgHex": "#FF7A57",
+          "bgHex": "#3A1C16",
+          "ratio": 6.02,
+          "min": 4.5,
+          "use": "coral text on soft coral chip",
+          "pass": true
+        },
+        {
+          "fg": "faint",
+          "bg": "bg",
+          "fgHex": "#7A8498",
+          "bgHex": "#0B0D12",
+          "ratio": 5.17,
+          "min": 3.0,
+          "use": "non-body only: icons, placeholders, large text",
+          "pass": true
+        },
+        {
+          "fg": "accent",
+          "bg": "bg",
+          "fgHex": "#165DFF",
+          "bgHex": "#0B0D12",
+          "ratio": 3.74,
+          "min": 3.0,
+          "use": "accent as a UI mark (focus ring, active tab)",
+          "pass": true
+        },
+        {
+          "fg": "accent",
+          "bg": "surface",
+          "fgHex": "#165DFF",
+          "bgHex": "#141824",
+          "ratio": 3.41,
+          "min": 3.0,
+          "use": "accent as a UI mark on cards",
+          "pass": true
+        },
+        {
+          "fg": "secondary",
+          "bg": "bg",
+          "fgHex": "#FF5A36",
+          "bgHex": "#0B0D12",
+          "ratio": 6.26,
+          "min": 3.0,
+          "use": "coral as a UI mark (live dot)",
+          "pass": true
+        }
+      ]
+    }
+  },
+  "postures": {
+    "order": [
+      "walking",
+      "standing",
+      "sitting",
+      "crouching",
+      "bending",
+      "arms raised"
+    ],
+    "previous_in_src_day_js": {
+      "walking": "#31A24C",
+      "standing": "#8A8D91",
+      "sitting": "#0866FF",
+      "crouching": "#A259FF",
+      "bending": "#E41E3F",
+      "arms raised": "#FF7A45"
+    },
+    "light": {
+      "colors": {
+        "walking": {
+          "hex": "#1C7A3A",
+          "hue": "green",
+          "oklch": [
+            0.511,
+            0.13,
+            149.3
+          ],
+          "contrast": {
+            "#FFFFFF": 5.39,
+            "#F4F7FC": 5.02
+          }
+        },
+        "standing": {
+          "hex": "#029AC1",
+          "hue": "cyan",
+          "oklch": [
+            0.638,
+            0.12,
+            224.1
+          ],
+          "contrast": {
+            "#FFFFFF": 3.28,
+            "#F4F7FC": 3.06
+          }
+        },
+        "sitting": {
+          "hex": "#254DEB",
+          "hue": "blue",
+          "oklch": [
+            0.507,
+            0.24,
+            266.0
+          ],
+          "contrast": {
+            "#FFFFFF": 6.29,
+            "#F4F7FC": 5.86
+          }
+        },
+        "crouching": {
+          "hex": "#A512B9",
+          "hue": "purple",
+          "oklch": [
+            0.525,
+            0.24,
+            322.1
+          ],
+          "contrast": {
+            "#FFFFFF": 6.2,
+            "#F4F7FC": 5.77
+          }
+        },
+        "bending": {
+          "hex": "#DC1126",
+          "hue": "red",
+          "oklch": [
+            0.568,
+            0.224,
+            25.4
+          ],
+          "contrast": {
+            "#FFFFFF": 5.06,
+            "#F4F7FC": 4.71
+          }
+        },
+        "arms raised": {
+          "hex": "#CC7D1B",
+          "hue": "amber",
+          "oklch": [
+            0.66,
+            0.14,
+            64.6
+          ],
+          "contrast": {
+            "#FFFFFF": 3.22,
+            "#F4F7FC": 3.0
+          }
+        }
+      },
+      "all_pairs_worst": {
+        "protan_deutan_min": {
+          "deltaE": 8.62,
+          "pair": [
+            "walking",
+            "arms raised"
+          ]
+        },
+        "tritan": {
+          "deltaE": 6.85,
+          "pair": [
+            "walking",
+            "sitting"
+          ]
+        },
+        "normal_vision": {
+          "deltaE": 17.25,
+          "pair": [
+            "bending",
+            "arms raised"
+          ]
+        }
+      },
+      "validator": [
+        {
+          "surface": "#FFFFFF",
+          "pairs": "all",
+          "exit": 0,
+          "checks": [
+            "[PASS] Lightness band all 6 inside L 0.43\u00e2\u20ac\u201c0.77",
+            "[PASS] Chroma floor all 6 >= 0.1",
+            "[PASS] CVD separation worst all-pairs #CC7D1B\u00e2\u2020\u201d#1C7A3A \u00ce\u201dE 8.6 (protan) \u00c2\u00b7 tritan 6.9",
+            "[PASS] Normal-vision floor worst all-pairs #CC7D1B\u00e2\u2020\u201d#DC1126 \u00ce\u201dE 17.2 (normal)",
+            "[PASS] Contrast vs surface all 6 >= 3:1"
+          ]
+        },
+        {
+          "surface": "#F4F7FC",
+          "pairs": "all",
+          "exit": 0,
+          "checks": [
+            "[PASS] Lightness band all 6 inside L 0.43\u00e2\u20ac\u201c0.77",
+            "[PASS] Chroma floor all 6 >= 0.1",
+            "[PASS] CVD separation worst all-pairs #CC7D1B\u00e2\u2020\u201d#1C7A3A \u00ce\u201dE 8.6 (protan) \u00c2\u00b7 tritan 6.9",
+            "[PASS] Normal-vision floor worst all-pairs #CC7D1B\u00e2\u2020\u201d#DC1126 \u00ce\u201dE 17.2 (normal)",
+            "[PASS] Contrast vs surface all 6 >= 3:1"
+          ]
+        }
+      ]
+    },
+    "dark": {
+      "colors": {
+        "walking": {
+          "hex": "#46A865",
+          "hue": "green",
+          "oklch": [
+            0.656,
+            0.136,
+            151.2
+          ],
+          "contrast": {
+            "#0B0D12": 6.52,
+            "#141824": 5.94,
+            "#1B2130": 5.39
+          }
+        },
+        "standing": {
+          "hex": "#00A1D1",
+          "hue": "cyan",
+          "oklch": [
+            0.662,
+            0.13,
+            228.3
+          ],
+          "contrast": {
+            "#0B0D12": 6.5,
+            "#141824": 5.92,
+            "#1B2130": 5.37
+          }
+        },
+        "sitting": {
+          "hex": "#0960FF",
+          "hue": "blue",
+          "oklch": [
+            0.553,
+            0.247,
+            262.0
+          ],
+          "contrast": {
+            "#0B0D12": 3.82,
+            "#141824": 3.48,
+            "#1B2130": 3.16
+          }
+        },
+        "crouching": {
+          "hex": "#B61FC7",
+          "hue": "purple",
+          "oklch": [
+            0.565,
+            0.249,
+            323.3
+          ],
+          "contrast": {
+            "#0B0D12": 3.71,
+            "#141824": 3.38,
+            "#1B2130": 3.07
+          }
+        },
+        "bending": {
+          "hex": "#DB0005",
+          "hue": "red",
+          "oklch": [
+            0.56,
+            0.229,
+            28.8
+          ],
+          "contrast": {
+            "#0B0D12": 3.72,
+            "#141824": 3.39,
+            "#1B2130": 3.07
+          }
+        },
+        "arms raised": {
+          "hex": "#D57900",
+          "hue": "amber",
+          "oklch": [
+            0.664,
+            0.154,
+            61.1
+          ],
+          "contrast": {
+            "#0B0D12": 6.07,
+            "#141824": 5.54,
+            "#1B2130": 5.02
+          }
+        }
+      },
+      "all_pairs_worst": {
+        "protan_deutan_min": {
+          "deltaE": 8.55,
+          "pair": [
+            "walking",
+            "arms raised"
+          ]
+        },
+        "tritan": {
+          "deltaE": 3.86,
+          "pair": [
+            "walking",
+            "standing"
+          ]
+        },
+        "normal_vision": {
+          "deltaE": 16.52,
+          "pair": [
+            "walking",
+            "standing"
+          ]
+        }
+      },
+      "validator": [
+        {
+          "surface": "#0B0D12",
+          "pairs": "all",
+          "exit": 0,
+          "checks": [
+            "[PASS] Lightness band all 6 inside L 0.48\u00e2\u20ac\u201c0.67",
+            "[PASS] Chroma floor all 6 >= 0.1",
+            "[PASS] CVD separation worst all-pairs #D57900\u00e2\u2020\u201d#46A865 \u00ce\u201dE 8.6 (deutan) \u00c2\u00b7 tritan 3.9",
+            "[PASS] Normal-vision floor worst all-pairs #00A1D1\u00e2\u2020\u201d#46A865 \u00ce\u201dE 16.5 (normal)",
+            "[PASS] Contrast vs surface all 6 >= 3:1"
+          ]
+        },
+        {
+          "surface": "#141824",
+          "pairs": "all",
+          "exit": 0,
+          "checks": [
+            "[PASS] Lightness band all 6 inside L 0.48\u00e2\u20ac\u201c0.67",
+            "[PASS] Chroma floor all 6 >= 0.1",
+            "[PASS] CVD separation worst all-pairs #D57900\u00e2\u2020\u201d#46A865 \u00ce\u201dE 8.6 (deutan) \u00c2\u00b7 tritan 3.9",
+            "[PASS] Normal-vision floor worst all-pairs #00A1D1\u00e2\u2020\u201d#46A865 \u00ce\u201dE 16.5 (normal)",
+            "[PASS] Contrast vs surface all 6 >= 3:1"
+          ]
+        },
+        {
+          "surface": "#1B2130",
+          "pairs": "all",
+          "exit": 0,
+          "checks": [
+            "[PASS] Lightness band all 6 inside L 0.48\u00e2\u20ac\u201c0.67",
+            "[PASS] Chroma floor all 6 >= 0.1",
+            "[PASS] CVD separation worst all-pairs #D57900\u00e2\u2020\u201d#46A865 \u00ce\u201dE 8.6 (deutan) \u00c2\u00b7 tritan 3.9",
+            "[PASS] Normal-vision floor worst all-pairs #00A1D1\u00e2\u2020\u201d#46A865 \u00ce\u201dE 16.5 (normal)",
+            "[PASS] Contrast vs surface all 6 >= 3:1"
+          ]
+        }
+      ]
+    },
+    "method": "Hue family fixed per posture; lightness/chroma searched to maximise the worst ALL-PAIRS OKLab deltaE (x100) under Machado-2009 protan/deutan simulation, because the routine timeline can put any two postures side by side. Gates (dataviz validate_palette.js): CVD >= 8 target, normal vision >= 15, OKLCH L inside the mode band, C >= 0.10, >= 3:1 against every surface of that theme. Tritan (rare) is reported, not gated. Keep the legend/labels: colour is never the only cue.",
+    "note": "Use the light set under the light theme and the dark set under the dark theme (same hue families, re-stepped). Sitting stays in the brand-blue family, as it is today."
+  },
+  "css_mapping_note": "Theme token names match src/styles.css (:root) and src/extras.css (:root[data-theme=dark]), so adopting it is a value swap. on-accent, accent-bright and secondary-* are new tokens."
+}

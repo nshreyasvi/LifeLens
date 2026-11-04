@@ -17,3 +17,8 @@ bench/_fake_smplh/
 # node front-end
 node_modules/
 dist/
+
+# head-camera input videos for the page: OmniEgoDB footage, never commit (README: Front-end)
+public/video/input/
+# camera clips saved by the page's Record button
+recordings/

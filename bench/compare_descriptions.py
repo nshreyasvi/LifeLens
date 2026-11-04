@@ -27,8 +27,9 @@ from insights import label_seconds  # noqa: E402
 from render import pose_series  # noqa: E402
 
 RUNS = (('office', 'S03_office_1'), ('outdoor', 'S04_outdoor_1'), ('robothome', 'S03_robothome_1'))
-SOURCES = (('Qwen narration', 'narration.json'), ('DAM ego', 'dam_ego.json'), ('DAM pose', 'dam_pose.json'),
-           ('DAM both', 'dam_both.json'))
+SOURCES = (('Qwen narration', 'narration.json'), ('Muse captions', 'narration_muse.json'),
+           ('Muse, POV + 3D body', 'narration_muse_body.json'), ('DAM ego', 'dam_ego.json'),
+           ('DAM pose', 'dam_pose.json'), ('DAM both', 'dam_both.json'))
 POSTURE = {'walking': r'\b(walk\w*|strid\w*|strolling|pacing|stepp\w*)\b',
            'standing': r'\b(stand\w*|stood|upright)\b',
            'sitting': r'\b(sit|sits|sitting|seated|sat)\b',
@@ -116,7 +117,7 @@ def main(a):
 
     if a.old_dam:
         print('\nDAM run to run (old vs new, same windows): windows naming the same set of postures')
-        for _, f in SOURCES[1:]:
+        for _, f in [x for x in SOURCES if x[1].startswith('dam_')]:
             same, total = 0, 0
             for run, _ in RUNS:
                 old_f = f'{a.old_dam}/{run}/{f}'

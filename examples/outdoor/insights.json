@@ -47,7 +47,82 @@
     "walking_distance_m": 66.6,
     "bent_over_min": 0.0
   },
-  "summary": "The individual began with a brief walk (0.95 min), followed by standing (0.6 min) and then sitting for 0.17 min\u2014totaling 1.75 minutes of seated activity. They moved through various tasks including walking on a wooden deck, interacting with a vending machine, and adjusting furniture. Their movements included frequent transitions between standing, walking, and sitting, with prolonged periods of sitting at a desk-like position.\n\nTo improve this routine, consider increasing movement throughout the day\u2014aim for at least 10\u201315 minutes of active engagement per session. Reduce sedentary time by taking regular breaks every 45 minutes; during these, stand up and stretch for 30 seconds. Additionally, ensure proper posture when sitting\u2014avoid slouching by using ergonomic chairs and maintaining a neutral spine. These adjustments will support better circulation, reduce strain, and enhance overall well-being.",
-  "model": "Qwen/Qwen3-VL-2B-Instruct",
-  "runtime_s": 11.7
+  "summary": "",
+  "model": "",
+  "log": "Total 1.75 min: walking 0.95 min, standing 0.6 min, sitting 0.17 min, crouching 0.03 min\n3 times sat or crouched down, longest sitting 0.17 min, walked 66.6 m, bent over 0.0 min.\nClip outdoor:\n  standing 6 s. The camera wearer is walking on a wooden deck. The camera wearer is walking on a wooden floor.\n  walking 1 s. The camera wearer is walking on a wooden floor.\n  standing 1 s. The camera wearer is walking on a wooden floor.\n  sitting 10 s. The camera wearer is walking on a wooden floor. The camera wearer is sitting on a chair and stretching their hands. The camera wearer is moving a chair.\n  standing 3 s. The camera wearer is moving a chair. The camera wearer walks on a wooden deck.\n  walking 18 s. The camera wearer walks on a wooden deck. The camera wearer walks to a table.\n  standing 5 s. The camera wearer walks to a table. The camera wearer walks to a vending machine.\n  crouching 1 s. The camera wearer walks to a vending machine.\n  standing 1 s. The camera wearer opens a vending machine.\n  crouching 1 s. The camera wearer opens a vending machine.\n  standing 5 s. The camera wearer opens a vending machine. The camera wearer is walking on a wooden deck.\n  walking 27 s. The camera wearer is walking on a wooden deck. The camera wearer walks on a wooden deck. The camera wearer walks into a room. The camera wearer walks to a vending machine.\n  standing 15 s. The camera wearer walks to a vending machine. The camera wearer opens the vending machine. The camera wearer opens a door.\n  walking 11 s. The camera wearer opens a door. The camera wearer walks towards a glass door. The camera wearer walks on a wooden deck.",
+  "runtime_s": 0.6,
+  "report": {
+    "summary": "This 1.75 min outdoor recording shows a brief sit at a table on a wooden deck followed by steady walking across the deck to tables and vending machines and through a glass door. You covered 66.6 m with 0.95 min walking and 0.6 min standing, with only 0.17 min sitting and two 1 s crouches and 0.0 min bent over.",
+    "what_they_did": [
+      "0:00-0:10: press palms together and pull out a chair to sit at a table on the wooden deck (sitting)",
+      "0:10-0:20: stand up from the chair using the table and walk away from tables and chairs (standing)",
+      "0:20-0:40: walk across the outdoor wooden deck past tables and chairs toward a table (walking)",
+      "0:40-0:50: approach a vending machine, open it and buy a drink with brief crouches (crouching)",
+      "0:50-1:10: walk away from the vending machine across the wooden deck (walking)",
+      "1:10-1:25: walk toward a vending machine and buy a drink (standing)",
+      "1:25-1:40: open a glass door and walk out onto the deck toward a table (walking)"
+    ],
+    "posture_and_movement": [
+      "You walked 0.95 min and stood 0.6 min out of 1.75 min and covered 66.6 m, so most of the time was on your feet moving across the deck.",
+      "You sat 0.17 min total with longest sit 0.17 min across 3 sit-downs, including the 10 s sit on a chair while stretching hands and moving a chair.",
+      "You crouched 0.03 min and bent over 0.0 min, matching the two 1 s crouches while opening the vending machine.",
+      "Models agree on walking at 54% rules, 57% muse, 57% qwen but split standing vs crouching at 34% standing and 2% crouching by rules vs 24% standing and 10% crouching by muse."
+    ],
+    "compared_with_history": [
+      "Compared with office at 1.38 min with 32.3 m and 0.45 min walking, this 1.75 min outdoor recording covered 66.6 m with 0.95 min walking, about double the distance and walking time.",
+      "Compared with robothome at 4.5 min with 3.37 min standing and 0.73 min sitting and longest sit 0.55 min, this recording had less standing at 0.6 min and sitting at 0.17 min with longest sit 0.17 min.",
+      "Compared with office with 1 sit-down and robothome with 2 sit-downs, this recording had 3 sit-downs, more up-and-down in a shorter clip."
+    ],
+    "improvements": [
+      {
+        "change": "Slow down when standing up from the chair",
+        "why": "you stood up from a chair using a table for support at 0:10 after only 10 s sitting",
+        "how": "push up with both hands on the table on the wooden deck and pause standing before walking away from tables and chairs"
+      },
+      {
+        "change": "Set the chair before you sit",
+        "why": "you pulled out a chair and moved a chair around 0:05-0:10 for a 0.17 min sit",
+        "how": "pull the chair fully clear on the deck, sit down centered, then stretch hands while feet stay flat"
+      },
+      {
+        "change": "Pause upright at the vending machine",
+        "why": "two 1 s crouches at 0:40-0:50 while opening the vending machine and buying a drink",
+        "how": "stand facing the machine for a breath, then dip knees a little once to reach the slot instead of two quick dips"
+      },
+      {
+        "change": "Keep a steady pace on the long deck walks",
+        "why": "walking stretches of 18 s and 27 s adding to 0.95 min and 66.6 m past tables and chairs",
+        "how": "pick a line toward the table or glass door, walk the wooden deck at one speed and slow near other tables"
+      },
+      {
+        "change": "Plant feet to open the glass door",
+        "why": "you opened a glass door to exit at 1:25-1:30 after 15 s standing at the vending machine",
+        "how": "stop with feet apart on the deck, open the door fully with one hand, then step through toward the table"
+      }
+    ],
+    "went_well": [
+      "Kept moving across the deck with 66.6 m walked in 0.95 min and no sit longer than 0.17 min.",
+      "Handled chair, tables, vending machines and glass door in flow with only 0.03 min crouching and 0.0 min bent over."
+    ],
+    "caveats": [
+      "Qwen and Muse captions can be wrong about sitting vs crouching and buying a drink, and the head camera never sees legs so the 3D estimate of walking, standing, sitting and crouching is guessed."
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "history": [
+      "office",
+      "robothome"
+    ]
+  },
+  "suggestions": {
+    "lines": [
+      "Slow down when standing up from the chair",
+      "Set the chair before you sit",
+      "Pause upright at the vending machine"
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "earlier_days": 2,
+    "sample_days": 0
+  }
 }

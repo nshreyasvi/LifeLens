@@ -1,0 +1,289 @@
+{
+  "pipeline": {
+    "machine": {
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "gpu_mem_mb": 8188,
+      "driver": "572.83",
+      "cpu": "13th Gen Intel(R) Core(TM) i9-13900H",
+      "cpu_threads": 20,
+      "ram_gb": 27.2,
+      "os": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "source": "runs/office/input.mp4 23.0-33.0 s",
+      "focal_px": 929.5
+    },
+    "runs": [
+      {
+        "run": "bench_live10",
+        "frames": 300,
+        "video_s": 10.0,
+        "stages": [
+          {
+            "stage": "ingest",
+            "wall_s": 11.59,
+            "s_per_video_s": 1.16,
+            "equiv_fps": 25.9,
+            "gpu_mem_peak_mb": 493.0,
+            "gpu_util_mean_pct": 4
+          },
+          {
+            "stage": "hawor",
+            "wall_s": 394.59,
+            "s_per_video_s": 39.46,
+            "equiv_fps": 0.76,
+            "gpu_mem_peak_mb": 7826.0,
+            "gpu_util_mean_pct": 43
+          },
+          {
+            "stage": "build_input",
+            "wall_s": 3.48,
+            "s_per_video_s": 0.35,
+            "equiv_fps": 86.27,
+            "gpu_mem_peak_mb": 273.0,
+            "gpu_util_mean_pct": 13
+          },
+          {
+            "stage": "omniegocap",
+            "wall_s": 44.82,
+            "s_per_video_s": 4.48,
+            "equiv_fps": 6.69,
+            "gpu_mem_peak_mb": 1144.0,
+            "gpu_util_mean_pct": 29
+          },
+          {
+            "stage": "render",
+            "wall_s": 38.09,
+            "s_per_video_s": 3.81,
+            "equiv_fps": 7.88,
+            "gpu_mem_peak_mb": 273.0,
+            "gpu_util_mean_pct": 29
+          },
+          {
+            "stage": "describe",
+            "wall_s": 30.5,
+            "s_per_video_s": 3.05,
+            "equiv_fps": 9.84,
+            "gpu_mem_peak_mb": 4674.0,
+            "gpu_util_mean_pct": 23
+          },
+          {
+            "stage": "insights",
+            "wall_s": 32.87,
+            "s_per_video_s": 3.29,
+            "equiv_fps": 9.13,
+            "gpu_mem_peak_mb": 4534.0,
+            "gpu_util_mean_pct": 28
+          }
+        ],
+        "hawor_steps": [
+          {
+            "step": "imports",
+            "wall_s": 34.24,
+            "s_per_video_s": 3.42,
+            "equiv_fps": 8.76
+          },
+          {
+            "step": "extract frames to jpg",
+            "wall_s": 4.08,
+            "s_per_video_s": 0.41,
+            "equiv_fps": 73.61
+          },
+          {
+            "step": "hand detection + tracking",
+            "wall_s": 90.7,
+            "s_per_video_s": 9.07,
+            "equiv_fps": 3.31
+          },
+          {
+            "step": "HaWoR hand mesh",
+            "wall_s": 127.02,
+            "s_per_video_s": 12.7,
+            "equiv_fps": 2.36
+          },
+          {
+            "step": "DROID-SLAM",
+            "wall_s": 84.94,
+            "s_per_video_s": 8.49,
+            "equiv_fps": 3.53
+          },
+          {
+            "step": "Metric3D load + keyframe depth",
+            "wall_s": 48.42,
+            "s_per_video_s": 4.84,
+            "equiv_fps": 6.2
+          },
+          {
+            "step": "metric scale + export",
+            "wall_s": 5.22,
+            "s_per_video_s": 0.52,
+            "equiv_fps": 57.52
+          }
+        ],
+        "model_only_s": {
+          "omniegocap_load": 12.214733600616455,
+          "omniegocap_predict": 13.789034605026245,
+          "qwen_narration_load": 9.6,
+          "qwen_narration_run": 9.0,
+          "insights_total": 31.1
+        },
+        "end_to_end": {
+          "wall_s": 555.94,
+          "s_per_video_s": 55.59,
+          "equiv_fps": 0.54,
+          "latency_for_video_s": 555.9
+        }
+      },
+      {
+        "run": "bench_live10_r2",
+        "frames": 300,
+        "video_s": 10.0,
+        "stages": [
+          {
+            "stage": "ingest",
+            "wall_s": 11.48,
+            "s_per_video_s": 1.15,
+            "equiv_fps": 26.13,
+            "gpu_mem_peak_mb": 273.0,
+            "gpu_util_mean_pct": 25
+          },
+          {
+            "stage": "hawor",
+            "wall_s": 539.87,
+            "s_per_video_s": 53.99,
+            "equiv_fps": 0.56,
+            "gpu_mem_peak_mb": 7860.0,
+            "gpu_util_mean_pct": 37
+          },
+          {
+            "stage": "build_input",
+            "wall_s": 5.19,
+            "s_per_video_s": 0.52,
+            "equiv_fps": 57.77,
+            "gpu_mem_peak_mb": 307.0,
+            "gpu_util_mean_pct": 32
+          },
+          {
+            "stage": "omniegocap",
+            "wall_s": 42.05,
+            "s_per_video_s": 4.21,
+            "equiv_fps": 7.13,
+            "gpu_mem_peak_mb": 1178.0,
+            "gpu_util_mean_pct": 25
+          },
+          {
+            "stage": "render",
+            "wall_s": 48.65,
+            "s_per_video_s": 4.86,
+            "equiv_fps": 6.17,
+            "gpu_mem_peak_mb": 307.0,
+            "gpu_util_mean_pct": 32
+          },
+          {
+            "stage": "describe",
+            "wall_s": 38.91,
+            "s_per_video_s": 3.89,
+            "equiv_fps": 7.71,
+            "gpu_mem_peak_mb": 4708.0,
+            "gpu_util_mean_pct": 24
+          },
+          {
+            "stage": "insights",
+            "wall_s": 33.21,
+            "s_per_video_s": 3.32,
+            "equiv_fps": 9.03,
+            "gpu_mem_peak_mb": 4570.0,
+            "gpu_util_mean_pct": 31
+          }
+        ],
+        "hawor_steps": [
+          {
+            "step": "imports",
+            "wall_s": 24.84,
+            "s_per_video_s": 2.48,
+            "equiv_fps": 12.08
+          },
+          {
+            "step": "extract frames to jpg",
+            "wall_s": 4.59,
+            "s_per_video_s": 0.46,
+            "equiv_fps": 65.33
+          },
+          {
+            "step": "hand detection + tracking",
+            "wall_s": 154.63,
+            "s_per_video_s": 15.46,
+            "equiv_fps": 1.94
+          },
+          {
+            "step": "HaWoR hand mesh",
+            "wall_s": 192.78,
+            "s_per_video_s": 19.28,
+            "equiv_fps": 1.56
+          },
+          {
+            "step": "DROID-SLAM",
+            "wall_s": 98.66,
+            "s_per_video_s": 9.87,
+            "equiv_fps": 3.04
+          },
+          {
+            "step": "Metric3D load + keyframe depth",
+            "wall_s": 56.73,
+            "s_per_video_s": 5.67,
+            "equiv_fps": 5.29
+          },
+          {
+            "step": "metric scale + export",
+            "wall_s": 7.67,
+            "s_per_video_s": 0.77,
+            "equiv_fps": 39.14
+          }
+        ],
+        "model_only_s": {
+          "omniegocap_load": 11.42742133140564,
+          "omniegocap_predict": 14.662019491195679,
+          "qwen_narration_load": 8.5,
+          "qwen_narration_run": 13.4,
+          "insights_total": 31.1
+        },
+        "end_to_end": {
+          "wall_s": 719.36,
+          "s_per_video_s": 71.94,
+          "equiv_fps": 0.42,
+          "latency_for_video_s": 719.4
+        }
+      }
+    ]
+  },
+  "director": {
+    "python": "3.11.15",
+    "os": "Windows-10-10.0.26300-SP0",
+    "passes": 5,
+    "note": "FastLoop.step + JSON of its message per frame, on the 3D body the pipeline already made (pose_timeseries.csv, joints_world.csv, activity.csv); no WebSocket send, no slow loop / LLM call",
+    "clips": [
+      {
+        "clip": "runs\\office",
+        "frames": 2493,
+        "video_s": 83.1,
+        "load_clip_s": 0.126,
+        "step_ms_mean": 0.0589,
+        "step_ms_p50": 0.0543,
+        "step_ms_p99": 0.2169,
+        "step_ms_max": 1.1292,
+        "equiv_fps": 16987,
+        "budget_ms_at_30fps": 33.3
+      },
+      {
+        "clip": "runs\\bench_live10",
+        "frames": 300,
+        "video_s": 10.0,
+        "load_clip_s": 0.013,
+        "step_ms_mean": 0.0581,
+        "step_ms_p50": 0.0536,
+        "step_ms_p99": 0.2008,
+        "step_ms_max": 0.5416,
+        "equiv_fps": 17224,
+        "budget_ms_at_30fps": 33.3
+      }
+    ]
+  }
+}

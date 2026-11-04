@@ -1,12 +1,13 @@
 """
 Narration of the ego video by a small local video LLM (Qwen3-VL-2B-Instruct): one sentence per window.
 
-python pipeline/describe.py --run runs/x [--window 5] [--fps 2] [--model Qwen/Qwen3-VL-2B-Instruct]
+python pipeline/describe.py --run runs/x [--window 5] [--fps 2] [--model Qwen/Qwen3-VL-2B-Instruct] [--ask posture]
 
 Writes
     narration.json   [{start_s, end_s, text}, ...] on input.mp4's clock
     narration.srt    the same as subtitles: load it in a player next to input.mp4 or side_by_side.mp4
-and lists both in manifest.json. Needs ~5 GB of VRAM, so it runs after the body pipeline, never alongside SLAM.
+and lists both in manifest.json. --ask posture instead asks for the wearer's posture in one word (one of LABELS, as
+insights.py labels the 3D body) and writes posture_qwen.json [{start_s, end_s, label, text}]. Needs ~5 GB of VRAM, so it runs after the body pipeline, never alongside SLAM.
 """
 
 import argparse
@@ -21,6 +22,10 @@ from transformers import AutoModelForImageTextToText, AutoProcessor
 
 PROMPT = ("This is first-person video from a camera on the wearer's head. In one short sentence starting with a verb, "
           "say what the camera wearer is doing.")
+POSTURE_PROMPT = ("This is first-person video from a camera on the wearer's head. Which posture is the camera "
+                  "wearer in for most of this clip? Answer with one of: walking, standing, sitting, crouching, bending, "
+                  "arms raised.")
+LABELS = ('walking', 'standing', 'sitting', 'crouching', 'bending', 'arms raised')
 WIDTH = 448     # the model spends one token per 32x32 pixels per 2 frames: 448 px wide keeps a 5 s window ~600 tokens
 
 
@@ -53,19 +58,28 @@ def main(a):
     for t, img in sampled_frames(f'{a.run}/input.mp4', a.fps):
         windows.setdefault(int(t // a.window), []).append(img)
         end = t + 1 / a.fps
-    prompt = processor.apply_chat_template(
-        [{'role': 'user', 'content': [{'type': 'video'}, {'type': 'text', 'text': PROMPT}]}], add_generation_prompt=True)
+    posture = a.ask == 'posture'
+    prompt = processor.apply_chat_template([{'role': 'user', 'content': [
+        {'type': 'video'}, {'type': 'text', 'text': POSTURE_PROMPT if posture else PROMPT}]}], add_generation_prompt=True)
     narration = []
     for w, imgs in sorted(windows.items()):
         imgs += imgs[-1:] * (len(imgs) % 2)     # the model pairs frames in time
         meta = {'fps': a.fps, 'total_num_frames': len(imgs), 'frames_indices': list(range(len(imgs)))}  # timestamps
         inputs = processor(text=[prompt], videos=[imgs], video_metadata=[meta], do_sample_frames=False,
                            return_tensors='pt').to(model.device)
-        ids = model.generate(**inputs, max_new_tokens=40, do_sample=False)
+        ids = model.generate(**inputs, max_new_tokens=8 if posture else 40, do_sample=False)
         text = processor.batch_decode(ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True)[0].strip()
         narration.append({'start_s': w * a.window, 'end_s': round(min((w + 1) * a.window, end), 2), 'text': text})
         print(f"{narration[-1]['start_s']:6.1f} s  {text}", flush=True)
     run_s = time.time() - t1
+
+    if posture:     # the first label named in the answer; 'unknown' when it names none
+        for n in narration:
+            low = n['text'].lower()
+            n['label'] = min((lab for lab in LABELS if lab in low), key=low.find, default='unknown')
+        json.dump(narration, open(f'{a.run}/posture_qwen.json', 'w'), indent=1)
+        print(f'{len(narration)} windows in {run_s:.1f} s:', [n['label'] for n in narration])
+        return
 
     json.dump(narration, open(f'{a.run}/narration.json', 'w'), indent=1)
     with open(f'{a.run}/narration.srt', 'w') as f:
@@ -88,4 +102,5 @@ if __name__ == '__main__':
     parser.add_argument('--window', type=float, default=5.0, help='Seconds of video per sentence.')
     parser.add_argument('--fps', type=float, default=2.0, help='Frames per second shown to the model.')
     parser.add_argument('--model', default='Qwen/Qwen3-VL-2B-Instruct')
+    parser.add_argument('--ask', choices=('narration', 'posture'), default='narration')
     main(parser.parse_args())

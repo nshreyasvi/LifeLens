@@ -1,824 +1,578 @@
-// LifeLens front-end: Activity and Stage views with demo mode
-'use strict';
+// LifeLens front-end: the director's live messages for the open recording, and what the 3D body does at each moment,
+// shown on Activity, Music and Stage.
+//   Play / Pause / Restart start and stop the director on this recording (vite.config.js: /api/live/*); the page
+//   connects to it at ws://127.0.0.1:8765 and the videos follow its clock (extras.js).
+//   Music: the body's last 10 s (session.js: pace, steps, arm swing, uprightness, stillness) and the director's mood
+//   and tempo set ReccoBeats' targets; a search for the mood finds the seed song.
+//   Stage: each light follows one part of the body; the director sets the color, the master level and the flashes.
 
-(() => {
-  const DATA_URL = 'sample-data.json';
-  const STEP_MS = 2000;
-  const LIVE_URL = 'ws://127.0.0.1:8765';
-  const LIVE_RETRY_MS = 5000;
-  const LIVE_MAX_MESSAGES = 100; // oldest timeline items are dropped past this
-  const TEMPO_MIN = 60;
-  const TEMPO_MAX = 180;
+import { bodyFeatures, clamp01, session } from './session.js';
 
-  // Brightness (0–1) for each energy level; "dim" scales it down further.
-  const ENERGY_LEVEL = { low: 0.4, medium: 0.7, high: 1 };
-  const ENERGY_ORDER = ['low', 'medium', 'high'];
-  const DIM_FACTOR = 0.4;
-  const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
+const LIVE_URL = 'ws://127.0.0.1:8765';
+const LIVE_RETRY_MS = 5000;
+const LIVE_STARTING_RETRY_MS = 400; // after Play: the director waits only 5 s for the page
+const LIVE_START_TIMEOUT_MS = 20000;
+const MAX_CUES = 100;
+const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
+const ENERGY_ORDER = ['low', 'medium', 'high'];
+const ACTION_LABELS = { flash_light: 'Flash light', dim: 'Dim', change_color: 'Change color' };
+const MOOD_RANGES = { calm: [60, 80], curious: [80, 110], joyful: [110, 140], tense: [90, 120], powerful: [120, 160] };
+// How each mood shifts the songs' valence (director/music_map.py moods).
+const MOOD_VALENCE = { calm: 0, curious: 0.05, joyful: 0.25, tense: -0.2, powerful: 0.15 };
+// The stage's lights and the body part each follows; scale: the value at which the light is fully on.
+const FIXTURES = [
+  { name: 'Left arm', read: (n) => n.armL, scale: 90 },
+  { name: 'Right arm', read: (n) => n.armR, scale: 90 },
+  { name: 'Left leg', read: (n) => n.legL, scale: 120 },
+  { name: 'Right leg', read: (n) => n.legR, scale: 120 },
+  { name: 'Torso', read: (n) => n.trunk, scale: 45 },
+  { name: 'Pace', read: (n) => n.speed, scale: 1.2 },
+];
 
-  // "change_color" moves to the next color in this list.
-  const PALETTE = [
-    { name: 'Meta blue', hex: '#0866FF' },
-    { name: 'Violet', hex: '#8B5CF6' },
-    { name: 'Teal', hex: '#14B8A6' },
-    { name: 'Amber', hex: '#F59E0B' },
-    { name: 'Rose', hex: '#F43F5E' },
-  ];
+const COLOR_NAMES = [
+  ['White', '#FFFFFF'], ['Warm white', '#FFF1D6'], ['Red', '#E53935'], ['Coral', '#FF6F59'], ['Orange', '#FB8C00'],
+  ['Amber', '#F59E0B'], ['Yellow', '#FDD835'], ['Lime', '#9CCC65'], ['Green', '#43A047'], ['Teal', '#14B8A6'],
+  ['Cyan', '#00BCD4'], ['Sky blue', '#4FC3F7'], ['Blue', '#3977FF'], ['Indigo', '#3F51B5'], ['Violet', '#9A55E8'],
+  ['Purple', '#7B1FA2'], ['Pink', '#F48FB1'], ['Rose', '#F43F5E'], ['Brown', '#8D6E63'], ['Gray', '#9E9E9E'], ['Black', '#1C1E21'],
+];
 
-  const VERY_LIGHT_LUMINANCE = 0.85;
+const $ = (id) => document.getElementById(id);
+const els = {
+  error: $('error'), playBtn: $('play-btn'), playLabel: $('play-label'), restartBtn: $('restart-btn'),
+  progressLabel: $('progress-label'), progressFill: $('progress-fill'), tabs: $('tabs'),
+  tabBtns: [...document.querySelectorAll('[role="tab"]')], views: [...document.querySelectorAll('[role="tabpanel"]')],
+  activityView: $('view-activity'), energyChip: $('energy-chip'), energyValue: $('energy-value'),
+  energySegs: [...document.querySelectorAll('#energy-meter .seg')], energyNote: $('energy-note'),
+  timeline: $('timeline'), timelineCount: $('timeline-count'), ambient: $('ambient'), bulbs: $('bulbs'),
+  lightsAction: $('lights-action'), lightsEnergy: $('lights-energy'), lightsMood: $('lights-mood'),
+  lightsSwatch: $('lights-swatch'), lightsColor: $('lights-color'), lightsReason: $('lights-reason'),
+  musicPanel: $('music-panel'), musicState: $('music-state'), beats: [...document.querySelectorAll('.beat')],
+  tempoValue: $('tempo-value'), tempoLabel: $('tempo-label'), songsMood: $('songs-mood'), songList: $('song-list'),
+  songsNote: $('songs-note'), player: $('player'), playerEmbed: $('player-embed'), playerBeat: $('player-beat'),
+  playerNote: $('player-note'), chainState: $('chain-state'), chainWindow: $('chain-window'),
+  features: $('music-features'), body: document.querySelector('#media [data-pane="body"] video'),
+};
 
-  // Friendly names for director colors: a color is shown as the closest name here
-  // (e.g. #FF6347 shows as "Coral"), so the panel never shows a raw code.
-  const COLOR_NAMES = [
-    { name: 'White', hex: '#FFFFFF' },
-    { name: 'Warm white', hex: '#FFF1D6' },
-    { name: 'Red', hex: '#E53935' },
-    { name: 'Coral', hex: '#FF6F59' },
-    { name: 'Orange', hex: '#FB8C00' },
-    { name: 'Amber', hex: '#F59E0B' },
-    { name: 'Yellow', hex: '#FDD835' },
-    { name: 'Lime', hex: '#9CCC65' },
-    { name: 'Green', hex: '#43A047' },
-    { name: 'Teal', hex: '#14B8A6' },
-    { name: 'Cyan', hex: '#00BCD4' },
-    { name: 'Sky blue', hex: '#4FC3F7' },
-    { name: 'Blue', hex: '#3977FF' },
-    { name: 'Indigo', hex: '#3F51B5' },
-    { name: 'Violet', hex: '#9A55E8' },
-    { name: 'Purple', hex: '#7B1FA2' },
-    { name: 'Pink', hex: '#F48FB1' },
-    { name: 'Rose', hex: '#F43F5E' },
-    { name: 'Brown', hex: '#8D6E63' },
-    { name: 'Gray', hex: '#9E9E9E' },
-    { name: 'Black', hex: '#1C1E21' },
-  ];
+// phase: 'idle' (no director) → 'live' (connected) → 'ended' (it closed); 'paused' after Pause
+const state = { phase: 'idle', starting: false, cues: [], liveCount: 0, last: null, master: 1, color: '#3977FF' };
 
-  // Very light bulbs (like Dhruv's white flash) get a gray outline and glow so they stay visible on the white page.
-  const LIGHT_BULB_OUTLINE = 'inset 0 0 0 2px #BCC0C4';
-  const LIGHT_BULB_GLOW = '#8A8D91';
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const word = (v) => (typeof v === 'string' && /^[a-z][a-z -]{0,23}$/i.test(v.trim()) ? v.trim().toLowerCase() : '');
 
-  const ACTION_LABELS = {
-    flash_light: 'Flash light',
-    dim: 'Dim',
-    change_color: 'Change color',
-  };
+function emit(name, detail) {
+  document.dispatchEvent(new CustomEvent(`lifelens:${name}`, { detail }));
+}
 
-  const PHASE_LABELS = { activity: 'Activity', stage: 'Stage' };
+function isValidMessage(m) {
+  return m && ENERGY_ORDER.includes(m.energy) && Object.hasOwn(ACTION_LABELS, m.action) && Number.isFinite(m.music_tempo);
+}
 
-  const LIGHT_NAMES = ['Living room', 'Kitchen', 'Desk', 'Hallway', 'Bedroom', 'Porch'];
+// ---------- Tabs ----------
 
-  // Fictional sample songs, grouped by tempo. Shown first and kept as the fallback.
-  const SONGS = {
-    calm: [
-      { name: 'Paper Lanterns', artist: 'The Quiet Hours', tempo: 72 },
-      { name: 'Slow Tide', artist: 'Mira Vale', tempo: 84 },
-      { name: 'Evening Static', artist: 'Low Orchard', tempo: 94 },
-    ],
-    medium: [
-      { name: 'City in Bloom', artist: 'Juniper Lane', tempo: 108 },
-      { name: 'Golden Hour Drive', artist: 'The Overpass', tempo: 122 },
-      { name: 'Neon Postcards', artist: 'Kite & Compass', tempo: 136 },
-    ],
-    fast: [
-      { name: 'Voltage Run', artist: 'Signal Fire', tempo: 148 },
-      { name: 'Heartbeat Circuit', artist: 'Nova Arcade', tempo: 160 },
-      { name: 'Midnight Sprint', artist: 'Polar Echo', tempo: 174 },
-    ],
-  };
-
-  const SONG_MOODS = { calm: 'Calm', medium: 'Medium', fast: 'Fast' };
-
-  const $ = (id) => document.getElementById(id);
-  const els = {
-    error: $('error'),
-    playBtn: $('play-btn'),
-    playLabel: $('play-label'),
-    pauseBtn: $('pause-btn'),
-    pauseLabel: $('pause-label'),
-    restartBtn: $('restart-btn'),
-    progressLabel: $('progress-label'),
-    progressFill: $('progress-fill'),
-    tabs: $('tabs'),
-    tabBtns: [...document.querySelectorAll('[role="tab"]')],
-    views: [...document.querySelectorAll('[role="tabpanel"]')],
-    activityView: $('view-activity'),
-    energyChip: $('energy-chip'),
-    energyValue: $('energy-value'),
-    energySegs: [...document.querySelectorAll('#energy-meter .seg')],
-    energyNote: $('energy-note'),
-    timeline: $('timeline'),
-    timelineCount: $('timeline-count'),
-    ambient: $('ambient'),
-    bulbs: $('bulbs'),
-    lightsAction: $('lights-action'),
-    lightsEnergy: $('lights-energy'),
-    lightsBrightness: $('lights-brightness'),
-    lightsSwatch: $('lights-swatch'),
-    lightsColor: $('lights-color'),
-    lightsReason: $('lights-reason'),
-    musicPanel: $('music-panel'),
-    musicState: $('music-state'),
-    beat: $('beat'),
-    tempoValue: $('tempo-value'),
-    tempoLabel: $('tempo-label'),
-    tempoMeter: $('tempo-meter'),
-    songsMood: $('songs-mood'),
-    songList: $('song-list'),
-    songsNote: $('songs-note'),
-    connStatus: $('conn-status'),
-    footDemo: $('foot-demo'),
-    footLive: $('foot-live'),
-  };
-
-  // phase: 'idle' → 'activity' → 'stage' → 'done'; 'live' while the director is connected
-  const state = {
-    messages: [],
-    sampleMessages: [],
-    loadError: null,
-    liveCount: 0,
-    phase: 'idle',
-    mode: 'activity', // which tab the demo plays: 'activity' or 'stage'
-    index: -1,
-    playing: false,
-    timer: null,
-    pending: null, // the next step to run; kept while paused so Resume can continue
-    colorIndex: 0,
-    tempo: null,
-    tempoFrame: null,
-    songMood: null,
-  };
-
-  // ---------- Helpers ----------
-
-  const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-  const isRunning = () => state.phase === 'activity' || state.phase === 'stage';
-
-  function hexToRgb(hex) {
-    const n = parseInt(hex.slice(1), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+function selectTab(name, { focus = false } = {}) {
+  for (const btn of els.tabBtns) {
+    const on = btn.dataset.tab === name;
+    btn.setAttribute('aria-selected', String(on));
+    btn.tabIndex = on ? 0 : -1;
+    if (on && focus) btn.focus();
   }
+  for (const view of els.views) view.hidden = view.dataset.view !== name;
+  els.player.hidden = !['music', 'stage'].includes(name);
+  if (name === 'day' && state.phase === 'live') stopDirector(); // only the live views keep playing
+  emit('tab', { tab: name });
+}
 
-  function hexToRgba(hex, alpha) {
-    const n = parseInt(hex.slice(1), 16);
-    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+function onTabKeydown(e) {
+  const i = els.tabBtns.indexOf(document.activeElement);
+  if (i === -1) return;
+  const last = els.tabBtns.length - 1;
+  const next = { ArrowRight: i === last ? 0 : i + 1, ArrowLeft: i === 0 ? last : i - 1, Home: 0, End: last }[e.key];
+  if (next === undefined) return;
+  e.preventDefault();
+  selectTab(els.tabBtns[next].dataset.tab, { focus: true });
+}
+
+// ---------- Director messages: energy, cues, light color, tempo and mood ----------
+
+function renderMessage(msg) {
+  const level = ENERGY_ORDER.indexOf(msg.energy) + 1;
+  els.energyValue.textContent = capitalize(msg.energy);
+  els.energySegs.forEach((seg, i) => seg.classList.toggle('is-on', i < level));
+  const posture = word(msg.posture_label) === 'unknown' ? '' : word(msg.posture_label);
+  const speed = Number.isFinite(msg.speed) ? ` at ${msg.speed.toFixed(2)} m/s` : '';
+  els.energyNote.textContent = `${msg.time ?? ''} · ${capitalize(posture || 'moving')}${speed} · ${ACTION_LABELS[msg.action]}`;
+
+  if (Number.isFinite(msg.intensity)) state.master = Math.min(1, Math.max(0, msg.intensity));
+  if (typeof msg.color === 'string' && HEX_COLOR.test(msg.color)) state.color = msg.color;
+  if (msg.action === 'flash_light') {
+    els.bulbs.classList.remove('flash');
+    void els.bulbs.offsetWidth; // restart the animation on back-to-back flashes
+    els.bulbs.classList.add('flash');
   }
-
-  // WCAG relative luminance: 0 is black, 1 is white.
-  function luminance(hex) {
-    const n = parseInt(hex.slice(1), 16);
-    const [r, g, b] = [n >> 16, n >> 8, n].map((v) => {
-      const c = (v & 255) / 255;
-      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
-
-  function isValidMessage(m) {
-    return m
-      && Object.hasOwn(ENERGY_LEVEL, m.energy)
-      && Object.hasOwn(ACTION_LABELS, m.action)
-      && Number.isFinite(m.music_tempo);
-  }
-
-  function tempoDescription(bpm) {
-    if (bpm < 90) return 'Slow and relaxed';
-    if (bpm < 120) return 'Moderate groove';
-    if (bpm < 150) return 'Upbeat';
-    return 'Fast and energetic';
-  }
-
-  // Below 100 BPM: calm. 100–140: medium. Above 140: fast.
-  function songMood(bpm) {
-    if (bpm < 100) return 'calm';
-    if (bpm <= 140) return 'medium';
-    return 'fast';
-  }
-
-  // ---------- Tabs ----------
-
-  function selectTab(name, { focus = false } = {}) {
-    for (const btn of els.tabBtns) {
-      const on = btn.dataset.tab === name;
-      btn.setAttribute('aria-selected', String(on));
-      btn.tabIndex = on ? 0 : -1;
-      if (on && focus) btn.focus();
-    }
-    for (const view of els.views) view.hidden = view.dataset.view !== name;
-    if (name === 'activity') scrollTimelineToCurrent();
-  }
-
-  function onTabKeydown(e) {
-    const i = els.tabBtns.indexOf(document.activeElement);
-    if (i === -1) return;
-    const last = els.tabBtns.length - 1;
-    const next = { ArrowRight: i === last ? 0 : i + 1, ArrowLeft: i === 0 ? last : i - 1, Home: 0, End: last }[e.key];
-    if (next === undefined) return;
-    e.preventDefault();
-    selectTab(els.tabBtns[next].dataset.tab, { focus: true });
-  }
-
-  // ---------- Energy readout (Activity) ----------
-
-  function renderEnergy(msg) {
-    const level = ENERGY_ORDER.indexOf(msg.energy) + 1;
-    els.energyValue.textContent = capitalize(msg.energy);
-    els.energySegs.forEach((seg, i) => seg.classList.toggle('is-on', i < level));
-    els.energyNote.textContent = `${msg.time ?? ''} · ${ACTION_LABELS[msg.action]}`;
-  }
-
-  // ---------- Timeline (Activity) ----------
-
-  function buildTimeline() {
-    els.timeline.innerHTML = '';
-    for (const msg of state.messages) els.timeline.appendChild(createTimelineItem(msg));
-    els.timeline.scrollTop = 0;
-  }
-
-  function createTimelineItem(msg) {
-    const li = document.createElement('li');
-    li.className = 'tl-item is-pending';
-    li.innerHTML = `
-      <span class="tl-dot" aria-hidden="true"></span>
-      <div>
-        <div class="tl-row">
-          <span class="tl-action">${ACTION_LABELS[msg.action]}</span>
-          <time></time>
-        </div>
-        <div class="tl-meta">
-          <span class="energy energy-${msg.energy}">${capitalize(msg.energy)} energy</span>
-          <span>${msg.music_tempo} BPM</span>
-        </div>
-      </div>`;
-    // Set as text: isValidMessage does not check "time", and live data is not trusted.
-    li.querySelector('time').textContent = msg.time ?? '';
-    return li;
-  }
-
-  // Items before `current` are done, `current` is highlighted, the rest are pending.
-  function renderTimeline(current) {
-    const items = els.timeline.children;
-    for (let i = 0; i < items.length; i++) {
-      const li = items[i];
-      li.classList.toggle('is-done', i < current);
-      li.classList.toggle('is-current', i === current);
-      li.classList.toggle('is-pending', i > current);
-      if (i === current) li.setAttribute('aria-current', 'step');
-      else li.removeAttribute('aria-current');
-    }
-    scrollTimelineToCurrent();
-  }
-
-  // Keep the current item centered inside the list without scrolling the page.
-  function scrollTimelineToCurrent() {
-    if (els.activityView.hidden || (state.phase !== 'activity' && state.phase !== 'live')) return;
-    const current = els.timeline.children[state.index];
-    if (!current) return;
-    const top = current.offsetTop - els.timeline.clientHeight / 2 + current.offsetHeight / 2;
-    els.timeline.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
-  }
-
-  // ---------- Lights (Stage) ----------
-
-  function buildBulbs() {
-    els.bulbs.innerHTML = '';
-    for (const name of LIGHT_NAMES) {
-      const light = document.createElement('div');
-      light.className = 'light';
-      light.innerHTML = `<div class="bulb"></div><span class="light-name">${name}</span>`;
-      els.bulbs.appendChild(light);
-    }
-  }
-
-  function renderLights(msg) {
-    // Director messages carry "intensity" and "color". Sample data doesn't, and neither value
-    // is checked by isValidMessage, so anything missing or malformed falls back to the old rules.
-    const hasIntensity = Number.isFinite(msg.intensity) && msg.intensity >= 0 && msg.intensity <= 1;
-    const hasColor = typeof msg.color === 'string' && HEX_COLOR.test(msg.color);
-
-    let level = hasIntensity ? msg.intensity : ENERGY_LEVEL[msg.energy];
-    if (!hasIntensity && msg.action === 'dim') level *= DIM_FACTOR;
-    if (!hasColor && msg.action === 'change_color') state.colorIndex = (state.colorIndex + 1) % PALETTE.length;
-    let color = PALETTE[state.colorIndex];
-    let veryLight = false;
-    if (hasColor) {
-      color = { name: colorName(msg.color), hex: msg.color };
-      veryLight = luminance(msg.color) >= VERY_LIGHT_LUMINANCE;
-    }
-
-    // Any level above 0 keeps a visible minimum. Only director intensity can be exactly 0: a blackout.
-    const opacity = level === 0 ? 0 : 0.25 + 0.75 * level;
-
-    els.bulbs.querySelectorAll('.bulb').forEach((bulb, i) => {
-      bulb.style.transitionDelay = `${i * 70}ms`;
-      bulb.style.backgroundColor = color.hex;
-      bulb.style.opacity = opacity.toFixed(2);
-      const glow = `0 0 ${Math.round(16 + 48 * level)}px ${Math.round(2 + 10 * level)}px ${hexToRgba(veryLight ? LIGHT_BULB_GLOW : color.hex, 0.6 * level)}`;
-      bulb.style.boxShadow = veryLight ? `${LIGHT_BULB_OUTLINE}, ${glow}` : glow;
-    });
-
-    els.ambient.style.backgroundColor = color.hex;
-    els.ambient.style.opacity = (0.35 * level).toFixed(2);
-
-    if (msg.action === 'flash_light') {
-      // Remove and re-add the class so the animation restarts on back-to-back flashes.
-      els.bulbs.classList.remove('flash');
-      void els.bulbs.offsetWidth;
-      els.bulbs.classList.add('flash');
-    }
-
-    els.lightsAction.textContent = ACTION_LABELS[msg.action];
-    els.lightsAction.classList.add('is-active');
-    els.lightsEnergy.textContent = capitalize(msg.energy);
-    els.lightsBrightness.textContent = `${Math.round(level * 100)}%`;
-    els.lightsSwatch.style.backgroundColor = color.hex;
-    els.lightsSwatch.style.boxShadow = veryLight ? LIGHT_BULB_OUTLINE : '';
-    els.lightsColor.textContent = color.name;
-    els.lightsReason.textContent = lightsReason(msg);
+  els.lightsAction.textContent = ACTION_LABELS[msg.action];
+  els.lightsAction.classList.add('is-active');
+  els.lightsEnergy.textContent = capitalize(msg.energy);
+  els.lightsSwatch.style.backgroundColor = state.color;
+  els.lightsColor.textContent = colorName(state.color);
+  els.ambient.style.backgroundColor = state.color;
+  if (typeof msg.reason === 'string' && msg.reason.trim()) {
+    els.lightsReason.textContent = msg.reason.trim();
     els.lightsReason.hidden = false;
   }
 
-  // The director explains each change in one short sentence ("reason"). Sample data has none,
-  // so the demo describes the front-end's own rule instead.
-  const ACTION_VERBS = { dim: 'dim', change_color: 'change color', flash_light: 'flash' };
+  const mood = word(msg.mood);
+  const range = MOOD_RANGES[mood];
+  const label = `${mood ? `${capitalize(mood)} mood` : 'Mood pending'}${range ? `, ${range[0]}-${range[1]} BPM` : ''}`;
+  els.tempoValue.textContent = msg.music_tempo;
+  els.tempoLabel.textContent = label;
+  els.lightsMood.textContent = mood ? capitalize(mood) : '-';
+  for (const beat of els.beats) beat.style.setProperty('--beat', `${(60 / msg.music_tempo).toFixed(3)}s`);
+  state.last = msg;
+}
 
-  function lightsReason(msg) {
-    const reason = typeof msg.reason === 'string' ? msg.reason.trim() : '';
-    if (reason) return reason;
-    return `Energy is ${msg.energy}, so the lights ${ACTION_VERBS[msg.action]}.`;
+function addCue(msg) {
+  const last = state.cues[state.cues.length - 1];
+  if (last && last.action === msg.action && last.energy === msg.energy && last.music_tempo === msg.music_tempo) {
+    state.cues[state.cues.length - 1] = msg; // ~3 messages a second repeat the same cue: they update the last row
+    els.timeline.lastElementChild.querySelector('time').textContent = msg.time ?? '';
+  } else {
+    state.cues.push(msg);
+    const li = document.createElement('li');
+    li.className = 'tl-item';
+    li.innerHTML = `<span class="tl-dot" aria-hidden="true"></span><div><div class="tl-row"><span class="tl-action"></span>
+      <time></time></div><div class="tl-meta"><span class="energy energy-${msg.energy}"></span><span></span></div></div>`;
+    li.querySelector('.tl-action').textContent = ACTION_LABELS[msg.action];
+    li.querySelector('time').textContent = msg.time ?? '';
+    li.querySelector('.energy').textContent = `${capitalize(msg.energy)} energy`;
+    li.querySelector('.tl-meta span:last-child').textContent = `${msg.music_tempo} BPM`;
+    els.timeline.appendChild(li);
   }
-
-  function colorName(hex) {
-    const [r, g, b] = hexToRgb(hex);
-    let best = COLOR_NAMES[0];
-    let bestDist = Infinity;
-    for (const c of COLOR_NAMES) {
-      const [r2, g2, b2] = hexToRgb(c.hex);
-      // Weighted RGB distance: close enough to how people see color for a short label.
-      const d = 2 * (r - r2) ** 2 + 4 * (g - g2) ** 2 + 3 * (b - b2) ** 2;
-      if (d < bestDist) { bestDist = d; best = c; }
-    }
-    return best.name;
+  if (state.cues.length > MAX_CUES) {
+    state.cues.shift();
+    els.timeline.firstElementChild.remove();
   }
-
-  // ---------- Music (Stage) ----------
-
-  function animateTempo(to) {
-    const from = state.tempo ?? to;
-    state.tempo = to;
-    cancelAnimationFrame(state.tempoFrame);
-    const start = performance.now();
-    const duration = 700;
-
-    const frame = (now) => {
-      const t = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      els.tempoValue.textContent = Math.round(from + (to - from) * eased);
-      if (t < 1) state.tempoFrame = requestAnimationFrame(frame);
-    };
-    state.tempoFrame = requestAnimationFrame(frame);
+  [...els.timeline.children].forEach((li, i, all) => li.classList.toggle('is-current', i === all.length - 1));
+  els.timelineCount.textContent = `${state.cues.length} cue${state.cues.length === 1 ? '' : 's'}`;
+  if (!els.activityView.hidden) {
+    const cur = els.timeline.lastElementChild;
+    els.timeline.scrollTo({ top: Math.max(cur.offsetTop - els.timeline.clientHeight / 2, 0), behavior: 'smooth' });
   }
+}
 
-  function renderMusic(msg) {
-    const bpm = msg.music_tempo;
-    animateTempo(bpm);
-    els.tempoLabel.textContent = tempoDescription(bpm);
-    const pct = Math.min(Math.max((bpm - TEMPO_MIN) / (TEMPO_MAX - TEMPO_MIN), 0), 1);
-    els.tempoMeter.style.width = `${pct * 100}%`;
-    els.beat.style.setProperty('--beat', `${(60 / bpm).toFixed(3)}s`);
-    renderSongs(bpm);
+function colorName(hex) {
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [r, g, b] = rgb(hex);
+  return COLOR_NAMES.reduce((best, [name, h]) => {
+    const [r2, g2, b2] = rgb(h);
+    const d = 2 * (r - r2) ** 2 + 4 * (g - g2) ** 2 + 3 * (b - b2) ** 2; // weighted RGB distance
+    return d < best[1] ? [name, d] : best;
+  }, ['', Infinity])[0];
+}
+
+// ---------- The body, every frame: stage lights and the music's targets ----------
+
+function buildBulbs() {
+  els.bulbs.replaceChildren(...FIXTURES.map((f) => {
+    const light = Object.assign(document.createElement('div'), { className: 'light' });
+    light.append(Object.assign(document.createElement('div'), { className: 'bulb' }),
+      Object.assign(document.createElement('span'), { className: 'light-name', textContent: f.name }),
+      Object.assign(document.createElement('span'), { className: 'light-value' }));
+    return light;
+  }));
+}
+
+// 0.65-1, peaking on each beat of the song playing (its BPM from ReccoBeats); 1 when nothing plays.
+function beatPulse() {
+  const bpm = player.song?.tempo;
+  if (!bpm || player.paused) return 1;
+  const beats = ((player.pos + performance.now() - player.at) / 60000) * bpm;
+  return 0.65 + 0.35 * (1 - (beats % 1)) ** 3;
+}
+
+function renderLights(f) {
+  const lights = els.bulbs.children;
+  const pulse = beatPulse();
+  FIXTURES.forEach((fx, i) => {
+    const v = clamp01(fx.read(f.now) / fx.scale);
+    const level = state.master * (0.12 + 0.88 * v) * pulse; // 0 only in a director blackout
+    const bulb = lights[i].firstChild;
+    bulb.style.backgroundColor = state.color;
+    bulb.style.opacity = (level ? 0.2 + 0.8 * level : 0).toFixed(2);
+    bulb.style.boxShadow = `0 0 ${Math.round(12 + 44 * level)}px ${Math.round(2 + 9 * level)}px ${state.color}${Math.round(150 * level).toString(16).padStart(2, '0')}`;
+    lights[i].lastChild.textContent = `${Math.round(v * 100)}%`;
+  });
+  els.ambient.style.opacity = (0.3 * state.master).toFixed(2);
+}
+
+// ReccoBeats' targets (0-1, tempo in BPM) from the body and the director's mood.
+function musicTargets(f, msg) {
+  const mood = word(msg?.mood);
+  return {
+    energy: clamp01(0.1 + 0.55 * Math.min(f.pace / 1.2, 1) + 0.35 * Math.min(f.arm / 20, 1)),
+    danceability: clamp01(f.steps ? f.steps / 130 : 0.25 + 0.35 * Math.min(f.arm / 20, 1)),
+    valence: clamp01(0.25 + 0.45 * f.upright + (MOOD_VALENCE[mood] ?? 0)),
+    acousticness: clamp01(0.15 + 0.7 * f.still),
+    tempo: Math.round(f.steps >= 60 ? f.steps : msg?.music_tempo ?? 90), // a walking pace sets the beat
+    mood,
+  };
+}
+
+function renderFeatures(f, t) {
+  const rows = [
+    ['Pace', `${f.pace.toFixed(2)} m/s`], ['Steps', f.steps ? `${Math.round(f.steps)}/min` : 'standing'],
+    ['Arm swing', `${Math.round(f.arm)}°`], ['Upright', `${Math.round(f.upright * 100)}%`],
+    ['Still', `${Math.round(f.still * 100)}%`], ['Energy', t.energy.toFixed(2)], ['Dance', t.danceability.toFixed(2)],
+    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', `${t.tempo} BPM`],
+  ];
+  els.features.replaceChildren(...rows.map(([k, v], i) => {
+    const row = Object.assign(document.createElement('div'), { className: i < 5 ? 'feat feat-in' : 'feat feat-out' });
+    row.append(Object.assign(document.createElement('dt'), { textContent: k }), Object.assign(document.createElement('dd'), { textContent: v }));
+    return row;
+  }));
+}
+
+let lastFeaturesAt = 0;
+function frame() {
+  requestAnimationFrame(frame);
+  if (!session.pose) return;
+  const t = els.body.currentTime;
+  const f = bodyFeatures(t);
+  if (!f) return;
+  renderLights(f);
+  if (performance.now() - lastFeaturesAt < 500) return;
+  lastFeaturesAt = performance.now();
+  const targets = { ...musicTargets(f, state.last), at: t };
+  renderFeatures(f, targets);
+  els.chainWindow.textContent = `The 3D body from ${clock(Math.max(0, t - f.window))} to ${clock(t)}.`;
+  maybeAskSongs(targets);
+}
+
+const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+// ---------- Songs: ReccoBeats, from the targets ----------
+
+const RECCO = 'https://api.reccobeats.com/v1';
+const RECCO_TIMEOUT_MS = 6000;
+const ASK_EVERY_MS = 15000;    // at most one request per 15 s, and only when the body changed
+const songs = { asked: null, at: 0, request: 0, seeds: {} };
+
+async function reccoGet(path) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), RECCO_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${RECCO}${path}`, { signal: ctrl.signal, headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`ReccoBeats answered ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    throw new Error(err.name === 'AbortError' ? 'ReccoBeats did not answer in time' : err.message);
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  // ReccoBeats picks songs that match the energy and tempo. It is free and
-  // needs no key. If it fails or is slow, the fictional list above is shown.
-  const RECCO_URL = 'https://api.reccobeats.com/v1/track/recommendation';
-  const RECCO_SEED = '0VjIjW4GlUZAMYd2vXMi3b'; // Spotify track ID used as the starting song
-  const RECCO_TIMEOUT_MS = 4000;
-  const RECCO_ENERGY = { calm: 0.3, medium: 0.6, fast: 0.9 };
-  const reccoCache = {};
-  let songRequest = 0;
+const spotifyId = (href) => (typeof href === 'string' && href.match(/open\.spotify\.com\/track\/([A-Za-z0-9]{22})/)?.[1]) || null;
 
-  async function fetchRecommendations(mood, bpm) {
-    const key = `${mood}`;
-    if (reccoCache[key]) return reccoCache[key];
-    const params = new URLSearchParams({
-      size: '5',
-      seeds: RECCO_SEED,
-      energy: String(RECCO_ENERGY[mood]),
-      tempo: String(Math.round(bpm)),
-    });
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), RECCO_TIMEOUT_MS);
-    try {
-      const res = await fetch(`${RECCO_URL}?${params}`, { signal: ctrl.signal });
-      if (!res.ok) throw new Error(`ReccoBeats ${res.status}`);
-      const data = await res.json();
-      const songs = (Array.isArray(data.content) ? data.content : [])
-        .map((t) => {
-          const match = typeof t.href === 'string' && t.href.match(/open\.spotify\.com\/track\/([A-Za-z0-9]{22})/);
-          return {
-            name: String(t.trackTitle || ''),
-            artist: Array.isArray(t.artists) ? t.artists.map((a) => a.name).join(', ') : '',
-            spotifyId: match ? match[1] : null,
-          };
-        })
-        .filter((t) => t.name && t.spotifyId);
-      if (!songs.length) throw new Error('No songs');
-      reccoCache[key] = songs;
-      return songs;
-    } finally {
-      clearTimeout(timer);
-    }
+// The seed song: ReccoBeats' top match for the mood the director's AI picked (no fixed seed).
+async function seedFor(mood) {
+  if (!songs.seeds[mood]) {
+    const found = await reccoGet(`/track/search?searchText=${encodeURIComponent(mood)}&size=5`);
+    const hit = (found.content ?? []).find((t) => t.id);
+    if (!hit) throw new Error(`ReccoBeats found no song for "${mood}"`);
+    songs.seeds[mood] = { id: hit.id, name: hit.trackTitle };
   }
+  return songs.seeds[mood];
+}
 
-  function drawSongs(songs) {
-    els.songList.innerHTML = '';
-    for (const song of songs) {
-      const li = document.createElement('li');
-      li.className = 'song';
-      const info = document.createElement('div');
-      info.className = 'song-info';
-      const name = document.createElement('span');
-      name.className = 'song-name';
-      name.textContent = song.name;
-      const artist = document.createElement('span');
-      artist.className = 'song-artist';
-      artist.textContent = song.artist;
-      info.append(name, artist);
-      li.appendChild(info);
+const changed = (a, b) => !b || a.mood !== b.mood || Math.abs(a.tempo - b.tempo) > 8
+  || ['energy', 'danceability', 'valence', 'acousticness'].some((k) => Math.abs(a[k] - b[k]) > 0.12);
 
-      if (song.spotifyId) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'song-play';
-        btn.textContent = 'Play';
-        btn.setAttribute('aria-label', `Play ${song.name} on Spotify`);
-        btn.addEventListener('click', () => toggleEmbed(li, btn, song.spotifyId));
-        li.appendChild(btn);
-      } else {
-        const tempo = document.createElement('span');
-        tempo.className = 'song-tempo';
-        tempo.textContent = `${song.tempo} BPM`;
-        li.appendChild(tempo);
-      }
-      els.songList.appendChild(li);
-    }
-  }
-
-  function toggleEmbed(li, btn, id) {
-    const open = li.querySelector('.song-embed');
-    els.songList.querySelectorAll('.song-embed').forEach((e) => e.remove());
-    els.songList.querySelectorAll('.song-play').forEach((b) => { b.textContent = 'Play'; });
-    if (open) return;
-    const frame = document.createElement('iframe');
-    frame.className = 'song-embed';
-    frame.src = `https://open.spotify.com/embed/track/${id}`;
-    frame.height = '80';
-    frame.loading = 'lazy';
-    frame.allow = 'encrypted-media';
-    frame.title = 'Spotify player';
-    li.appendChild(frame);
-    btn.textContent = 'Close';
-  }
-
-  function renderSongs(bpm) {
-    const mood = songMood(bpm);
-    if (mood === state.songMood) return;
-    state.songMood = mood;
-
-    els.songsMood.textContent = `${SONG_MOODS[mood]} songs`;
-    els.songsMood.dataset.mood = mood;
+function maybeAskSongs(t) {
+  if (!t.mood || performance.now() - songs.at < ASK_EVERY_MS || !changed(t, songs.asked)) return;
+  songs.asked = t;
+  songs.at = performance.now();
+  const request = ++songs.request;
+  askSongs(t).then((list) => {
+    if (request !== songs.request) return;
+    player.queue = list.songs;
+    drawSongs(list.songs);
+    els.songsMood.textContent = `Seed: ${list.seed}`;
     els.songsNote.hidden = true;
-    drawSongs(SONGS[mood]);
-
-    const request = ++songRequest;
-    fetchRecommendations(mood, bpm)
-      .then((songs) => {
-        if (request !== songRequest || state.songMood !== mood) return;
-        drawSongs(songs);
-      })
-      .catch(() => { /* keep the fictional sample list */ });
-  }
-
-  // ---------- Reset ----------
-
-  function resetDisplay() {
-    els.energyValue.textContent = '—';
-    els.energySegs.forEach((seg) => seg.classList.remove('is-on'));
-    els.energyNote.textContent = 'Press Play demo to start.';
-    buildTimeline();
-
-    els.bulbs.classList.remove('flash');
-    els.bulbs.querySelectorAll('.bulb').forEach((bulb) => { bulb.style.cssText = ''; });
-    els.ambient.style.cssText = '';
-    els.lightsAction.textContent = 'Waiting';
-    els.lightsReason.textContent = '';
-    els.lightsReason.hidden = true;
-    els.lightsAction.classList.remove('is-active');
-    els.lightsEnergy.textContent = '—';
-    els.lightsBrightness.textContent = '—';
-    els.lightsSwatch.style.cssText = '';
-    els.lightsColor.textContent = '—';
-
-    cancelAnimationFrame(state.tempoFrame);
-    state.tempo = null;
-    els.tempoValue.textContent = '—';
-    els.tempoLabel.textContent = 'Starts in the Stage phase';
-    els.tempoMeter.style.width = '0';
-    els.beat.style.removeProperty('--beat');
-
-    state.songMood = null;
-    songRequest += 1;
-    els.songsMood.textContent = 'Waiting';
-    delete els.songsMood.dataset.mood;
-    els.songList.innerHTML = '';
+    if (state.phase === 'live' && (!player.song || player.song.ended)) playSong(list.songs[0]);
+  }).catch((err) => {
+    if (request !== songs.request) return;
+    els.songList.replaceChildren();
     els.songsNote.hidden = false;
+    els.songsNote.textContent = `No songs: ${err.message}.`;
+    songs.asked = null; // try again in 15 s
+  });
+}
+
+async function askSongs(t) {
+  const seed = await seedFor(t.mood);
+  const params = new URLSearchParams({ size: '10', seeds: seed.id, tempo: String(t.tempo) });
+  for (const k of ['energy', 'danceability', 'valence', 'acousticness']) params.set(k, t[k].toFixed(2));
+  const data = await reccoGet(`/track/recommendation?${params}`);
+  const seen = new Set();
+  const list = (data.content ?? []).map((s) => ({
+    id: String(s.id || ''), name: String(s.trackTitle || ''), spotifyId: spotifyId(s.href),
+    artist: Array.isArray(s.artists) ? s.artists.map((a) => a.name).join(', ') : '',
+  })).filter((s) => s.name && s.spotifyId && !seen.has(s.spotifyId) && seen.add(s.spotifyId));
+  if (!list.length) throw new Error('ReccoBeats returned no songs');
+  // Each song's measured audio features, so the list shows how close it is and sorts by it.
+  const features = await reccoGet(`/audio-features?ids=${encodeURIComponent(list.map((s) => s.id).join(','))}`);
+  const by = new Map((features.content ?? []).map((x) => [spotifyId(x.href), x]));
+  for (const s of list) {
+    const x = by.get(s.spotifyId);
+    s.tempo = x ? Math.round(x.tempo) : null;
+    s.fit = x ? Math.abs(x.tempo - t.tempo) / 60 + Math.abs(x.energy - t.energy) + Math.abs(x.valence - t.valence) : 9;
+    s.why = `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo} BPM, ${t.mood} mood.`;
   }
+  list.sort((a, b) => a.fit - b.fit);
+  return { seed: `"${seed.name}"`, songs: list.slice(0, 5) };
+}
 
-  // ---------- Progress & controls ----------
+function drawSongs(list) {
+  els.songList.replaceChildren(...list.map((song) => {
+    const li = Object.assign(document.createElement('li'), { className: 'song' });
+    li.dataset.id = song.spotifyId;
+    const info = Object.assign(document.createElement('div'), { className: 'song-info' });
+    info.append(Object.assign(document.createElement('span'), { className: 'song-name', textContent: song.name }),
+      Object.assign(document.createElement('span'), { className: 'song-artist', textContent: song.artist }));
+    li.appendChild(info);
+    if (song.tempo) li.appendChild(Object.assign(document.createElement('span'), { className: 'song-tempo', textContent: `${song.tempo} BPM` }));
+    const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'song-play', textContent: 'Play' });
+    btn.setAttribute('aria-label', `Play ${song.name}`);
+    btn.addEventListener('click', () => playSong(song));
+    li.appendChild(btn);
+    return li;
+  }));
+  markPlaying();
+}
 
-  function renderProgress() {
-    const total = state.messages.length;
-    let label;
-    let fill;
+// ---------- Player: one Spotify embed for Music and Stage, driven by Spotify's iFrame API ----------
+// Spotify plays a 30 s preview, or the whole song when this browser is logged in to Spotify. When a song ends, the
+// newest list's first other song plays, so the music follows the body at song boundaries, not mid-song.
 
-    if (state.phase === 'live') {
-      label = state.liveCount ? `Live · Message ${state.liveCount}` : 'Live · Waiting for the director';
-      fill = 1;
-    } else if (state.phase === 'idle') {
-      label = `${total} messages ready`;
-      fill = 0;
-    } else if (state.phase === 'done') {
-      label = 'Demo complete';
-      fill = 1;
-    } else {
-      label = `${PHASE_LABELS[state.phase]} · Message ${state.index + 1} of ${total}`;
-      if (!state.playing) label += ' · Paused';
-      fill = (state.index + 1) / total;
+const player = { api: null, ctrl: null, song: null, queue: [], paused: true, pos: 0, at: 0 };
+
+function spotifyApi() {
+  player.api ??= new Promise((resolve, reject) => {
+    window.onSpotifyIframeApiReady = resolve;
+    const script = Object.assign(document.createElement('script'), { src: 'https://open.spotify.com/embed/iframe-api/v1', async: true });
+    script.onerror = () => { player.api = null; reject(new Error('the Spotify player did not load')); };
+    document.head.append(script);
+  });
+  return player.api;
+}
+
+function markPlaying() {
+  for (const li of els.songList.children) li.classList.toggle('is-playing', li.dataset.id === player.song?.spotifyId);
+}
+
+async function playSong(song) {
+  if (!song || player.creating) return;
+  player.song = { ...song, ended: false };
+  els.playerBeat.textContent = song.tempo ? `${song.tempo} BPM` : 'BPM unknown';
+  els.playerNote.textContent = song.why ?? '';
+  markPlaying();
+  const uri = `spotify:track:${song.spotifyId}`;
+  if (player.ctrl) {
+    player.ctrl.loadUri(uri);
+    player.ctrl.play();
+    // play() right after loadUri is often ignored while the song loads: ask again while it is still paused.
+    for (const ms of [800, 1800, 3500]) {
+      setTimeout(() => { if (player.paused && player.song?.spotifyId === song.spotifyId && state.phase === 'live') player.ctrl.resume(); }, ms);
     }
-
-    els.progressLabel.textContent = label;
-    els.progressFill.style.width = `${fill * 100}%`;
-
-    const shown = { idle: 0, activity: state.index + 1 }[state.phase] ?? total;
-    els.timelineCount.textContent = `${shown} / ${total}`;
+    return;
   }
-
-  function renderControls() {
-    const running = isRunning();
-    const paused = running && !state.playing;
-    const live = state.phase === 'live';
-    emit('state', { phase: state.phase, playing: state.playing });
-
-    els.playBtn.disabled = running || live;
-    els.pauseBtn.disabled = live;
-    els.restartBtn.disabled = live;
-    els.playLabel.textContent = state.phase === 'done' ? 'Play again' : 'Play demo';
-    els.pauseBtn.dataset.state = paused ? 'resume' : 'pause';
-    els.pauseLabel.textContent = paused ? 'Resume' : 'Pause';
-
-    for (const btn of els.tabBtns) {
-      btn.classList.toggle('is-live', state.playing && (live || btn.dataset.tab === state.phase));
-    }
-
-    const activityLive = (state.phase === 'activity' || live) && state.playing;
-    els.energyChip.textContent = state.phase === 'activity' || live
-      ? (state.playing ? 'Live' : 'Paused')
-      : state.phase === 'done' && state.mode === 'activity' ? 'Complete' : 'Waiting';
-    els.energyChip.classList.toggle('is-active', activityLive);
-
-    const stageLive = (state.phase === 'stage' || live) && state.playing;
-    els.musicState.textContent = state.phase === 'stage' || live
-      ? (state.playing ? 'Playing' : 'Paused')
-      : state.phase === 'done' && state.mode === 'stage' ? 'Finished' : 'Waiting';
-    els.musicState.classList.toggle('is-active', stageLive);
-    els.musicPanel.classList.toggle('is-paused', !stageLive);
+  player.creating = true;
+  try {
+    const api = await spotifyApi();
+    api.createController(els.playerEmbed, { uri, width: '100%', height: 80 }, (ctrl) => {
+      player.ctrl = ctrl;
+      player.creating = false;
+      ctrl.addListener('ready', () => ctrl.play());
+      ctrl.addListener('playback_update', ({ data }) => {
+        Object.assign(player, { paused: data.isPaused, pos: data.position, at: performance.now() });
+        const song = player.song;
+        if (!song || !data.duration) return;
+        // Right after loadUri the embed still reports the old song's end: count an end only after this one played.
+        if (!data.isPaused && data.position > 0 && data.position < data.duration - 1500) song.started = true;
+        if (song.started && data.position >= data.duration - 400 && !song.ended) {
+          player.song.ended = true;
+          if (state.phase === 'live') playSong(player.queue.find((s) => s.spotifyId !== player.song.spotifyId));
+        }
+      });
+    });
+  } catch (err) {
+    player.creating = false;
+    els.playerNote.textContent = `No player: ${err.message}.`;
   }
+}
 
-  // ---------- Demo playback ----------
+// ---------- Controls and state ----------
 
-  function schedule(fn) {
-    state.pending = fn;
-    state.timer = setTimeout(() => {
-      state.timer = null;
-      state.pending = null;
-      fn();
-    }, STEP_MS);
+function renderControls() {
+  const live = state.phase === 'live';
+  const hasRec = Boolean(session.rec);
+  emit('state', { phase: state.phase, playing: live });
+  els.playBtn.disabled = !hasRec || state.starting;
+  els.restartBtn.disabled = !hasRec || state.starting;
+  els.playBtn.dataset.state = live ? 'pause' : 'play';
+  els.playLabel.textContent = state.starting ? 'Starting…' : live ? 'Pause' : state.phase === 'paused' ? 'Resume' : 'Play';
+  for (const btn of els.tabBtns) btn.classList.toggle('is-live', live && btn.dataset.tab !== 'day');
+  const status = live ? 'Live' : state.phase === 'paused' ? 'Paused' : state.phase === 'ended' ? 'Ended' : 'Waiting';
+  for (const chip of [els.energyChip, els.musicState, els.chainState]) {
+    chip.textContent = status;
+    chip.classList.toggle('is-active', live);
   }
+  els.musicPanel.classList.toggle('is-paused', !live);
+  if (session.live) els.progressLabel.textContent = 'Live session';
+  else if (!hasRec) els.progressLabel.textContent = 'Pick a recording';
+  else if (live) els.progressLabel.textContent = `Live · message ${state.liveCount}`;
+  else els.progressLabel.textContent = state.phase === 'ended' ? 'Director finished' : state.phase === 'paused' ? 'Paused' : 'Ready';
+  els.progressFill.style.transform = `scaleX(${live ? 1 : 0})`;
+}
 
-  function stopTimer() {
-    clearTimeout(state.timer);
-    state.timer = null;
+function showNotice(text) {
+  els.error.hidden = false;
+  els.error.textContent = text;
+}
+
+function reset() {
+  Object.assign(state, { phase: 'idle', cues: [], liveCount: 0, last: null, master: 1 });
+  els.timeline.replaceChildren();
+  els.timelineCount.textContent = '0 cues';
+  els.energyValue.textContent = '-';
+  els.energySegs.forEach((s) => s.classList.remove('is-on'));
+  els.energyNote.textContent = 'Press Play.';
+  els.lightsAction.textContent = 'Waiting';
+  els.lightsAction.classList.remove('is-active');
+  els.lightsReason.hidden = true;
+  els.tempoValue.textContent = '-';
+  player.ctrl?.pause();
+  player.song = null;
+  player.queue = [];
+  els.playerBeat.textContent = 'No song yet';
+  els.playerNote.textContent = 'Press Play: the first song ReccoBeats picks for the body starts here.';
+  songs.asked = null;
+  songs.at = 0;
+  els.songList.replaceChildren();
+  els.songsNote.hidden = false;
+  els.songsNote.textContent = 'Songs come once the body has moved for a few seconds.';
+  els.songsMood.textContent = 'Waiting';
+  els.features.replaceChildren();
+}
+
+// Play, Pause, Restart: the dev server starts the director on this recording from `start`; the page then connects.
+async function startDirector(start) {
+  if (!session.rec) return;
+  state.starting = true;
+  els.error.hidden = true;
+  renderControls();
+  try {
+    const res = await fetch('/api/live/start', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ run: session.rec.base, start, captions: captionModel() }) });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 404) throw new Error('Play needs the dev server: run npm run dev.');
+    if (!res.ok) throw new Error(body.error || `The dev server answered ${res.status}.`);
+    retryMs = LIVE_STARTING_RETRY_MS;
+    connectLive();
+    setTimeout(() => {
+      if (state.starting) fail('The director started, but the page could not connect to it.');
+    }, LIVE_START_TIMEOUT_MS);
+  } catch (err) {
+    fail(err.message);
   }
+}
 
-  // Other modules (src/extras.js) listen for these to follow the panel without changing it.
-  function emit(name, detail) {
-    document.dispatchEvent(new CustomEvent(`lifelens:${name}`, { detail }));
+function fail(reason) {
+  state.starting = false;
+  retryMs = LIVE_RETRY_MS;
+  showNotice(`Couldn't play. ${reason}`);
+  renderControls();
+}
+
+// Which model's captions the director reads: the header switch (Qwen3-VL or Muse Spark).
+const captionModel = () => document.querySelector('#caption-switch [aria-pressed="true"]')?.dataset.captions ?? 'qwen';
+
+async function stopDirector() {
+  player.ctrl?.pause();
+  await fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
+  state.phase = 'paused';
+  renderControls();
+}
+
+function onPlay() {
+  if (state.phase === 'live') stopDirector();
+  else startDirector(state.phase === 'paused' ? els.body.currentTime : 0);
+}
+
+// ---------- Live connection ----------
+
+let socket = null;
+let retryTimer = null;
+let retryMs = LIVE_RETRY_MS;
+
+function scheduleConnect() {
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(connectLive, retryMs);
+}
+
+function connectLive() {
+  if (socket && socket.readyState <= WebSocket.OPEN) return;
+  try {
+    socket = new WebSocket(LIVE_URL);
+  } catch {
+    scheduleConnect();
+    return;
   }
-
-  function step() {
-    state.index += 1;
-    const msg = state.messages[state.index];
-    emit('message', { msg, live: false });
-    if (state.phase === 'activity') {
-      renderEnergy(msg);
-      renderTimeline(state.index);
-    } else {
-      renderLights(msg);
-      renderMusic(msg);
-    }
-    renderProgress();
-  }
-
-  function tick() {
-    step();
-    if (state.index < state.messages.length - 1) schedule(tick);
-    else finish();
-  }
-
-  function finish() {
-    state.phase = 'done';
-    state.playing = false;
-    state.pending = null;
-    renderProgress();
-    renderControls();
-  }
-
-  function startDemo() {
-    if (!state.messages.length) return;
-    stopTimer();
-    state.pending = null;
-    resetDisplay();
-    // Play the tab you are looking at: Activity plays the 10 activity messages,
-    // Stage plays the 10 stage messages. They no longer run one after the other.
-    const open = els.tabBtns.find((btn) => btn.getAttribute('aria-selected') === 'true');
-    state.mode = open && open.dataset.tab === 'stage' ? 'stage' : 'activity';
-    state.phase = state.mode;
-    state.index = -1;
-    state.colorIndex = 0;
-    state.playing = true;
-    if (state.mode === 'stage') renderTimeline(state.messages.length);
-    selectTab(state.mode);
-    renderControls();
-    tick();
-  }
-
-  function togglePause() {
-    if (!isRunning()) {
-      els.progressLabel.textContent = state.phase === 'done'
-        ? 'Demo complete · press Play again'
-        : 'Press Play demo to start';
-      return;
-    }
-    if (state.playing) {
-      state.playing = false;
-      stopTimer();
-    } else {
-      state.playing = true;
-      schedule(state.pending ?? tick);
-    }
-    renderControls();
-    renderProgress();
-  }
-
-  // ---------- Live connection ----------
-
-  function showSource(live) {
-    els.connStatus.textContent = live ? 'Live' : 'Demo';
-    els.footDemo.hidden = live;
-    els.footLive.hidden = !live;
-  }
-
-  function enterLive() {
-    stopTimer();
-    state.pending = null;
-    state.messages = [];
-    state.liveCount = 0;
-    resetDisplay();
+  socket.addEventListener('open', () => {
+    state.starting = false;
     state.phase = 'live';
-    state.index = -1;
-    state.colorIndex = 0;
-    state.playing = true;
-    els.energyNote.textContent = 'Waiting for the director…';
-    els.tempoLabel.textContent = 'Waiting for the director…';
+    retryMs = LIVE_RETRY_MS;
     els.error.hidden = true;
-    showSource(true);
-    renderProgress();
+    if (player.song && !player.song.ended) player.ctrl?.resume();
     renderControls();
-  }
-
-  function enterDemo() {
-    state.messages = state.sampleMessages;
-    resetDisplay();
-    state.phase = 'idle';
-    state.index = -1;
-    state.colorIndex = 0;
-    state.playing = false;
-    showSource(false);
-    renderProgress();
-    renderControls();
-    if (state.loadError) showError(state.loadError);
-  }
-
-  // Live data drives both views at once, since there is no fixed list to replay in two passes.
-  function applyLiveMessage(msg) {
-    emit('message', { msg, live: true });
-    renderEnergy(msg);
-    renderLights(msg);
-    renderMusic(msg);
-
-    state.messages.push(msg);
-    els.timeline.appendChild(createTimelineItem(msg));
-    if (state.messages.length > LIVE_MAX_MESSAGES) {
-      state.messages.shift();
-      els.timeline.firstElementChild.remove();
-    }
-    state.index = state.messages.length - 1;
-    state.liveCount += 1;
-    renderTimeline(state.index);
-    renderProgress();
-  }
-
-  function onLiveMessage(event) {
-    // The try also covers rendering: isValidMessage accepts some values the renderers can't
-    // handle, such as {"energy": ["low"]}.
+  });
+  socket.addEventListener('message', (event) => {
     try {
       const msg = JSON.parse(event.data);
-      if (!isValidMessage(msg)) {
-        console.warn('Ignored invalid live message:', event.data);
-        return;
-      }
-      applyLiveMessage(msg);
+      if (!isValidMessage(msg) || !session.rec) return;
+      emit('message', { msg, live: true });
+      renderMessage(msg);
+      addCue(msg);
+      state.liveCount += 1;
+      renderControls();
     } catch (err) {
       console.warn('Ignored bad live message:', err.message);
     }
-  }
-
-  function connectLive() {
-    let socket;
-    try {
-      socket = new WebSocket(LIVE_URL);
-    } catch (err) {
-      console.warn('Could not open the live connection:', err.message);
-      setTimeout(connectLive, LIVE_RETRY_MS);
-      return;
-    }
-    socket.addEventListener('open', enterLive);
-    socket.addEventListener('message', onLiveMessage);
-    // "close" also fires after a failed attempt. Only leaving live resets the screen, so
-    // failed retries don't interrupt a demo that is already playing.
-    socket.addEventListener('close', () => {
-      if (state.phase === 'live') enterDemo();
-      setTimeout(connectLive, LIVE_RETRY_MS);
-    });
-  }
-
-  // ---------- Startup ----------
-
-  function showError(err) {
-    const onFile = location.protocol === 'file:';
-    els.error.hidden = false;
-    els.error.innerHTML = `
-      <p><strong>Couldn't load ${DATA_URL}.</strong> ${err.message}</p>
-      ${onFile
-        ? '<p>Browsers block loading data from pages opened directly from disk. Run <code>python3 -m http.server 8000</code> in this folder and open <code>http://localhost:8000</code>.</p>'
-        : ''}`;
-    els.progressLabel.textContent = 'No data loaded';
-    els.playBtn.disabled = true;
-    els.pauseBtn.disabled = true;
-    els.restartBtn.disabled = true;
-  }
-
-  async function init() {
-    buildBulbs();
-    els.playBtn.addEventListener('click', startDemo);
-    els.restartBtn.addEventListener('click', startDemo);
-    els.pauseBtn.addEventListener('click', togglePause);
-    els.tabBtns.forEach((btn) => btn.addEventListener('click', () => selectTab(btn.dataset.tab)));
-    els.tabs.addEventListener('keydown', onTabKeydown);
-
-    try {
-      const res = await fetch(DATA_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`The server responded with ${res.status}.`);
-      const data = await res.json();
-      const messages = Array.isArray(data.messages) ? data.messages : [];
-      state.sampleMessages = messages.filter(isValidMessage);
-      state.messages = state.sampleMessages;
-      if (state.messages.length < messages.length) {
-        console.warn(`Skipped ${messages.length - state.messages.length} invalid message(s) in ${DATA_URL}.`);
-      }
-      if (!state.messages.length) throw new Error('It has no valid messages.');
-    } catch (err) {
-      state.loadError = err;
-      showError(err);
-      connectLive(); // the director can still drive the page without sample data
-      return;
-    }
-
-    buildTimeline();
-    renderProgress();
+  });
+  socket.addEventListener('close', () => {
+    socket = null;
+    if (state.phase === 'live') state.phase = 'ended'; // the director closes at the end of the recording
+    if (!state.starting) player.ctrl?.pause();
     renderControls();
-    connectLive();
-  }
+    if (state.starting) scheduleConnect(); // retry only while a Play is waiting for the director
 
-  init();
-})();
+  });
+}
+
+// ---------- Startup ----------
+
+document.addEventListener('lifelens:session', () => {
+  if (state.phase === 'live') fetch('/api/live/stop', { method: 'POST' }).catch(() => {});
+  reset();
+  renderControls();
+});
+document.addEventListener('lifelens:leave', () => {
+  if (state.phase === 'live') stopDirector();
+});
+
+buildBulbs();
+els.playBtn.addEventListener('click', onPlay);
+els.restartBtn.addEventListener('click', () => startDirector(0));
+els.tabBtns.forEach((btn) => btn.addEventListener('click', () => selectTab(btn.dataset.tab)));
+els.tabs.addEventListener('keydown', onTabKeydown);
+renderControls();
+requestAnimationFrame(frame);

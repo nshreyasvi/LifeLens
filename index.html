@@ -1,68 +1,107 @@
-<!-- LifeLens front-end: Activity and Stage views with demo mode -->
+<!-- LifeLens beta: pick a recording (or record a live session), then see its POV, 3D body, routine, music and stage -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Video, director reason, AI badge and light/dark theme (src/extras.*). -->
-  <link rel="stylesheet" href="/src/extras.css">
-  <script type="module" src="/src/extras.js"></script>
   <script>
     // Apply the saved theme before the page draws, so it doesn't flash white first.
     try { if (localStorage.getItem('lifelens-theme') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch (e) {}
   </script>
   <meta name="theme-color" content="#FFFFFF">
-  <title>LifeLens Live Panel</title>
+  <meta name="description" content="LifeLens beta: your whole body, routine and music from a head-mounted camera.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>LifeLens beta</title>
   <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/extras.css">
   <link rel="stylesheet" href="/src/day.css">
 </head>
-<body>
+<body class="is-starting">
+  <!-- Start: who you are, then a recording or a new live session. -->
+  <section class="start" id="start" aria-labelledby="start-title">
+    <div class="start-card">
+      <img class="start-logo" src="/logo-mark.svg" alt="" width="72" height="72">
+      <h1 class="start-title" id="start-title">LifeLens <span class="badge">beta</span></h1>
+      <p class="start-sub">Your whole body, your routine and its music, from a head camera.</p>
+      <label class="field">
+        <span>Your name</span>
+        <input id="user-name" type="text" maxlength="40" autocomplete="given-name" placeholder="Name">
+      </label>
+      <div class="choices">
+        <button class="choice" id="choose-live" type="button">
+          <svg class="icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
+          <span class="choice-name">New live session</span>
+          <span class="choice-sub">Camera with live Muse captions; 3D body after</span>
+        </button>
+        <button class="choice" id="choose-rec" type="button">
+          <svg class="icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h3.6l2 2H17.5A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/></svg>
+          <span class="choice-name">Open a recording</span>
+          <span class="choice-sub">One LifeLens processed, or a new video</span>
+        </button>
+      </div>
+      <div class="rec-list" id="rec-list" hidden>
+        <ul id="rec-processed" aria-label="Processed recordings"></ul>
+        <ul id="rec-raw" aria-label="Videos to process"></ul>
+        <p class="rec-note" id="rec-note" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
   <header class="topbar">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <h1>LifeLens Live Panel</h1>
-      <span class="badge" id="conn-status" role="status">Demo</span>
-      <span class="ai-badge" id="ai-badge" data-mode="demo" title="The director's AI step picks mood and tempo with Meta models: Muse Spark (Meta Model API) or Llama 3.2 3B (Meta open weights, run locally).">
+      <img class="brand-logo" src="/logo-mark.svg" alt="" width="28" height="28">
+      <h1>LifeLens</h1>
+      <span class="badge">beta</span>
+      <span class="who" id="who"></span>
+      <button class="chip-btn" id="change-btn" type="button">Change</button>
+      <span class="ai-badge" id="ai-badge" data-mode="idle" title="The director's AI step picks mood and tempo with Meta Muse Spark (Meta Model API) or Llama 3.2 3B (Meta open weights, run locally).">
         <span class="ai-dot" aria-hidden="true"></span>
-        <span class="ai-name">Director AI: Muse Spark · Llama 3.2 (Meta)</span>
-        <span class="ai-state" id="ai-state">Sample data</span>
+        <span class="ai-name">Director AI</span>
+        <span class="ai-state" id="ai-state">Idle</span>
       </span>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Switch to the dark theme">
-        <svg class="icon icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
-        <svg class="icon icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
-        <span id="theme-label">Dark</span>
-      </button>
+      <div class="toggles toggles-small" id="caption-switch" role="group" aria-label="Captions by" title="Which model describes the video, for the director and the Routine: Qwen3-VL-2B on this machine, or Meta Muse Spark">
+        <button class="toggle" type="button" data-captions="qwen" aria-pressed="true">Qwen3-VL</button>
+        <button class="toggle" type="button" data-captions="muse" aria-pressed="false">Muse Spark</button>
+      </div>
     </div>
-    <div class="buttons">
-      <button class="btn btn-primary" id="play-btn" type="button">
-        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
-        <span id="play-label">Play demo</span>
-      </button>
-      <button class="btn" id="pause-btn" type="button" data-state="pause">
-        <svg class="icon icon-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
-        <svg class="icon icon-resume" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
-        <span id="pause-label">Pause</span>
-      </button>
-      <button class="btn" id="restart-btn" type="button">
-        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2.5a.5.5 0 0 0-.8-.4L6.6 5.6a.5.5 0 0 0 0 .8l4.6 3.5a.5.5 0 0 0 .8-.4V7a5 5 0 1 1-5 5.2 1 1 0 0 0-2 0A7 7 0 1 0 12 5z"/></svg>
-        <span>Restart</span>
-      </button>
-    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Switch to the dark theme">
+      <svg class="icon icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      <svg class="icon icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+      <span id="theme-label">Dark</span>
+    </button>
 
     <nav class="segmented" id="tabs" role="tablist" aria-label="Views">
       <button class="tab" id="tab-btn-activity" type="button" role="tab" data-tab="activity" aria-controls="view-activity" aria-selected="true">
         <span class="tab-dot" aria-hidden="true"></span>Activity
       </button>
+      <button class="tab" id="tab-btn-day" type="button" role="tab" data-tab="day" aria-controls="view-day" aria-selected="false" tabindex="-1">
+        <span class="tab-dot" aria-hidden="true"></span>Routine
+      </button>
+      <button class="tab" id="tab-btn-music" type="button" role="tab" data-tab="music" aria-controls="view-music" aria-selected="false" tabindex="-1">
+        <span class="tab-dot" aria-hidden="true"></span>Music
+      </button>
       <button class="tab" id="tab-btn-stage" type="button" role="tab" data-tab="stage" aria-controls="view-stage" aria-selected="false" tabindex="-1">
         <span class="tab-dot" aria-hidden="true"></span>Stage
       </button>
-      <button class="tab" id="tab-btn-day" type="button" role="tab" data-tab="day" aria-controls="view-day" aria-selected="false" tabindex="-1">
-        <span class="tab-dot" aria-hidden="true"></span>Day
-      </button>
     </nav>
 
+    <div class="controls" role="group" aria-label="Playback">
+      <button class="btn btn-primary" id="play-btn" type="button" data-state="play">
+        <svg class="icon icon-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
+        <svg class="icon icon-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+        <span id="play-label">Play</span>
+      </button>
+      <button class="btn btn-icon" id="restart-btn" type="button" aria-label="Play from the start" title="Play from the start">
+        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2.5a.5.5 0 0 0-.8-.4L6.6 5.6a.5.5 0 0 0 0 .8l4.6 3.5a.5.5 0 0 0 .8-.4V7a5 5 0 1 1-5 5.2 1 1 0 0 0-2 0A7 7 0 1 0 12 5z"/></svg>
+      </button>
+      <button class="btn btn-record" id="record-btn" type="button" hidden>
+        <svg class="icon icon-rec" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
+        <span id="record-label">Record</span>
+      </button>
+    </div>
+
     <div class="progress">
-      <span id="progress-label" aria-live="polite">Loading…</span>
+      <span id="progress-label" aria-live="polite">Pick a recording</span>
       <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
   </header>
@@ -70,88 +109,188 @@
   <div id="error" class="error" role="alert" hidden></div>
 
   <main class="views">
-    <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
-      <div class="video-box has-video">
-        <video class="pov-video" id="pov-video" src="/video/office-body.mp4" muted playsinline loop preload="auto"
-          aria-label="3D body of the person in the office recording, moving in time with the director"></video>
-        <p class="video-credit">3D body from the office recording · OmniEgoDB, CC BY-NC 4.0</p>
-      </div>
-
-      <div class="activity-cards">
-        <section class="panel panel-energy glass" aria-labelledby="energy-title">
-          <div class="panel-head">
-            <h2 id="energy-title">Energy</h2>
-            <span class="chip" id="energy-chip">Waiting</span>
-          </div>
-          <div class="energy-value" id="energy-value" aria-live="polite">—</div>
+    <!-- Activity, Music and Stage: the POV on the left, never hidden; the 3D body and the tab's details in the rail. -->
+    <div class="shell" id="media">
+      <section class="panel media shell-main" aria-labelledby="media-title">
+        <div class="panel-head media-head">
           <div>
-            <div class="energy-meter" id="energy-meter" aria-hidden="true">
-              <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+            <h2 id="media-title">Recording</h2>
+            <p class="panel-sub" id="media-sub">What the head camera saw.</p>
+          </div>
+          <div class="toggles" role="group" aria-label="Show next to the POV">
+            <button class="toggle" type="button" data-toggle="body" aria-pressed="false">3D body</button>
+            <button class="toggle" type="button" data-toggle="graph" aria-pressed="false">Kinematics</button>
+          </div>
+        </div>
+        <div class="media-stage">
+          <div class="media-pane media-base" data-pane="pov">
+            <video muted playsinline loop preload="auto" aria-label="Head-camera video"></video>
+            <div class="live-overlay" id="live-overlay" aria-live="polite" hidden>
+              <span class="live-posture" id="live-posture"></span>
+              <span class="live-caption" id="live-caption"></span>
             </div>
-            <div class="energy-scale" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span></div>
           </div>
-          <p class="energy-note" id="energy-note">Press Play demo to start.</p>
+        </div>
+        <div class="media-pane media-graph" data-pane="graph" hidden>
+          <video muted playsinline loop preload="auto" aria-label="Kinematics of the 3D body over the last 10 seconds"></video>
+        </div>
+        <p class="media-caption" id="media-caption"></p>
+        <p class="media-note" hidden>No POV video for this recording on this machine, so the 3D body fills the main window.</p>
+      </section>
+
+      <aside class="shell-rail" aria-label="3D body and details">
+        <div class="media-pane media-side" data-pane="body" hidden>
+          <video muted playsinline loop preload="auto" aria-label="3D body, reconstructed from the head camera"></video>
+        </div>
+        <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
+          <section class="panel panel-energy" aria-labelledby="energy-title">
+            <div class="panel-head">
+              <h2 id="energy-title">Energy</h2>
+              <span class="chip" id="energy-chip">Waiting</span>
+            </div>
+            <div class="energy-value" id="energy-value" aria-live="polite">-</div>
+            <div>
+              <div class="energy-meter" id="energy-meter" aria-hidden="true">
+                <span class="seg"></span><span class="seg"></span><span class="seg"></span>
+              </div>
+              <div class="energy-scale" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span></div>
+            </div>
+            <p class="energy-note" id="energy-note">Press Play.</p>
+          </section>
+
+          <section class="panel panel-timeline" aria-labelledby="timeline-title">
+            <div class="panel-head">
+              <h2 id="timeline-title">Director cues</h2>
+              <span class="chip" id="timeline-count">0 cues</span>
+            </div>
+            <ol class="timeline" id="timeline"></ol>
+          </section>
         </section>
 
-        <section class="panel panel-timeline glass" aria-labelledby="timeline-title">
+        <section class="view view-music" id="view-music" data-view="music" role="tabpanel" aria-labelledby="tab-btn-music" hidden>
+          <section class="panel panel-chain" aria-labelledby="chain-title">
+            <div class="panel-head">
+              <h2 id="chain-title">From the body to the music</h2>
+              <span class="chip" id="chain-state">Waiting</span>
+            </div>
+            <p class="panel-sub" id="chain-window">The last 10 s of the 3D body.</p>
+            <dl class="features" id="music-features"></dl>
+          </section>
+
+          <section class="panel panel-music is-paused" id="music-panel" aria-labelledby="music-title">
+            <div class="panel-head">
+              <h2 id="music-title">Music</h2>
+              <span class="chip" id="music-state">Waiting</span>
+            </div>
+            <div class="tempo">
+              <div class="beat" id="beat" aria-hidden="true"><span></span></div>
+              <div>
+                <div class="tempo-value"><span id="tempo-value">-</span><span class="unit">BPM</span></div>
+                <div class="tempo-label" id="tempo-label">Press Play</div>
+              </div>
+            </div>
+            <div class="songs">
+              <div class="songs-head">
+                <h3 id="songs-title">Songs for this moment</h3>
+                <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
+              </div>
+              <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
+              <p class="songs-note" id="songs-note">Songs come once the body has moved for a few seconds.</p>
+            </div>
+          </section>
+        </section>
+
+        <section class="view view-stage" id="view-stage" data-view="stage" role="tabpanel" aria-labelledby="tab-btn-stage" hidden>
+          <section class="panel panel-lights" aria-labelledby="lights-title">
+            <div class="ambient" id="ambient" aria-hidden="true"></div>
+            <div class="panel-head">
+              <h2 id="lights-title">Stage lights</h2>
+              <span class="chip" id="lights-action">Waiting</span>
+            </div>
+            <p class="panel-sub">Each light follows one part of the body; the director sets the color and the flashes.</p>
+            <div class="bulbs" id="bulbs"></div>
+            <dl class="stats">
+              <div><dt>Energy</dt><dd id="lights-energy">-</dd></div>
+              <div><dt>Mood</dt><dd id="lights-mood">-</dd></div>
+              <div><dt>Color</dt><dd><span class="swatch" id="lights-swatch"></span><span id="lights-color">-</span></dd></div>
+            </dl>
+            <p class="lights-reason" id="lights-reason" aria-live="polite" hidden></p>
+          </section>
+        </section>
+
+        <!-- Music and Stage share one player, so a song keeps playing between them; the lights pulse to its beat. -->
+        <section class="panel panel-player" id="player" aria-labelledby="player-title" hidden>
           <div class="panel-head">
-            <h2 id="timeline-title">Timeline</h2>
-            <span class="chip" id="timeline-count">0 / 0</span>
+            <h2 id="player-title">Playing</h2>
+            <span class="chip" id="player-beat">No song yet</span>
           </div>
-          <ol class="timeline" id="timeline"></ol>
+          <div class="player-embed"><div id="player-embed"></div></div>
+          <p class="panel-sub" id="player-note">Press Play: the first song ReccoBeats picks for the body starts here.</p>
         </section>
-      </div>
-    </section>
+      </aside>
+    </div>
 
-    <section class="view view-stage" id="view-stage" data-view="stage" role="tabpanel" aria-labelledby="tab-btn-stage" hidden>
-      <section class="panel panel-lights" aria-labelledby="lights-title">
-        <div class="ambient" id="ambient" aria-hidden="true"></div>
-        <div class="panel-head">
-          <h2 id="lights-title">Lights</h2>
-          <span class="chip" id="lights-action">Waiting</span>
-        </div>
-        <div class="bulbs" id="bulbs"></div>
-        <dl class="stats">
-          <div><dt>Energy</dt><dd id="lights-energy">—</dd></div>
-          <div><dt>Brightness</dt><dd id="lights-brightness">—</dd></div>
-          <div><dt>Color</dt><dd><span class="swatch" id="lights-swatch"></span><span id="lights-color">—</span></dd></div>
-        </dl>
-        <p class="lights-reason" id="lights-reason" aria-live="polite" hidden></p>
-      </section>
-
-      <section class="panel panel-music is-paused" id="music-panel" aria-labelledby="music-title">
-        <div class="panel-head">
-          <h2 id="music-title">Music</h2>
-          <span class="chip" id="music-state">Waiting</span>
-        </div>
-        <div class="tempo">
-          <div class="beat" id="beat" aria-hidden="true"><span></span></div>
-          <div>
-            <div class="tempo-value"><span id="tempo-value">—</span><span class="unit">BPM</span></div>
-            <div class="tempo-label" id="tempo-label">Starts in the Stage phase</div>
-          </div>
-        </div>
-        <div>
-          <div class="meter" aria-hidden="true"><div class="meter-fill" id="tempo-meter"></div></div>
-          <div class="meter-scale" aria-hidden="true"><span>60</span><span>120</span><span>180</span></div>
-        </div>
-        <div class="songs">
-          <div class="songs-head">
-            <h3 id="songs-title">Songs</h3>
-            <span class="songs-mood" id="songs-mood" aria-live="polite">Waiting</span>
-          </div>
-          <ol class="song-list" id="song-list" aria-labelledby="songs-title"></ol>
-          <p class="songs-note" id="songs-note">Songs appear in the Stage phase.</p>
-        </div>
-      </section>
-    </section>
     <section class="view view-day" id="view-day" data-view="day" role="tabpanel" aria-labelledby="tab-btn-day" hidden>
       <section class="panel panel-day-wide" aria-labelledby="day-title">
         <div class="panel-head">
-          <h2 id="day-title">Your day</h2>
+          <h2 id="day-title">Routine</h2>
           <span class="chip" id="day-status">Loading</span>
         </div>
         <div class="day-stats" id="day-stats"></div>
+      </section>
+
+      <section class="panel panel-day-wide" aria-labelledby="did-title">
+        <div class="panel-head">
+          <h2 id="did-title">What they did</h2>
+          <span class="chip" id="did-captions">Qwen3-VL captions</span>
+        </div>
+        <div class="posture-pick">
+          <span class="posture-pick-name" id="posture-pick-name">Posture from</span>
+          <div class="toggles" id="posture-switch" role="group" aria-labelledby="posture-pick-name">
+            <button class="toggle" type="button" data-source="rules" aria-pressed="true">Rules</button>
+            <button class="toggle" type="button" data-source="muse" aria-pressed="false">Muse Spark</button>
+            <button class="toggle" type="button" data-source="qwen" aria-pressed="false">Qwen3-VL</button>
+            <button class="toggle" type="button" data-source="combined" aria-pressed="false">Combined</button>
+          </div>
+          <p class="posture-how" id="posture-how" aria-live="polite"></p>
+        </div>
+        <div class="routine">
+          <div class="routine-player">
+            <div class="media media-compact" id="routine-media">
+              <div class="media-bar">
+                <button class="btn btn-icon btn-small" id="routine-play" type="button" aria-label="Play">
+                  <svg class="icon icon-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z"/></svg>
+                  <svg class="icon icon-pause" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+                </button>
+                <span class="media-clock" id="routine-clock">0:00</span>
+                <div class="toggles" role="group" aria-label="Windows over the POV">
+                  <button class="toggle" type="button" data-toggle="body" aria-pressed="false">3D body</button>
+                </div>
+              </div>
+              <div class="media-stage">
+                <div class="media-pane media-base" data-pane="pov">
+                  <video muted playsinline preload="auto" aria-label="Head-camera video of this recording"></video>
+                </div>
+                <div class="media-pane media-window" data-pane="body" hidden>
+                  <video muted playsinline preload="auto" aria-label="3D body of this recording"></video>
+                </div>
+              </div>
+              <p class="media-note" hidden>No POV video for this recording on this machine: the 3D body fills the main window.</p>
+            </div>
+            <div class="strip-row"><span class="strip-name" id="strip-source-name">Rules</span><div class="day-strip" id="routine-strip"></div></div>
+            <div class="strip-row" hidden><span class="strip-name">Motion capture</span><div class="day-strip day-strip-ref" id="routine-ref" aria-hidden="true"></div></div>
+            <p class="day-caption" id="routine-caption" aria-live="polite"></p>
+          </div>
+          <ol class="log" id="routine-log" aria-label="What they did, in time order"></ol>
+        </div>
+      </section>
+
+      <section class="panel panel-day-wide" aria-labelledby="review-title">
+        <div class="panel-head">
+          <h2 id="review-title">Review</h2>
+          <span class="chip" id="review-source">Meta Muse Spark</span>
+        </div>
+        <div class="review" id="review"></div>
       </section>
 
       <section class="panel" aria-labelledby="day-postures-title">
@@ -162,28 +301,20 @@
         <ul class="day-legend" id="day-legend"></ul>
       </section>
 
-      <section class="panel" aria-labelledby="day-summary-title">
+      <section class="panel" aria-labelledby="days-title">
         <div class="panel-head">
-          <h2 id="day-summary-title">Suggestions</h2>
+          <h2 id="days-title">History</h2>
         </div>
-        <div class="day-summary" id="day-summary"></div>
-        <p class="day-note" id="day-summary-note"></p>
-      </section>
-
-      <section class="panel panel-day-wide" aria-labelledby="day-timeline-title">
-        <div class="panel-head">
-          <h2 id="day-timeline-title">Second by second</h2>
-          <span class="chip">Hover or tap a bar</span>
-        </div>
-        <div class="day-rows" id="day-strips"></div>
-        <p class="day-caption" id="day-caption" aria-live="polite">Hover or tap the timeline to see what was happening.</p>
+        <div class="days-wrap"><table class="days" id="days-table"></table></div>
       </section>
     </section>
   </main>
 
-  <footer class="foot">LifeLens · <span id="foot-demo">showing fictional sample data from <code>sample-data.json</code>.</span><span id="foot-live" hidden>showing live messages from the director.</span></footer>
+  <footer class="foot">© 2026 LifeLens team · beta research prototype, not medical advice · OmniEgoDB recordings CC BY-NC 4.0 · SMPL-H and MANO under the MPI license · Models: Meta Muse Spark, Llama 3.2, Qwen3-VL</footer>
 
+  <script type="module" src="/src/start.js"></script>
   <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/extras.js"></script>
   <script type="module" src="/src/day.js"></script>
 </body>
 </html>

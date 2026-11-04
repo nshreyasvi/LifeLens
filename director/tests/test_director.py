@@ -882,3 +882,24 @@ def test_fast_zone_color_is_not_replaced_by_model_color():
     loop = FastLoop(StubPredictor())
     msg, _ = loop.step(frame(0, .3, "C"))
     assert msg["zone"] == "C" and msg["color"] == "#FF6347"
+
+
+def test_messages_carry_the_frame_speed_and_posture():
+    clip = load_clip(Path(__file__).parents[2] / "examples" / "office")
+    loop = FastLoop(StubPredictor())
+    frame = next(f for f in clip.frames if f.speed_m_s > 0.5)
+    msg, _ = loop.step(frame)
+    assert msg["speed"] == round(frame.speed_m_s, 3) and msg["speed"] > 0.5
+    assert msg["posture_label"] == frame.posture_label != "unknown"
+
+
+def test_with_captions_replaces_narration_by_time(tmp_path):
+    from director.features import FrameFeatures
+    from director.replay import Clip, with_captions
+    frame = lambda t: FrameFeatures(time_s=t, zone="A", energy=0.1, speed_m_s=0.1, pelvis_height_m=0.9, trunk_lean=5.0,
+                                    posture_label="standing", narration="qwen says", floor_x=0.0, floor_y=0.0)
+    caps = tmp_path / "narration_muse.json"
+    caps.write_text(json.dumps([{"start_s": 0, "end_s": 5, "text": "Pour water."},
+                                {"start_s": 5, "end_s": 10, "text": "[no caption: TimeoutError]"}]), encoding="utf-8")
+    clip = with_captions(Clip(name="x", fps=30.0, frames=[frame(1.0), frame(6.0)], source_dir=tmp_path), caps)
+    assert [f.narration for f in clip.frames] == ["Pour water.", ""]

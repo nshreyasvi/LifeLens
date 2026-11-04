@@ -14,7 +14,7 @@ import websockets
 
 from .anticipation import StubPredictor
 from .fast_loop import FastLoop
-from .replay import Clip, load_clip
+from .replay import Clip, load_clip, with_captions
 from .features import STILL_SPEED_M_S, is_still_speed
 from .slow_loop import SlowLoop
 from .output_map import OUTPUT_FIELDS
@@ -33,6 +33,8 @@ def _arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--max-muse-calls", type=int, default=30)
     parser.add_argument("--describe", choices=("qwen", "dam", "both"), default="qwen")
+    parser.add_argument("--captions", choices=("qwen", "muse"), default="qwen",
+                        help="whose 5 s captions the slow loop reads as narration: Qwen's (activity.csv) or Muse's")
     return parser
 
 
@@ -235,6 +237,8 @@ async def run(args: argparse.Namespace) -> None:
     project_root = Path(__file__).resolve().parents[1]
     load_dotenv(project_root / "director" / ".env")
     clip = load_clip(args.clip)
+    if args.captions == "muse":
+        clip = with_captions(clip, clip.source_dir / "narration_muse.json")
     clients: set[Any] = set()
     ready = asyncio.Event()
 
