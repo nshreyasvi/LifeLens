@@ -191,7 +191,7 @@
                 </svg>
               </span>
               <span class="choice-name">New live session</span>
-              <span class="choice-sub">Record camera with live Muse Spark captions &amp; full 3D pipeline</span>
+              <span class="choice-sub">Camera with live Muse Spark captions. Record, then Process for the 3D body, music and stage</span>
             </button>
 
             <button class="choice" id="choose-rec" type="button">
@@ -361,6 +361,7 @@
       <button class="btn btn-icon" id="restart-btn" type="button" aria-label="Play from the start" title="Play from the start">
         <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2.5a.5.5 0 0 0-.8-.4L6.6 5.6a.5.5 0 0 0 0 .8l4.6 3.5a.5.5 0 0 0 .8-.4V7a5 5 0 1 1-5 5.2 1 1 0 0 0-2 0A7 7 0 1 0 12 5z"/></svg>
       </button>
+      <input class="rec-name-input" id="rec-name" type="text" maxlength="40" placeholder="Name this recording" aria-label="Recording name" hidden>
       <button class="btn btn-record" id="record-btn" type="button" hidden>
         <svg class="icon icon-rec" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
         <span id="record-label">Record</span>
@@ -402,6 +403,12 @@
           <video muted playsinline loop preload="auto" aria-label="Kinematics of the 3D body over the last 10 seconds"></video>
         </div>
         <p class="media-caption" id="media-caption"></p>
+        <div class="saved-bar" id="saved-bar" hidden>
+          <span class="saved-text" id="saved-text"></span>
+          <button class="btn btn-small-text btn-primary" id="saved-process" type="button">Process now</button>
+          <button class="btn btn-small-text" id="saved-again" type="button">Record another</button>
+        </div>
+        <p class="live-req" id="live-req" hidden></p>
         <p class="media-note" hidden>No POV video for this recording on this machine, so the 3D body fills the main window.</p>
       </section>
 

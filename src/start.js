@@ -166,8 +166,25 @@ export async function showRecordings() {
       await openRecording(rec);
       enter();
     })));
-    $('rec-raw').replaceChildren(...raw.map((r) => item(r.name, `${Math.max(1, Math.round(r.size / 2 ** 20))} MB · raw`,
-      'Process', (btn) => processVideo(r.file, btn))));
+    const status = await fetch('/api/process/status', { cache: 'no-store' }).then((x) => x.json()).catch(() => ({}));
+    const running = status.done || status.error ? '' : status.name;
+    $('rec-raw').replaceChildren(...raw.map((r) => {
+      const at = (status.queue ?? []).indexOf(r.name);
+      const state = r.name === running ? `processing ${status.percent ?? 0}%` : at >= 0 ? `queued #${at + 1}` : 'saved, not processed';
+      const li = item(r.name, `${Math.max(1, Math.round(r.size / 2 ** 20))} MB · ${state}`, 'Process', (btn) => processVideo(r.file, btn));
+      li.querySelector('button').disabled = r.name === running || at >= 0;
+      const del = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-small-text', textContent: 'Delete' });
+      del.disabled = r.name === running || at >= 0;
+      del.setAttribute('aria-label', `Delete ${r.name}`);
+      del.addEventListener('click', async () => {
+        if (!window.confirm(`Delete the saved clip "${r.name}"? This can't be undone.`)) return;
+        const res = await fetch(`/api/recordings?file=${encodeURIComponent(r.file)}`, { method: 'DELETE' });
+        if (!res.ok) note((await res.json().catch(() => ({}))).error || `Couldn't delete ${r.name}.`);
+        showRecordings();
+      });
+      li.appendChild(del);
+      return li;
+    }));
     note(processed.length || raw.length ? '' : 'No recordings yet: start a live session.');
   } catch (err) {
     note(`Recordings: ${err.message}.`);
@@ -195,6 +212,12 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
     body: JSON.stringify({ file }),
   });
   const body = await res.json().catch(() => ({}));
+  if (res.status === 202) {                                 // the pipeline is busy: queued, it starts by itself
+    hideProcessModal();
+    onStep(body.queued ? `${clipName} is queued (#${body.queued}) after ${body.running}.` : `${clipName} is already processing.`);
+    if (btn) btn.textContent = 'Queued';
+    return;
+  }
   if (!res.ok) {
     const msg = body.error || `The dev server answered ${res.status}.`;
     onStep(msg);

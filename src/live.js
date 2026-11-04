@@ -1,10 +1,10 @@
-// LifeLens front-end: a live session. The camera is the POV; Record films it, the clip goes to recordings/ (dev server)
-// and the pipeline builds its 3D body, posture, captions and Meta Muse Spark review; while processing, the dedicated
-// Processing Studio loading screen shows live stage progress (0-100%), GPU/CPU telemetry, and the newly recorded clip.
+// LifeLens front-end: a live session. The camera is the POV, with Muse Spark's live captions; Record films it and Stop
+// saves it to recordings/ (dev server). Process (now, or later from "Open a recording") builds its 3D body, posture,
+// captions and Muse Spark review, with the Processing screen's progress and GPU/CPU telemetry.
 
 import { media } from './extras.js';
 import { openRecording, session } from './session.js';
-import { enter, hideProcessModal, processVideo, showProcessModal } from './start.js';
+import { enter, processVideo } from './start.js';
 
 const $ = (id) => document.getElementById(id);
 const btn = $('record-btn');
@@ -69,7 +69,8 @@ async function startCamera() {
     media.setLive(stream);
     btn.disabled = false;
     captionLoop(++liveRun);
-    say('Camera live · Click Record to capture your session, then Stop to run the 3D body & Muse Spark pipeline.');
+    showRequirement();
+    say('Camera live · Record, then Stop to save the session.');
   } catch (err) {
     btn.disabled = true;
     say(window.isSecureContext ? `No camera: ${err.message}.` : 'The camera needs localhost or https.');
@@ -102,47 +103,62 @@ function record() {
   btn.dataset.recording = 'true';
 }
 
+// Stop saves the clip to recordings/ under the name typed (not processed): Process now, or later from "Open a recording".
+let saved = '';
 async function upload() {
   clearInterval(ticker);
   delete btn.dataset.recording;
   btn.disabled = true;
   label.textContent = 'Record';
   const blob = new Blob(chunks, { type: recorder?.mimeType || 'video/webm' });
-
-  // Immediately stop the live camera and preview the newly recorded clip (never leaving an old video on screen).
   stopCamera();
   if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
   previewBlobUrl = URL.createObjectURL(blob);
   media.setPreview(previewBlobUrl);
-
-  showProcessModal({
-    name: 'live-capture',
-    step: 'Saving newly recorded camera clip…',
-    percent: 0,
-    elapsedMs: 0,
-    log: `Captured ${Math.max(1, Math.round(blob.size / 1024))} KB video stream. Uploading to local studio server…`,
-    previewUrl: previewBlobUrl,
-  });
-
-  say('Saving & processing your new recording…');
+  say('Saving the recording…');
   try {
-    const res = await fetch('/api/recordings', { method: 'POST', body: blob, headers: { 'Content-Type': blob.type } });
+    const name = encodeURIComponent($('rec-name').value.trim());
+    const res = await fetch(`/api/recordings?name=${name}`, { method: 'POST', body: blob, headers: { 'Content-Type': blob.type } });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.error || `the dev server answered ${res.status}`);
-    await processVideo(body.file, btn, say, async (rec) => {
-      await openRecording(rec);
-      enter();
-    }, previewBlobUrl);
+    saved = body.file;
+    $('saved-text').textContent = `Saved as "${body.name}". Process it now, or later from Open a recording.`;
+    $('saved-bar').hidden = false;
+    say('');
   } catch (err) {
-    hideProcessModal();
     say(`Couldn't save the recording: ${err.message}.`);
     btn.disabled = false;
   }
 }
 
+// What a live 3D body would need. Measured here (bench/live_fps.json): 0.3-0.8 fps on an RTX 4060 Laptop, 8 GB;
+// shortcut: the 16 GB / RTX 4080-4090 figure is an estimate from GPU throughput, not measured; measure on such a GPU.
+async function showRequirement() {
+  const hw = await fetch('/api/hardware').then((r) => r.json()).catch(() => null);
+  const gb = hw?.vramTotalMb ? Math.round(hw.vramTotalMb / 1024) : 0;
+  $('live-req').hidden = false;
+  $('live-req').textContent = 'Live 3D body: about 1-2 fps needs an NVIDIA GPU with 16 GB of VRAM or more '
+    + `(RTX 4080/4090 class, estimated). ${hw?.gpu ?? 'This machine'}${gb ? ` (${gb} GB)` : ''}: `
+    + (gb >= 16 ? 'may reach it, but live 3D is not built yet. ' : 'an RTX 4060 Laptop (8 GB) measured 0.3-0.8 fps. ')
+    + 'So record, then press Process: it builds the 3D body, the music and the stage show at full quality, '
+    + 'and keeps the session for next time.';
+}
+
+$('saved-process').addEventListener('click', () => {
+  $('saved-bar').hidden = true;
+  processVideo(saved, $('saved-process'), say, async (rec) => { await openRecording(rec); enter(); }, previewBlobUrl);
+});
+$('saved-again').addEventListener('click', () => {
+  $('saved-bar').hidden = true;
+  $('rec-name').value = '';
+  startCamera();
+});
+
 btn.addEventListener('click', () => (recorder?.state === 'recording' ? recorder.stop() : record()));
 document.addEventListener('lifelens:session', () => {
   btn.hidden = !session.live;
+  $('rec-name').hidden = !session.live;
+  if (!session.live) { $('live-req').hidden = true; $('saved-bar').hidden = true; }
   document.body.classList.toggle('is-live-session', session.live);
   if (session.live) startCamera();
   else stopCamera();

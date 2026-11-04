@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { basename, extname, join } from 'node:path';
 import { output as lightsOutput, status as lightsStatus } from './server/lights.js';
@@ -8,7 +8,8 @@ import { output as lightsOutput, status as lightsStatus } from './server/lights.
 // Dev-server endpoints behind the page (npm run dev only), local requests only:
 //   GET  /api/hardware            live GPU (nvidia-smi) and CPU processor telemetry
 //   GET  /api/recordings          processed recordings (runs/, examples/) and raw videos waiting in recordings/
-//   POST /api/recordings          save a camera clip from the page to recordings/<time>.webm (or .mp4)
+//   POST /api/recordings[?name=]  save a camera clip from the page to recordings/<name>.webm (or .mp4); not processed
+//   DELETE /api/recordings?file=  delete a saved, unprocessed clip in recordings/
 //   POST /api/process {file}      run the 3D body + Meta Muse Spark pipeline on a raw video
 //   GET  /api/process/status      live pipeline stage progress (0-100%), logs, and GPU/CPU telemetry
 //   POST /api/live/start {run, start}   the director replays that recording from `start` s with Meta Muse Spark captions
@@ -204,12 +205,28 @@ function lifelensApi() {
     if (/==\s*insights/i.test(text)) setStage('posture_muse');
   }
 
+  // Clips waiting for the pipeline, in order: the next starts when a job finishes or fails.
+  const queue = [];
+  const busy = () => job && !job.done && !job.error;
+  function startJob(file, name) {
+    const now = Date.now();
+    job = {
+      file, name, step: PIPELINE_STAGES[0].label, index: 0, stageIndex: 0, stageAt: now, startedAt: now, percent: 0,
+      steps: PIPELINE_STAGES.map((s) => s.label), log: '', error: '',
+      failed: new Set(), // optional stages that failed or were skipped
+      done: false,
+    };
+    runSteps(processSteps(file, name));
+  }
+  const nextJob = () => { const q = queue.shift(); if (q) startJob(q.file, q.name); };
+
   function runSteps(steps, i = 0) {
     if (i === steps.length) {
       job.done = true;
       job.percent = 100;
       job.stageIndex = PIPELINE_STAGES.length;
       job.step = 'Complete';
+      nextJob();
       return;
     }
     const [label, critical, cmd, args] = steps[i];
@@ -228,18 +245,18 @@ function lifelensApi() {
     proc.stdout.on('data', keep);
     proc.stderr.on('data', keep);
     proc.on('error', (err) => {
-      if (critical) job.error = `${label}: ${err.message}`;
+      if (critical) { job.error = `${label}: ${err.message}`; nextJob(); }
       else { job.failed.add(stageOf); runSteps(steps, i + 1); }
     });
     proc.on('exit', (code) => {
-      if (code !== 0 && critical) job.error = `${label} stopped (exit ${code})`;
+      if (code !== 0 && critical) { job.error = `${label} stopped (exit ${code})`; nextJob(); }
       else { if (code !== 0) job.failed.add(stageOf); runSteps(steps, i + 1); } // optional step failed: shown, not ticked
     });
   }
 
   function statusPayload() {
     refreshHardware();
-    if (!job) return { idle: true, hardware: hwCache };
+    if (!job) return { idle: true, hardware: hwCache, queue: [] };
     const elapsedMs = Date.now() - job.startedAt;
     // The share of the pipeline whose stages have started (fixed weights per stage); no timer moves it in between.
     const percent = job.percent;
@@ -255,6 +272,7 @@ function lifelensApi() {
       elapsedMs,
       stages,
       hardware: hwCache,
+      queue: queue.map((q) => q.name),
     };
   }
 
@@ -271,7 +289,21 @@ function lifelensApi() {
 
       server.middlewares.use('/api/recordings', (req, res) => {
         if (req.method === 'GET') return send(res, 200, recordings());
-        if (req.method !== 'POST') return send(res, 405, { error: 'Use GET or POST.' });
+        const params = new URL(req.url, 'http://local').searchParams;
+        if (req.method === 'DELETE') {
+          const file = params.get('file') || '';
+          const name = basename(file, extname(file));
+          if (!file.startsWith('recordings/') || file.includes('..') || !VIDEO.test(file) || !NAME.test(name)
+            || !existsSync(join(root, file))) return send(res, 400, { error: 'Pick a saved clip in recordings/.' });
+          if ((busy() && job.file === file) || queue.some((q) => q.file === file)) {
+            return send(res, 409, { error: 'That clip is being processed.' });
+          }
+          unlinkSync(join(root, file));
+          return send(res, 200, { ok: true });
+        }
+        if (req.method !== 'POST') return send(res, 405, { error: 'Use GET, POST or DELETE.' });
+        // the name the user typed, made safe for a file name; the time is added when it is taken or empty
+        const wanted = (params.get('name') || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
         const chunks = [];
         let size = 0;
         req.on('data', (c) => {
@@ -283,7 +315,9 @@ function lifelensApi() {
           if (!size) return send(res, 400, { error: 'The recording is empty.' });
           mkdirSync(join(root, 'recordings'), { recursive: true });
           const ext = (req.headers['content-type'] || '').includes('mp4') ? 'mp4' : 'webm';
-          const name = `live-${new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-')}`;
+          const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
+          const taken = (n) => ['webm', 'mp4'].some((e) => existsSync(join(root, 'recordings', `${n}.${e}`))) || existsSync(join(root, 'runs', n));
+          const name = wanted && !taken(wanted) ? wanted : `${wanted || 'live'}-${stamp}`;
           writeFileSync(join(root, 'recordings', `${name}.${ext}`), Buffer.concat(chunks));
           send(res, 200, { file: `recordings/${name}.${ext}`, name });
         });
@@ -293,30 +327,16 @@ function lifelensApi() {
 
       server.middlewares.use('/api/process', async (req, res) => {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST.' });
-        if (job && !job.done && !job.error) return send(res, 409, { error: `Already processing ${job.name}.` });
         const { file } = await readBody(req);
         const name = typeof file === 'string' ? basename(file, extname(file)) : '';
         if (!file?.startsWith('recordings/') || !VIDEO.test(file) || !NAME.test(name) || !existsSync(join(root, file))) {
           return send(res, 400, { error: 'Pick a video from recordings/.' });
         }
-        const steps = processSteps(file, name);
-        const now = Date.now();
-        job = {
-          file,
-          name,
-          step: PIPELINE_STAGES[0].label,
-          index: 0,
-          stageIndex: 0,
-          stageAt: now,
-          startedAt: now,
-          percent: 0,
-          steps: PIPELINE_STAGES.map((s) => s.label),
-          log: '',
-          error: '',
-          failed: new Set(), // optional stages that failed or were skipped
-          done: false,
-        };
-        runSteps(steps);
+        if (busy()) {                                       // the pipeline is busy: wait in the queue
+          if (job.file !== file && !queue.some((q) => q.file === file)) queue.push({ file, name });
+          return send(res, 202, { queued: queue.findIndex((q) => q.file === file) + 1, running: job.name });
+        }
+        startJob(file, name);
         send(res, 200, statusPayload());
       });
 
