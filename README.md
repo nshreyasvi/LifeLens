@@ -23,12 +23,18 @@ LifeLens takes a video from a camera on your head (phone, smart glasses or GoPro
 though the camera never sees it. From that body and the video it tells you what you did, how you moved and what you
 could change, and it drives music and stage lights from your movement.
 
-[![LifeLens demo: open a recording, play it, then the Routine, Music and Stage tabs](docs/demo.gif)](docs/demo.mp4)
+[![LifeLens demo: the head-camera POV with the 3D body window beside it, then the Routine, Music and Stage tabs](docs/demo.gif)](docs/demo.mp4)
 
-*The demo at 2× speed ([full video, 63 s](docs/demo.mp4)). It shows the `office` recording: the director plays it
-live, the Routine tab shows Muse Spark's review, the Music tab picks songs from the body, and the Stage tab lights
-each body part. The head-camera video is hidden: it is OmniEgoDB footage and can't be redistributed. So the 3D body
-fills the main window, as it does on any machine without the dataset.*
+*The demo at 2× speed ([full video, 68 s](docs/demo.mp4)), on the `office` recording.*
+- *The head-camera POV fills the main window, with the 3D body window beside it (closed and reopened) and the
+  kinematics underneath.*
+- *Play starts the director live. The Routine tab shows the posture timeline and Muse Spark's review.*
+- *The Music tab picks songs from the body, and the Stage tab lights each body part.*
+
+> **POV footage:** [OmniEgoDB](https://huggingface.co/datasets/cscandkswon/OmniEgoDB), sequence `S03_office_1`,
+> CC BY-NC 4.0, shown here for non-commercial research. The person in it can ask for removal
+> (cscandkswon@snu.ac.kr), and the video will then be replaced. Cho, Na, Joo, *OmniEgoCap: Device-Agnostic
+> Sequence-Level Egocentric Motion Reconstruction*, NeurIPS 2026.
 
 ## What you get
 
@@ -257,5 +263,6 @@ No license is set for this code yet. These are not included and are non-commerci
 - SMPL-H and MANO
 - OmniEgoDB (CC BY-NC, gated)
 
-That's fine for research and demos, but not for a product. The example recordings are derived from OmniEgoDB and
-inherit CC BY-NC. © 2026 LifeLens team.
+That's fine for research and demos, but not for a product. The example recordings and the demo video (whose POV is
+OmniEgoDB footage) are derived from OmniEgoDB and inherit CC BY-NC. The raw POV videos themselves are not in the
+repo. © 2026 LifeLens team.
