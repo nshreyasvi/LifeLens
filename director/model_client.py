@@ -117,7 +117,11 @@ def _muse(prompt: str, max_calls: int) -> str:
             or parsed.port not in (None, 443) or parsed.username or parsed.password
             or parsed.query or parsed.fragment):
         raise RuntimeError("Muse requests are restricted to HTTPS api.meta.ai")
-    body = json.dumps({"model": model, "input": prompt}).encode()
+    request_body: dict[str, Any] = {"model": model, "input": prompt}
+    reasoning_effort = os.getenv("MUSE_REASONING")
+    if reasoning_effort in {"low", "medium", "high"}:
+        request_body["reasoning"] = {"effort": reasoning_effort}
+    body = json.dumps(request_body).encode()
     request = Request(base_url + "/responses", data=body,
                       headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
                       method="POST")

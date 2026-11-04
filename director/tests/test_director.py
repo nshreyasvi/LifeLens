@@ -887,6 +887,76 @@ def test_muse_request_uses_certifi_ca_context(monkeypatch):
     assert captured["passed_context"] is captured["context"]
 
 
+def test_muse_request_omits_unset_reasoning_effort(monkeypatch):
+    import director.model_client as model_client
+
+    captured = {}
+
+    class Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b'{"output_text":"{}"}'
+
+    def fake_urlopen(request, *, timeout, context):
+        captured["body"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.delenv("MUSE_REASONING", raising=False)
+    monkeypatch.setenv("MUSE_BASE_URL", "https://api.meta.ai/v1")
+    monkeypatch.setenv("MUSE_MODEL", "muse-spark-1.3")
+    monkeypatch.setattr(model_client, "_MUSE_CALLS", 0)
+    monkeypatch.setattr(model_client, "_muse_api_key_from_file", lambda: "test-placeholder")
+    monkeypatch.setattr(model_client, "urlopen", fake_urlopen)
+
+    model_client._muse("A safe test prompt.", max_calls=30)
+
+    assert captured["body"] == {"model": "muse-spark-1.3", "input": "A safe test prompt."}
+
+
+def test_muse_request_includes_valid_reasoning_effort(monkeypatch):
+    import director.model_client as model_client
+
+    captured = {}
+
+    class Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b'{"output_text":"{}"}'
+
+    def fake_urlopen(request, *, timeout, context):
+        captured["body"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.setenv("MUSE_REASONING", "low")
+    monkeypatch.setenv("MUSE_BASE_URL", "https://api.meta.ai/v1")
+    monkeypatch.setenv("MUSE_MODEL", "muse-spark-1.3")
+    monkeypatch.setattr(model_client, "_MUSE_CALLS", 0)
+    monkeypatch.setattr(model_client, "_muse_api_key_from_file", lambda: "test-placeholder")
+    monkeypatch.setattr(model_client, "urlopen", fake_urlopen)
+
+    model_client._muse("A safe test prompt.", max_calls=30)
+
+    assert captured["body"] == {
+        "model": "muse-spark-1.3",
+        "input": "A safe test prompt.",
+        "reasoning": {"effort": "low"},
+    }
+
+
 def test_fast_zone_color_is_not_replaced_by_model_color():
     loop = FastLoop(StubPredictor())
     msg, _ = loop.step(frame(0, .3, "C"))
