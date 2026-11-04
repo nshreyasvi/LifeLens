@@ -49,76 +49,75 @@
   },
   "summary": "",
   "model": "",
-  "log": "Total 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min\n1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.\nClip office:\n  standing 4 s. The camera wearer is adjusting their gloves.\n  walking 14 s. The camera wearer is adjusting their gloves. The camera wearer walks towards a door. The camera wearer walks around the office. The camera wearer walks into an office.\n  sitting 3 s. The camera wearer walks into an office. The camera wearer picks up a plastic bag from a table.\n  walking 2 s. The camera wearer picks up a plastic bag from a table.\n  standing 21 s. The camera wearer picks up a plastic bag from a table. The camera wearer is pouring a liquid into a cup. The camera wearer turns on the water dispenser. The camera wearer is walking towards a table.\n  walking 5 s. The camera wearer is walking towards a table. The camera wearer opens a door.\n  standing 22 s. The camera wearer opens a door. The camera wearer opens the refrigerator. The camera wearer opens a refrigerator. The camera wearer opens a cabinet. The camera wearer walks to the table.\n  walking 6 s. The camera wearer walks to the table.\n  standing 5 s. The camera wearer walks to the table. The camera wearer walks around the office.\n  arms raised 1 s. The camera wearer walks around the office.",
-  "runtime_s": 0.6,
+  "log": "Total 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min\n1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.\nClip office:\n  standing 4 s. Walk away from a table with laptops and VR headsets.\n  walking 14 s. Walk away from a table with laptops and VR headsets. Walking around a small indoor room. Walking around an office. Turn around in the office.\n  sitting 3 s. Turn around in the office. Walk to a water dispenser and pick up two cups.\n  walking 2 s. Walk to a water dispenser and pick up two cups.\n  standing 21 s. Walk to a water dispenser and pick up two cups. Pouring ice into a plastic cup. Fill a paper cup with water from a dispenser. Carry a paper cup to a table.\n  walking 5 s. Carry a paper cup to a table. Walk to a refrigerator and open it.\n  standing 22 s. Walk to a refrigerator and open it. Closing the refrigerator door. Opening a snack-filled cabinet. Browse clothes hanging on a rack. Walk toward a table with a laptop and VR headset.\n  walking 6 s. Walk toward a table with a laptop and VR headset. Stand up and face another person.\n  standing 5 s. Stand up and face another person. Stand up from a chair near a table.\n  arms raised 1 s. Stand up from a chair near a table.",
+  "runtime_s": 0.1,
   "report": {
-    "summary": "This 1.38-min office clip follows you moving between tables, a water dispenser, a refrigerator and a cabinet to get cups, water and snacks. You spent most time standing (0.87 min) with short walks totaling 32.3 m and only a 0.05-min sit to pick up a plastic bag.",
+    "summary": "This 1.38 min office recording shows moving around a small indoor room between a table with laptops and VR headsets, a water dispenser, a refrigerator, a snack-filled cabinet and a clothes rack. The time was mostly standing at 0.87 min with short walks totalling 0.45 min and 32.3 m, with only 0.05 min sitting.",
     "what_they_did": [
-      "0:00-0:18: adjusting gloves and walking towards a door and around the office (standing and walking)",
-      "0:18-0:23: walking into an office and picking up a plastic bag from a table (sitting and walking)",
-      "0:23-0:44: picking up two cups, pouring ice and filling a paper cup at the water dispenser (standing)",
-      "0:44-0:50: carrying a paper cup to a table and opening a door (walking)",
-      "0:50-1:11: opening and closing the refrigerator and opening a snack-filled cabinet (standing)",
-      "1:11-1:22: walking to a table with a laptop and VR headset and standing near another person (walking and standing)"
+      "0:00-0:18: walked away from a table with laptops and VR headsets and around the office (standing, walking)",
+      "0:18-0:23: turned in the office and walked to a water dispenser to pick up two cups (sitting, walking)",
+      "0:23-0:44: poured ice into a plastic cup, filled a paper cup with water from a dispenser and carried a paper cup to a table (standing)",
+      "0:44-1:11: walked to a refrigerator and opened it, closed the refrigerator door, opened a snack-filled cabinet and browsed clothes hanging on a rack (walking, standing)",
+      "1:11-1:23: walked toward a table with a laptop and VR headset and stood up to face another person near a chair (walking, standing, arms raised)"
     ],
     "posture_and_movement": [
-      "Standing dominated at 0.87 min (63% by rules) in bouts up to 22 s and 21 s around the dispenser, fridge and cabinet.",
-      "Walking was 0.45 min (33%) covering 32.3 m in short bursts of 14 s, 5 s, 6 s and 2 s between tables, door and fridge.",
-      "Sitting was minimal at 0.05 min with 1 sit-downs and longest sit 0.05 min during the 3 s picking up a plastic bag from a table.",
-      "Almost no other postures: 0.0 min bent over and only 0.02 min (1 s) arms raised at the end while around the office."
+      "Spent 0.87 min standing and 0.45 min walking out of 1.38 min, with rules at standing 63% and walking 33% and Muse at standing 58% and walking 42%.",
+      "Sat only 0.05 min with 1 sit-down and longest sit 0.05 min, so there was no extended sit in this clip.",
+      "Walked 32.3 m in short bursts of 14 s, 2 s, 5 s and 6 s, with standing bouts of 4 s, 21 s, 22 s and 5 s between walks.",
+      "Bent over 0.0 min and had arms raised only 0.02 min for 1 s when standing up from a chair near a table."
     ],
     "compared_with_history": [
-      "Shorter and less walking than outdoor (1.38 min vs 1.75 min; walking 0.45 min and 32.3 m vs 0.95 min and 66.6 m).",
-      "Less sitting than outdoor (sitting 0.05 min and 1 sit-down vs 0.17 min and 3 sit-downs).",
-      "More standing-concentrated than outdoor: standing 0.87 min (63%) vs outdoor standing 0.60 min (34%), with 0.0 min bent over in both."
+      "Compared with outdoor, this office clip was shorter at 1.38 min versus 1.75 min and covered less distance at 32.3 m versus 66.6 m.",
+      "Compared with outdoor, walking was less here at 0.45 min versus 0.95 min while standing was more at 0.87 min versus 0.6 min.",
+      "Compared with outdoor, sitting was briefer here with 1 sit-down and longest sit 0.05 min versus 3 sit-downs and longest sit 0.17 min, and outdoor had 0.03 min crouching while office had 0.0 min bent over in both."
     ],
     "improvements": [
       {
-        "change": "Sit for part of the water-dispenser wait",
-        "why": "you stood 21 s straight pouring liquid and filling a paper cup with longest sit only 0.05 min",
-        "how": "pull a chair to the dispenser and sit while the cup fills, then stand to carry the cup to the table"
+        "change": "Take a seated pause after carrying the cup",
+        "why": "longest sit was only 0.05 min and sitting total was 0.05 min after carrying a paper cup to a table",
+        "how": "sit at the table with laptops and VR headsets for a short rest after carrying the paper cup to the table before going to the refrigerator"
       },
       {
-        "change": "Split the fridge and cabinet browse with a short walk",
-        "why": "you stood 22 s opening the refrigerator, closing it and opening a snack-filled cabinet",
-        "how": "open the fridge, carry the item to the table, then return to open the cabinet instead of standing through both"
+        "change": "Break up the two long stands",
+        "why": "stood 21 s at the water dispenser filling a paper cup and 22 s at the refrigerator, snack-filled cabinet and clothes rack",
+        "how": "step in place or shift feet while the paper cup fills and while browsing the snack-filled cabinet and clothes hanging on a rack"
       },
       {
-        "change": "Put the plastic bag down before pouring",
-        "why": "you picked up a plastic bag from a table then held it through pouring ice and filling cups at the dispenser",
-        "how": "leave the bag on the table by the dispenser while you pick up two cups and pour, then pick it up to carry"
+        "change": "Add extra steps between tasks",
+        "why": "walked only 32.3 m in 0.45 min in bursts of 14 s, 2 s, 5 s and 6 s",
+        "how": "take one extra loop around the office when walking from the water dispenser to the table and when walking to the refrigerator and back to the table with a laptop and VR headset"
       },
       {
-        "change": "Slow the cup-carry walks and use both hands",
-        "why": "you walked 5 s carrying a paper cup to a table and 6 s walking to the table",
-        "how": "hold the paper cup with both hands and walk the short table route at an easy pace to avoid spills"
+        "change": "Use a knee bend to pick up and set down cups",
+        "why": "bent over 0.0 min while picking up two cups and pouring ice into a plastic cup and filling a paper cup",
+        "how": "bend knees slightly when picking up two cups at the water dispenser and when setting the paper cup down at the table"
       },
       {
-        "change": "Add leg movement during glove adjusting and table waiting",
-        "why": "you stood 4 s adjusting gloves at the start and 5 s standing around the office at the end",
-        "how": "shift weight foot to foot or step in place while adjusting gloves and while standing by the table with laptop and VR headset"
+        "change": "Face and greet without rushing to stand",
+        "why": "ended with 6 s walking toward a table with a laptop and VR headset then 5 s standing and 1 s arms raised to stand up and face another person",
+        "how": "pause near the chair near the table, plant both feet, then stand up from the chair to face the other person"
       }
     ],
     "went_well": [
-      "Kept moving with no long still period: longest sit 0.05 min and standing bouts broken by walks totaling 32.3 m.",
-      "Completed many small office tasks on foot \u2014 water dispenser, refrigerator, cabinet and table with laptop \u2014 without standing in one spot beyond 22 s."
+      "Kept moving through the room with 0.45 min walking and 32.3 m covered across trips to the water dispenser, refrigerator, snack-filled cabinet and clothes rack.",
+      "Handled pour, fill and carry tasks while standing for 0.87 min with steady short walks between stations."
     ],
     "caveats": [
-      "Models disagree on sitting: rules says sitting 4% and 0.05 min while qwen says sitting 18%, so the 3 s picking up a plastic bag may be a brief stoop mislabeled as sitting.",
-      "Leg posture is a 3D guess the head camera never sees, so standing vs walking shares (rules 63%/33% vs muse 58%/42%) and the 1 s arms raised are uncertain."
+      "Muse named 3 s sitting while turning in the office to walk to a water dispenser, which likely mislabels standing or walking, and rules and Muse differ on walking at 33% versus 42%.",
+      "The head camera never sees legs, so the 3D estimate for the 0.05 min sitting, 0.0 min bent over and 0.02 min arms raised is inferred and may be wrong."
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",
     "history": [
       "outdoor"
     ],
-    "prompt": "You review one recording of a person's day for them, as a movement and daily-routine coach. It was filmed\nby a camera on their head. LifeLens turned it into a 3D body estimate: a posture every second (walking, standing,\nsitting, crouching, bending, arms raised) and the walking distance. Two models described the video every 5 s (Qwen3-VL\nfrom the video, Meta Muse Spark from frames); either can be wrong. Earlier recordings of the same person follow.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (office, 1.38 min)\nRecorded 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min. Walked 32.3 m, 1 sit-downs, longest sit 0.05 min, bent over 0.0 min.\nPosture by source (share of the recording): rules: standing 63%, walking 33%, sitting 4%, arms raised 1%; muse: standing 58%, walking 42%; qwen: standing 52%, walking 30%, sitting 18%\nPosture bouts and what Qwen saw:\nTotal 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min\n1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.\nClip office:\n  standing 4 s. The camera wearer is adjusting their gloves.\n  walking 14 s. The camera wearer is adjusting their gloves. The camera wearer walks towards a door. The camera wearer walks around the office. The camera wearer walks into an office.\n  sitting 3 s. The camera wearer walks into an office. The camera wearer picks up a plastic bag from a table.\n  walking 2 s. The camera wearer picks up a plastic bag from a table.\n  standing 21 s. The camera wearer picks up a plastic bag from a table. The camera wearer is pouring a liquid into a cup. The camera wearer turns on the water dispenser. The camera wearer is walking towards a table.\n  walking 5 s. The camera wearer is walking towards a table. The camera wearer opens a door.\n  standing 22 s. The camera wearer opens a door. The camera wearer opens the refrigerator. The camera wearer opens a refrigerator. The camera wearer opens a cabinet. The camera wearer walks to the table.\n  walking 6 s. The camera wearer walks to the table.\n  standing 5 s. The camera wearer walks to the table. The camera wearer walks around the office.\n  arms raised 1 s. The camera wearer walks around the office.\nMuse's captions every 5 s:\n0:00 Walk away from a table with laptops and VR headsets.\n0:05 Walking around a small indoor room.\n0:10 Walking around an office.\n0:15 Turn around in the office.\n0:20 Walk to a water dispenser and pick up two cups.\n0:25 Pouring ice into a plastic cup.\n0:30 Fill a paper cup with water from a dispenser.\n0:35 Fill a paper cup with water from a dispenser.\n0:40 Carry a paper cup to a table.\n0:45 Walk to a refrigerator and open it.\n0:50 Closing the refrigerator door.\n0:55 Closing the refrigerator door.\n1:00 Opening a snack-filled cabinet.\n1:05 Browse clothes hanging on a rack.\n1:10 Walk toward a table with a laptop and VR headset.\n1:15 Stand up and face another person.\n1:20 Stand up from a chair near a table.\n\nEARLIER RECORDINGS\n- outdoor: Recorded 1.75 min: walking 0.95 min, standing 0.6 min, sitting 0.17 min, crouching 0.03 min. Walked 66.6 m, 3 sit-downs, longest sit 0.17 min, bent over 0.0 min. Posture by source: rules: walking 54%, standing 34%, sitting 10%, crouching 2%; muse: walking 57%, standing 24%, crouching 10%, sitting 10%; qwen: walking 57%, standing 33%, sitting 5%, crouching 5%. What they did: 0:00 The camera wearer is walking on a wooden deck.; 0:05 The camera wearer is walking on a wooden floor.; 0:10 The camera wearer is sitting on a chair and stretching their hands.; 0:15 The camera wearer is moving a chair.; 0:20 The camera wearer walks on a wooden deck.; 0:35 The camera wearer walks to a table.; 0:40 The camera wearer walks to a vending machine.; 0:45 The camera wearer opens a vending machine.\n- robothome: Recorded 4.5 min: walking 0.28 min, standing 3.37 min, sitting 0.73 min, bending 0.12 min. Walked 49.8 m, 2 sit-downs, longest sit 0.55 min, bent over 0.12 min. Posture by source: rules: standing 75%, sitting 16%, walking 6%, bending 3%; muse: standing 39%, walking 37%, crouching 13%, bending 7%, sitting 4%; qwen: standing 69%, sitting 20%, walking 11%. What they did: 0:00 The camera wearer walks around a room.; 0:25 The camera wearer picks up a chair.; 0:55 The camera wearer is adjusting a plant on a table.; 1:20 The camera wearer picks up a bottle of water.; 1:50 The camera wearer is walking through a room with chairs and a table.; 2:40 The camera wearer walks around a cluttered room.; 3:15 The person is cooking on the stove.; 3:45 The camera wearer is holding a white plastic container and placing it on a wooden shelf."
+    "prompt": "You review one recording of a person's day for them, as a movement and daily-routine coach. It was filmed\nby a camera on their head. LifeLens turned it into a 3D body estimate: a posture every second (walking, standing,\nsitting, crouching, bending, arms raised) and the walking distance. Meta Muse Spark described frames of the video every\n5 s and named a posture; it can be wrong. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (office, 1.38 min)\nRecorded 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min. Walked 32.3 m, 1 sit-downs, longest sit 0.05 min, bent over 0.0 min.\nPosture by source (share of the recording): rules: standing 63%, walking 33%, sitting 4%, arms raised 1%; muse: standing 58%, walking 42%\nPosture bouts and what Muse saw:\nTotal 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min\n1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.\nClip office:\n  standing 4 s. Walk away from a table with laptops and VR headsets.\n  walking 14 s. Walk away from a table with laptops and VR headsets. Walking around a small indoor room. Walking around an office. Turn around in the office.\n  sitting 3 s. Turn around in the office. Walk to a water dispenser and pick up two cups.\n  walking 2 s. Walk to a water dispenser and pick up two cups.\n  standing 21 s. Walk to a water dispenser and pick up two cups. Pouring ice into a plastic cup. Fill a paper cup with water from a dispenser. Carry a paper cup to a table.\n  walking 5 s. Carry a paper cup to a table. Walk to a refrigerator and open it.\n  standing 22 s. Walk to a refrigerator and open it. Closing the refrigerator door. Opening a snack-filled cabinet. Browse clothes hanging on a rack. Walk toward a table with a laptop and VR headset.\n  walking 6 s. Walk toward a table with a laptop and VR headset. Stand up and face another person.\n  standing 5 s. Stand up and face another person. Stand up from a chair near a table.\n  arms raised 1 s. Stand up from a chair near a table.\nMuse's captions every 5 s:\n0:00 Walk away from a table with laptops and VR headsets.\n0:05 Walking around a small indoor room.\n0:10 Walking around an office.\n0:15 Turn around in the office.\n0:20 Walk to a water dispenser and pick up two cups.\n0:25 Pouring ice into a plastic cup.\n0:30 Fill a paper cup with water from a dispenser.\n0:35 Fill a paper cup with water from a dispenser.\n0:40 Carry a paper cup to a table.\n0:45 Walk to a refrigerator and open it.\n0:50 Closing the refrigerator door.\n0:55 Closing the refrigerator door.\n1:00 Opening a snack-filled cabinet.\n1:05 Browse clothes hanging on a rack.\n1:10 Walk toward a table with a laptop and VR headset.\n1:15 Stand up and face another person.\n1:20 Stand up from a chair near a table.\n\nOTHER RECORDINGS\n- outdoor: Recorded 1.75 min: walking 0.95 min, standing 0.6 min, sitting 0.17 min, crouching 0.03 min. Walked 66.6 m, 3 sit-downs, longest sit 0.17 min, bent over 0.0 min. Posture by source: rules: walking 54%, standing 34%, sitting 10%, crouching 2%; muse: walking 57%, standing 24%, crouching 10%, sitting 10%. What they did: 0:00 Pressing their palms together in front of them.; 0:10 Stand up from a chair using a table for support.; 0:20 Walk away from a table and chairs.; 0:30 Walking across a wooden deck past tables and chairs.; 0:40 Approach a vending machine.; 0:50 Walk away from a vending machine.; 1:05 Walking across a wooden deck toward a table.; 1:20 Buying a drink from a vending machine."
   },
   "suggestions": {
     "lines": [
-      "Sit for part of the water-dispenser wait",
-      "Split the fridge and cabinet browse with a short walk",
-      "Put the plastic bag down before pouring"
+      "Take a seated pause after carrying the cup",
+      "Break up the two long stands",
+      "Add extra steps between tasks"
     ],
     "provider": "Meta Muse Spark",
     "model": "muse-spark-1.3",

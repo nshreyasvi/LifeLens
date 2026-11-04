@@ -2,8 +2,8 @@
 
 python -m director.routine_tips examples/robothome --history examples/office examples/outdoor
 
-Reads <run>/insights.json (totals and the posture log: posture bouts with Qwen's narration of them),
-<run>/postures.json (posture from the rules, Muse and Qwen) and <run>/narration_muse.json (Muse's captions) when
+Reads <run>/insights.json (totals and the posture log: posture bouts with Muse's caption of them),
+<run>/postures.json (posture from the rules and Muse) and <run>/narration_muse.json (Muse's captions) when
 present; for each history run, its totals and what it shows the person doing. Muse answers a JSON review, written into
 <run>/insights.json as "report" (and its first three changes as "suggestions"). The key is read only from
 director/.env, as for the slow loop.
@@ -24,8 +24,9 @@ KEYS = ('summary', 'what_they_did', 'posture_and_movement', 'compared_with_histo
         'caveats')
 PROMPT = """You review one recording of a person's day for them, as a movement and daily-routine coach. It was filmed
 by a camera on their head. LifeLens turned it into a 3D body estimate: a posture every second (walking, standing,
-sitting, crouching, bending, arms raised) and the walking distance. Two models described the video every 5 s (Qwen3-VL
-from the video, Meta Muse Spark from frames); either can be wrong. Earlier recordings of the same person follow.
+sitting, crouching, bending, arms raised) and the walking distance. Meta Muse Spark described frames of the video every
+5 s and named a posture; it can be wrong. Other recordings follow; they may be of other people, so compare routines,
+not the person.
 
 Write a detailed, specific review as one JSON object with exactly these keys:
 - "summary": 2-3 sentences on what this recording shows.
@@ -43,12 +44,12 @@ JSON object only.
 THIS RECORDING ({name}, {duration})
 {totals}
 Posture by source (share of the recording): {shares}
-Posture bouts and what Qwen saw:
+Posture bouts and what Muse saw:
 {log}
 Muse's captions every 5 s:
 {captions}
 
-EARLIER RECORDINGS
+OTHER RECORDINGS
 {history}"""
 
 
@@ -70,7 +71,9 @@ def shares(run: Path) -> str:
         return 'rules only'
     labels = json.loads(path.read_text(encoding='utf-8'))['labels']
     out = []
-    for src in ('rules', 'muse', 'qwen'):
+    for src in ('rules', 'muse'):
+        if src not in labels:
+            continue
         c = Counter(labels[src])
         out.append(f"{src}: " + ', '.join(f'{k} {round(100 * v / len(labels[src]))}%' for k, v in c.most_common() if k != 'unknown'))
     return '; '.join(out)

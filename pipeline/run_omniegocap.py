@@ -26,6 +26,8 @@ import time
 
 import numpy as np
 import torch
+
+from device import best, peak_mb
 from scipy.ndimage import gaussian_filter1d
 from scipy.spatial.transform import Rotation
 
@@ -96,13 +98,14 @@ def export_kinematics(run: str, result, seq, joints_world: np.ndarray, hand_pose
 
 def main(a):
     t0 = time.time()
-    model = OmniEgoCap(a.checkpoint)
+    model = OmniEgoCap(a.checkpoint, device=best())     # CUDA, else Apple MPS, else CPU
     load_s = time.time() - t0
     seq = EgoSequence.load(f'{a.run}/omniegocap_input.npz')
 
-    torch.cuda.reset_peak_memory_stats()
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
     result = model.predict(seq, optimization=a.optimization)
-    result.meta.update(load_s=load_s, peak_gpu_mb=torch.cuda.max_memory_allocated() / 2**20, smooth_sigma=a.smooth)
+    result.meta.update(load_s=load_s, peak_gpu_mb=peak_mb(), smooth_sigma=a.smooth)
     if a.smooth > 0:
         rot = smooth_rot(np.concatenate([result.root_orient[:, None], result.pose_body.reshape(-1, 21, 3)], 1), a.smooth)
         result.root_orient, result.pose_body = rot[:, 0], rot[:, 1:].reshape(-1, 63)

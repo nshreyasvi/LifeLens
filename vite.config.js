@@ -37,8 +37,10 @@ function lifelensApi() {
   let director = null;
   let job = null;
   let root = '';
+  const mac = process.platform === 'darwin';
   let hwCache = {
-    gpu: 'CUDA GPU',
+    // macOS: no nvidia-smi; torch runs on the Apple GPU (MPS), and own videos need a CUDA machine for SLAM (README)
+    gpu: mac ? 'Apple GPU (MPS)' : 'No NVIDIA GPU found',
     vramTotalMb: 0,
     vramUsedMb: 0,
     gpuUtilPct: 0,
@@ -46,12 +48,14 @@ function lifelensApi() {
     cpu: (os.cpus()[0]?.model || 'Multi-core Processor').replace(/\s+/g, ' ').trim(),
     cpuCores: os.cpus().length,
     ramGb: Math.round(os.totalmem() / 2 ** 30),
-    stack: 'WSL2 CUDA · OmniEgoCap + HaWoR · Meta Muse Spark',
+    platform: mac ? 'macOS' : process.platform === 'win32' ? 'WSL2' : 'Linux',
+    telemetry: false, // true once nvidia-smi answered: only then are the GPU numbers measured
+    stack: `${mac ? 'macOS MPS' : process.platform === 'win32' ? 'WSL2 CUDA' : 'Linux CUDA'} · OmniEgoCap + HaWoR · Meta Muse Spark`,
     updatedAt: 0,
   };
 
   function refreshHardware() {
-    if (Date.now() - hwCache.updatedAt < 1800) return;
+    if (mac || Date.now() - hwCache.updatedAt < 1800) return;
     hwCache.updatedAt = Date.now();
     execFile(
       'nvidia-smi',
@@ -68,6 +72,7 @@ function lifelensApi() {
             vramUsedMb: Number(parts[2]) || 0,
             gpuUtilPct: Number(parts[3]) || 0,
             gpuTempC: Number(parts[4]) || 0,
+            telemetry: true,
             updatedAt: Date.now(),
           };
         }
@@ -93,7 +98,7 @@ function lifelensApi() {
   const wsl = (cmd) => (process.platform === 'win32'
     ? ['wsl', ['-e', 'bash', '-lc', `cd '/mnt/${root[0].toLowerCase()}${root.slice(2).replace(/\\/g, '/')}' && ${cmd}`]]
     : ['bash', ['-lc', `cd '${root}' && ${cmd}`]]);
-  const env = (name) => `~/anaconda3/envs/${name}/bin`;
+  const env = (name) => `${process.env.CONDA_ROOT || '~/anaconda3'}/envs/${name}/bin`; // run.py reads CONDA_ROOT too
   const museKey = () => {
     const f = join(root, 'director', '.env');
     const line = existsSync(f) ? readFileSync(f, 'utf8').split(/\r?\n/).find((l) => l.trim().startsWith('MUSE_API_KEY=')) : null;
@@ -162,10 +167,11 @@ function lifelensApi() {
     const text = String(chunk);
     if (/==\s*ingest/i.test(text)) setStage('ingest');
     if (/==\s*hawor/i.test(text)) setStage('hawor');
-    if (/==\s*(build_input|fallback)/i.test(text)) setStage('build_input');
+    if (/==\s*build_input/i.test(text)) setStage('build_input');
     if (/==\s*omniegocap/i.test(text)) setStage('omniegocap');
     if (/==\s*render/i.test(text)) setStage('render');
     if (/==\s*describe_muse/i.test(text)) setStage('describe_muse');
+    if (/describe_muse warning/i.test(text)) job.failed.add('describe_muse');
     if (/==\s*insights/i.test(text)) setStage('posture_muse');
   }
 
@@ -178,6 +184,7 @@ function lifelensApi() {
       return;
     }
     const [label, critical, cmd, args] = steps[i];
+    const stageOf = ['', 'posture_muse', 'posture_muse', 'routine_tips'][i];
     job.index = i;
     if (i === 0) setStage('ingest');
     else if (i === 1 || i === 2) setStage('posture_muse');
@@ -193,11 +200,11 @@ function lifelensApi() {
     proc.stderr.on('data', keep);
     proc.on('error', (err) => {
       if (critical) job.error = `${label}: ${err.message}`;
-      else runSteps(steps, i + 1);
+      else { job.failed.add(stageOf); runSteps(steps, i + 1); }
     });
     proc.on('exit', (code) => {
       if (code !== 0 && critical) job.error = `${label} stopped (exit ${code})`;
-      else runSteps(steps, i + 1);
+      else { if (code !== 0) job.failed.add(stageOf); runSteps(steps, i + 1); } // optional step failed: shown, not ticked
     });
   }
 
@@ -205,19 +212,13 @@ function lifelensApi() {
     refreshHardware();
     if (!job) return { idle: true, hardware: hwCache };
     const elapsedMs = Date.now() - job.startedAt;
-    let percent = job.percent;
-    if (!job.done && !job.error) {
-      const cur = PIPELINE_STAGES[job.stageIndex]?.pct ?? 8;
-      const next = PIPELINE_STAGES[job.stageIndex + 1]?.pct ?? 99;
-      const stageElapsedS = (Date.now() - job.stageAt) / 1000;
-      const creep = Math.min(next - cur - 1, Math.floor(stageElapsedS * 0.8));
-      percent = Math.max(percent, cur + Math.max(0, creep));
-      job.percent = percent;
-    }
+    // The share of the pipeline whose stages have started (fixed weights per stage); no timer moves it in between.
+    const percent = job.percent;
     const stages = PIPELINE_STAGES.map((s, idx) => ({
       id: s.id,
       label: s.label,
-      state: job.done || idx < job.stageIndex ? 'done' : idx === job.stageIndex ? (job.error ? 'error' : 'active') : 'pending',
+      state: job.failed.has(s.id) ? 'error'
+        : job.done || idx < job.stageIndex ? 'done' : idx === job.stageIndex ? (job.error ? 'error' : 'active') : 'pending',
     }));
     return {
       ...job,
@@ -279,10 +280,11 @@ function lifelensApi() {
           stageIndex: 0,
           stageAt: now,
           startedAt: now,
-          percent: 5,
+          percent: 0,
           steps: PIPELINE_STAGES.map((s) => s.label),
           log: '',
           error: '',
+          failed: new Set(), // optional stages that failed or were skipped
           done: false,
         };
         runSteps(steps);

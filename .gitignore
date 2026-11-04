@@ -26,3 +26,5 @@ recordings/
 archive/raw-data/
 archive/playwright-logs/
 archive/graphify-out/cache/
+# browser-test screenshots and logs
+.playwright-mcp/

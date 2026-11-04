@@ -121,10 +121,13 @@ function renderMessage(msg) {
     els.lightsReason.hidden = false;
   }
 
-  const mood = word(msg.mood);
+  // Mood and tempo are the model's only once its first reply came (source "slow"); before that the director sends its
+  // built-in starting scene (curious, 90 BPM), which is not shown as a result.
+  if (msg.source === 'slow') state.modelMood = true;
+  const mood = state.modelMood ? word(msg.mood) : '';
   const range = MOOD_RANGES[mood];
-  const label = `${mood ? `${capitalize(mood)} mood` : 'Mood pending'}${range ? `, ${range[0]}-${range[1]} BPM` : ''}`;
-  els.tempoValue.textContent = msg.music_tempo;
+  const label = `${mood ? `${capitalize(mood)} mood` : 'Waiting for Muse Spark'}${range ? `, ${range[0]}-${range[1]} BPM` : ''}`;
+  els.tempoValue.textContent = mood ? msg.music_tempo : '-';
   els.tempoLabel.textContent = label;
   els.lightsMood.textContent = mood ? capitalize(mood) : '-';
   for (const beat of els.beats) beat.style.setProperty('--beat', `${(60 / msg.music_tempo).toFixed(3)}s`);
@@ -145,7 +148,7 @@ function addCue(msg) {
     li.querySelector('.tl-action').textContent = ACTION_LABELS[msg.action];
     li.querySelector('time').textContent = msg.time ?? '';
     li.querySelector('.energy').textContent = `${capitalize(msg.energy)} energy`;
-    li.querySelector('.tl-meta span:last-child').textContent = `${msg.music_tempo} BPM`;
+    li.querySelector('.tl-meta span:last-child').textContent = state.modelMood ? `${msg.music_tempo} BPM` : 'Tempo pending';
     els.timeline.appendChild(li);
   }
   if (state.cues.length > MAX_CUES) {
@@ -207,13 +210,13 @@ function renderLights(f) {
 
 // ReccoBeats' targets (0-1, tempo in BPM) from the body and the director's mood.
 function musicTargets(f, msg) {
-  const mood = word(msg?.mood);
+  const mood = state.modelMood ? word(msg?.mood) : '';
   return {
     energy: clamp01(0.1 + 0.55 * Math.min(f.pace / 1.2, 1) + 0.35 * Math.min(f.arm / 20, 1)),
     danceability: clamp01(f.steps ? f.steps / 130 : 0.25 + 0.35 * Math.min(f.arm / 20, 1)),
     valence: clamp01(0.25 + 0.45 * f.upright + (MOOD_VALENCE[mood] ?? 0)),
     acousticness: clamp01(0.15 + 0.7 * f.still),
-    tempo: Math.round(f.steps >= 60 ? f.steps : msg?.music_tempo ?? 90), // a walking pace sets the beat
+    tempo: f.steps >= 60 ? Math.round(f.steps) : mood ? msg.music_tempo : null, // a walking pace sets the beat
     mood,
   };
 }
@@ -223,7 +226,7 @@ function renderFeatures(f, t) {
     ['Pace', `${f.pace.toFixed(2)} m/s`], ['Steps', f.steps ? `${Math.round(f.steps)}/min` : 'standing'],
     ['Arm swing', `${Math.round(f.arm)}°`], ['Upright', `${Math.round(f.upright * 100)}%`],
     ['Still', `${Math.round(f.still * 100)}%`], ['Energy', t.energy.toFixed(2)], ['Dance', t.danceability.toFixed(2)],
-    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', `${t.tempo} BPM`],
+    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? `${t.tempo} BPM` : '-'],
   ];
   els.features.replaceChildren(...rows.map(([k, v], i) => {
     const row = Object.assign(document.createElement('div'), { className: i < 5 ? 'feat feat-in' : 'feat feat-out' });
@@ -399,7 +402,9 @@ async function playSong(song) {
         if (!song || !data.duration) return;
         // Right after loadUri the embed still reports the old song's end: count an end only after this one played.
         if (!data.isPaused && data.position > 0 && data.position < data.duration - 1500) song.started = true;
-        if (song.started && data.position >= data.duration - 400 && !song.ended) {
+        // The end: near the duration, or (updates come ~1 s apart) back at 0 and paused once it had played.
+        const atEnd = data.position >= data.duration - 400 || (data.isPaused && data.position === 0);
+        if (song.started && atEnd && !song.ended) {
           player.song.ended = true;
           if (state.phase === 'live') playSong(player.queue.find((s) => s.spotifyId !== player.song.spotifyId));
         }
@@ -441,7 +446,7 @@ function showNotice(text) {
 }
 
 function reset() {
-  Object.assign(state, { phase: 'idle', cues: [], liveCount: 0, last: null, master: 1 });
+  Object.assign(state, { phase: 'idle', cues: [], liveCount: 0, last: null, master: 1, modelMood: false });
   els.timeline.replaceChildren();
   els.timelineCount.textContent = '0 cues';
   els.energyValue.textContent = '-';

@@ -11,9 +11,11 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 
-os.environ.setdefault('PYOPENGL_PLATFORM', 'egl')
+if sys.platform != 'darwin':      # macOS has no EGL: pyrender uses its default (pyglet) there
+    os.environ.setdefault('PYOPENGL_PLATFORM', 'egl')
 
 import imageio.v2 as imageio  # noqa: E402
 import imageio_ffmpeg  # noqa: E402

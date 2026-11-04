@@ -132,8 +132,9 @@ def timeline_png(path: str, clips: list):
 def summarize(log: str, model_id: str) -> str:
     import torch
     from transformers import AutoModelForImageTextToText, AutoProcessor
+    from device import best
     processor = AutoProcessor.from_pretrained(model_id)
-    model = AutoModelForImageTextToText.from_pretrained(model_id, dtype=torch.bfloat16, device_map='cuda')
+    model = AutoModelForImageTextToText.from_pretrained(model_id, dtype=torch.bfloat16, device_map=best())
     prompt = processor.apply_chat_template([{'role': 'user', 'content': [{'type': 'text', 'text': PROMPT.format(log=log)}]}],
                                            add_generation_prompt=True)
     inputs = processor(text=[prompt], return_tensors='pt').to(model.device)

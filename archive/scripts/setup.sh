@@ -17,7 +17,7 @@
 #                       models/MANO_LEFT.pkl  -> third_party/HaWoR/_DATA/data_left/mano_left/
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"   # the repo root: this script lives in archive/scripts/
 TP="$ROOT/third_party"
 CONDA_ROOT="${CONDA_ROOT:-$HOME/anaconda3}"
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda-12.6}"

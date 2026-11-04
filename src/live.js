@@ -118,7 +118,7 @@ async function upload() {
   showProcessModal({
     name: 'live-capture',
     step: 'Saving newly recorded camera clip…',
-    percent: 3,
+    percent: 0,
     elapsedMs: 0,
     log: `Captured ${Math.max(1, Math.round(blob.size / 1024))} KB video stream. Uploading to local studio server…`,
     previewUrl: previewBlobUrl,

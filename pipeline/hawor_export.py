@@ -83,6 +83,15 @@ def align(A, B):
 def main(a):
     video, out_dir = os.path.abspath(a.video), os.path.abspath(a.out_dir)
     focal = a.focal or HAWOR_DEFAULT_FOCAL
+    if not torch.cuda.is_available():
+        if not a.hands_only:     # fail before minutes of hand tracking, with the reason
+            raise SystemExit('DROID-SLAM (the camera path for your own video) needs an NVIDIA GPU with CUDA; this '
+                             'machine has none (Apple MPS can\'t run its CUDA kernels). Process the video on a CUDA '
+                             'machine, or pass run.py --input_npz with a ready camera path.')
+        # Hands only: HaWoR calls .cuda() itself; without CUDA keep its tensors and models on the CPU, where its own
+        # fallback (device = cuda if available else cpu) puts the rest.
+        torch.Tensor.cuda = lambda self, *args, **kwargs: self
+        torch.nn.Module.cuda = lambda self, *args, **kwargs: self
     os.chdir(HAWOR)     # HaWoR loads its weights from relative paths
     sys.path.insert(0, HAWOR)
     from lib.eval_utils.custom_utils import load_slam_cam

@@ -62,46 +62,6 @@ def run_stage(name: str, out_file: str, cmd: list, run_dir: str):
         f.write(f"{name}\t{dt}\n")
 
 
-def synthesize_webcam_fallback(run_dir: str, input_mp4: str):
-    """When a short/stationary webcam clip lacks sufficient SLAM parallax for DROID-SLAM/HaWoR,
-    preserve the newly recorded input.mp4 and trim a baseline 3D body & kinematics stream to match its length
-    so Meta Muse Spark captions, posture analysis, and routine coaching still complete on the new recording."""
-    print("== fallback: synthesizing 3D body stream for stationary/short camera clip", flush=True)
-    probe = subprocess.run(
-        ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', input_mp4],
-        capture_output=True, text=True
-    )
-    try:
-        dur = max(2.0, float(probe.stdout.strip()))
-    except ValueError:
-        dur = 10.0
-    n_frames = max(60, int(round(dur * 30)))
-    ref_dir = os.path.join(ROOT, 'examples', 'office')
-    for src_name, dst_name in [('mesh_exo.mp4', 'mesh_exo.mp4'), ('pose_graph.mp4', 'pose_graph.mp4')]:
-        src = os.path.join(ref_dir, src_name)
-        dst = os.path.join(run_dir, dst_name)
-        if not os.path.exists(dst) and os.path.exists(src):
-            subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-stream_loop', '-1', '-i', src,
-                            '-t', f"{dur:.2f}", '-c:v', 'libx264', '-pix_fmt', 'yuv420p', dst], check=True)
-    csv_src = os.path.join(ref_dir, 'pose_timeseries.csv')
-    csv_dst = os.path.join(run_dir, 'pose_timeseries.csv')
-    if not os.path.exists(csv_dst) and os.path.exists(csv_src):
-        with open(csv_src, encoding='utf-8') as f:
-            lines = [l for l in f.read().splitlines() if l.strip()]
-        head, body = lines[0], lines[1:]
-        cols = head.split(',')
-        f_idx = cols.index('frame') if 'frame' in cols else 0
-        t_idx = cols.index('time_s') if 'time_s' in cols else 1
-        out_lines = [head]
-        for i in range(n_frames):
-            row = body[i % len(body)].split(',')
-            row[f_idx] = str(i)
-            row[t_idx] = f"{i / 30.0:.4f}"
-            out_lines.append(','.join(row))
-        with open(csv_dst, 'w', encoding='utf-8', newline='\n') as f:
-            f.write('\n'.join(out_lines) + '\n')
-
-
 def main():
     parser = argparse.ArgumentParser(description="Process egocentric video into full-body SMPL-H motion.")
     parser.add_argument("video", help="Input video file path.")
@@ -184,8 +144,9 @@ def main():
         render_cmd = [py_mhr, os.path.join(PIPELINE, 'render.py'), '--run', run_dir]
         run_stage('render', 'side_by_side.mp4', render_cmd, run_dir)
     except subprocess.CalledProcessError as exc:
-        print(f"== 3D SLAM stage exited with {exc.returncode}; using camera clip with fallback 3D stream", flush=True)
-        synthesize_webcam_fallback(run_dir, input_mp4)
+        # No stand-in body: a recording without its own 3D body stops here, with the stage's error above.
+        sys.exit(f"== 3D body failed ({os.path.basename(exc.cmd[1])} exited with {exc.returncode}); see the error above. "
+                 "Short or static clips can give SLAM too little motion: record 20 s or more while walking around.")
 
     # 6. Video captions by Meta Muse Spark (narration_muse.json)
     muse_env = os.path.join(ROOT, 'director', '.env')

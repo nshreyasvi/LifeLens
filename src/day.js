@@ -13,7 +13,7 @@ const POSTURE_COLORS = {
 const SOURCES = {
   rules: { name: '3D Rules', how: '3D kinematics thresholds (speed, hip height, knee flexion & trunk lean) per second.' },
   muse: { name: 'Muse Spark', how: 'Meta Muse Spark classifies each 5 s window from 3D kinematics + egocentric scene.' },
-  combined: { name: 'Combined', how: 'Consensus of 3D biomechanical rules and Meta Muse Spark posture classification.' },
+  combined: { name: 'Both agree', how: 'Seconds where the rules and Meta Muse Spark name the same posture; grey where they differ.' },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -191,7 +191,8 @@ function pickSource(source) {
   view.source = SOURCES[source] ? source : 'rules';
   for (const b of $('posture-switch').children) b.setAttribute('aria-pressed', String(b.dataset.source === view.source));
   const a = view.postures?.agreement;
-  const match = a && Number.isFinite(a[view.source]) ? ` · ${Math.round(a[view.source] * 100)}% mocap match` : '';
+  // Motion capture exists for the OmniEgoDB examples only; its labels use the rules' thresholds, so it favors them.
+  const match = a && Number.isFinite(a[view.source]) ? ` · agrees with motion capture ${Math.round(a[view.source] * 100)}% of seconds` : '';
   $('posture-how').textContent = `${SOURCES[view.source].how}${match}`;
   redraw();
 }
@@ -403,7 +404,7 @@ async function renderHistory(current) {
       barTd,
       el('td', 'num', minutes(ins.total.duration_min)),
       el('td', 'num', `${Math.round(ins.total.walking_distance_m)} m`),
-      el('td', 'num', a && Number.isFinite(a.muse) ? `${Math.round(a.muse * 100)}%` : 'Muse Spark'),
+      el('td', 'num', a && Number.isFinite(a.muse) ? `${Math.round(a.muse * 100)}%` : '–'),
       actionTd,
     );
     tbody.appendChild(tr);

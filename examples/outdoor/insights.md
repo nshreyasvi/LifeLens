@@ -15,19 +15,19 @@
 Total 1.75 min: walking 0.95 min, standing 0.6 min, sitting 0.17 min, crouching 0.03 min
 3 times sat or crouched down, longest sitting 0.17 min, walked 66.6 m, bent over 0.0 min.
 Clip outdoor:
-  standing 6 s. The camera wearer is walking on a wooden deck. The camera wearer is walking on a wooden floor.
-  walking 1 s. The camera wearer is walking on a wooden floor.
-  standing 1 s. The camera wearer is walking on a wooden floor.
-  sitting 10 s. The camera wearer is walking on a wooden floor. The camera wearer is sitting on a chair and stretching their hands. The camera wearer is moving a chair.
-  standing 3 s. The camera wearer is moving a chair. The camera wearer walks on a wooden deck.
-  walking 18 s. The camera wearer walks on a wooden deck. The camera wearer walks to a table.
-  standing 5 s. The camera wearer walks to a table. The camera wearer walks to a vending machine.
-  crouching 1 s. The camera wearer walks to a vending machine.
-  standing 1 s. The camera wearer opens a vending machine.
-  crouching 1 s. The camera wearer opens a vending machine.
-  standing 5 s. The camera wearer opens a vending machine. The camera wearer is walking on a wooden deck.
-  walking 27 s. The camera wearer is walking on a wooden deck. The camera wearer walks on a wooden deck. The camera wearer walks into a room. The camera wearer walks to a vending machine.
-  standing 15 s. The camera wearer walks to a vending machine. The camera wearer opens the vending machine. The camera wearer opens a door.
-  walking 11 s. The camera wearer opens a door. The camera wearer walks towards a glass door. The camera wearer walks on a wooden deck.
+  standing 6 s. Pressing their palms together in front of them. Pull out a chair and sit down at a table.
+  walking 1 s. Pull out a chair and sit down at a table.
+  standing 1 s. Pull out a chair and sit down at a table.
+  sitting 10 s. Pull out a chair and sit down at a table. Stand up from a chair using a table for support. Stand up while holding onto a table and chair.
+  standing 3 s. Stand up while holding onto a table and chair. Walk away from a table and chairs.
+  walking 18 s. Walk away from a table and chairs. Walk across an outdoor deck toward a table. Walking across a wooden deck past tables and chairs. Walking across a wooden deck beside an outdoor table.
+  standing 5 s. Walking across a wooden deck beside an outdoor table. Approach a vending machine.
+  crouching 1 s. Approach a vending machine.
+  standing 1 s. Buy a drink from a vending machine.
+  crouching 1 s. Buy a drink from a vending machine.
+  standing 5 s. Buy a drink from a vending machine. Walk away from a vending machine.
+  walking 27 s. Walk away from a vending machine. Walking across a wooden deck past tables and chairs. Walking across a wooden deck. Walking across a wooden deck toward a table. Walk toward a vending machine.
+  standing 15 s. Walk toward a vending machine. Buying a drink from a vending machine. Opening a glass door to exit. Open a glass door and walk out onto a deck.
+  walking 11 s. Open a glass door and walk out onto a deck. Walk across a wooden deck past tables and chairs. Walking toward a table on an outdoor deck.
 ```
 </details>

@@ -49,25 +49,27 @@ export function renderHardware(hw) {
     startText.textContent = `${hw.gpu}${vramGb} · ${shortCpu} · Meta Muse Spark`;
   }
   const gpuName = $('hw-gpu-name');
-  if (gpuName) gpuName.textContent = hw.gpu || 'CUDA Accelerator';
+  if (gpuName) gpuName.textContent = hw.gpu || 'GPU';
   const gpuMeta = $('hw-gpu-meta');
   if (gpuMeta) {
     const parts = [];
     if (hw.vramTotalMb) parts.push(`VRAM ${hw.vramUsedMb} / ${hw.vramTotalMb} MB`);
-    parts.push(`Load ${hw.gpuUtilPct ?? 0}%`);
+    if (hw.telemetry) parts.push(`Load ${hw.gpuUtilPct ?? 0}%`);
     if (hw.gpuTempC) parts.push(`${hw.gpuTempC}°C`);
-    gpuMeta.textContent = parts.join(' · ');
+    gpuMeta.textContent = parts.join(' · ') || 'No live GPU readings on this machine';
   }
   const gpuBar = $('hw-gpu-bar');
   if (gpuBar) {
-    const vramPct = hw.vramTotalMb ? (hw.vramUsedMb / hw.vramTotalMb) * 100 : 15;
-    const pct = Math.max(12, Math.min(100, Math.max(hw.gpuUtilPct || 0, vramPct)));
+    const vramPct = hw.vramTotalMb ? (hw.vramUsedMb / hw.vramTotalMb) * 100 : 0;
+    const pct = hw.telemetry ? Math.min(100, Math.max(hw.gpuUtilPct || 0, vramPct)) : 0; // measured, or empty
     gpuBar.style.width = `${Math.round(pct)}%`;
   }
   const cpuName = $('hw-cpu-name');
   if (cpuName) cpuName.textContent = shortCpu;
   const cpuMeta = $('hw-cpu-meta');
-  if (cpuMeta) cpuMeta.textContent = `${hw.cpuCores || 8} logical threads · ${hw.ramGb || 16} GB RAM · WSL2`;
+  if (cpuMeta) cpuMeta.textContent = `${hw.cpuCores} logical threads · ${hw.ramGb} GB RAM · ${hw.platform}`;
+  const stackChip = $('hw-stack-chip');
+  if (stackChip && hw.stack) stackChip.textContent = hw.stack.split(' · ')[0];
 }
 
 async function fetchHardware() {
@@ -102,7 +104,7 @@ function renderProcessStages(stages = DEFAULT_STAGES) {
   }));
 }
 
-export function showProcessModal({ name, step, percent = 5, elapsedMs = 0, stages = DEFAULT_STAGES, log = '', previewUrl = '' }) {
+export function showProcessModal({ name, step, percent = 0, elapsedMs = 0, stages = DEFAULT_STAGES, log = '', previewUrl = '' }) {
   const modal = $('process-screen');
   if (!modal) return;
   modal.hidden = false;
@@ -179,7 +181,7 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
   showProcessModal({
     name: clipName,
     step: 'Uploading & starting 3D reconstruction pipeline…',
-    percent: 4,
+    percent: 0,
     elapsedMs: 0,
     stages: DEFAULT_STAGES,
     log: `Queued ${file} for HaWoR + OmniEgoCap + Meta Muse Spark…`,
@@ -214,7 +216,7 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
         showProcessModal({
           name: job.name,
           step: job.error,
-          percent: job.percent || 10,
+          percent: job.percent || 0,
           elapsedMs: job.elapsedMs || 0,
           stages: job.stages || DEFAULT_STAGES,
           log: job.log || job.error,
@@ -223,7 +225,7 @@ export async function processVideo(file, btn, onStep = note, onReady, previewUrl
         if (btn) btn.disabled = false;
         return;
       }
-      const pct = job.done ? 100 : (job.percent ?? 10);
+      const pct = job.done ? 100 : (job.percent ?? 0);
       showProcessModal({
         name: job.name || clipName,
         step: job.done ? 'Session ready — opening studio…' : `${job.step} (${pct}%)`,

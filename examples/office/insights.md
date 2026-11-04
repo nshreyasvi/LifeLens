@@ -15,15 +15,15 @@
 Total 1.38 min: walking 0.45 min, standing 0.87 min, sitting 0.05 min, arms raised 0.02 min
 1 times sat or crouched down, longest sitting 0.05 min, walked 32.3 m, bent over 0.0 min.
 Clip office:
-  standing 4 s. The camera wearer is adjusting their gloves.
-  walking 14 s. The camera wearer is adjusting their gloves. The camera wearer walks towards a door. The camera wearer walks around the office. The camera wearer walks into an office.
-  sitting 3 s. The camera wearer walks into an office. The camera wearer picks up a plastic bag from a table.
-  walking 2 s. The camera wearer picks up a plastic bag from a table.
-  standing 21 s. The camera wearer picks up a plastic bag from a table. The camera wearer is pouring a liquid into a cup. The camera wearer turns on the water dispenser. The camera wearer is walking towards a table.
-  walking 5 s. The camera wearer is walking towards a table. The camera wearer opens a door.
-  standing 22 s. The camera wearer opens a door. The camera wearer opens the refrigerator. The camera wearer opens a refrigerator. The camera wearer opens a cabinet. The camera wearer walks to the table.
-  walking 6 s. The camera wearer walks to the table.
-  standing 5 s. The camera wearer walks to the table. The camera wearer walks around the office.
-  arms raised 1 s. The camera wearer walks around the office.
+  standing 4 s. Walk away from a table with laptops and VR headsets.
+  walking 14 s. Walk away from a table with laptops and VR headsets. Walking around a small indoor room. Walking around an office. Turn around in the office.
+  sitting 3 s. Turn around in the office. Walk to a water dispenser and pick up two cups.
+  walking 2 s. Walk to a water dispenser and pick up two cups.
+  standing 21 s. Walk to a water dispenser and pick up two cups. Pouring ice into a plastic cup. Fill a paper cup with water from a dispenser. Carry a paper cup to a table.
+  walking 5 s. Carry a paper cup to a table. Walk to a refrigerator and open it.
+  standing 22 s. Walk to a refrigerator and open it. Closing the refrigerator door. Opening a snack-filled cabinet. Browse clothes hanging on a rack. Walk toward a table with a laptop and VR headset.
+  walking 6 s. Walk toward a table with a laptop and VR headset. Stand up and face another person.
+  standing 5 s. Stand up and face another person. Stand up from a chair near a table.
+  arms raised 1 s. Stand up from a chair near a table.
 ```
 </details>
