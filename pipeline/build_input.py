@@ -66,6 +66,12 @@ def main(a):
     if window.sum() < 10:
         window = np.ones(len(time_s), dtype=bool)
     slam_height = float(np.median(T[window, 2, 3])) - floor_z
+    if not 0.8 < slam_height < 2.2:
+        z_rel = T[:, 2, 3] - floor_z
+        standing = z_rel >= np.percentile(z_rel, 75)
+        if standing.sum() >= 10 and np.median(z_rel[standing]) > 0.4:
+            window = standing
+            slam_height = float(np.median(T[window, 2, 3])) - floor_z
     scale = (a.height - LENS_BELOW_TOP) / slam_height if a.height else 1.0   # the wearer's height sets the metric scale
     T[:, :3, 3] *= scale
     points *= scale

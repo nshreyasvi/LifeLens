@@ -15,17 +15,17 @@
 </h3>
 
 <p align="center">
-  <a href="https://dev.meta.ai/docs/quickstart"><img alt="Meta Muse Spark 1.3" src="https://img.shields.io/badge/Meta_AI-Muse_Spark_1.3-0467DF?style=for-the-badge&logo=meta&logoColor=white"></a>
-  <a href="https://ai.meta.com/sam2/"><img alt="Meta SAM 3D Body" src="https://img.shields.io/badge/Meta_AI-sam--3d--body-0467DF?style=for-the-badge&logo=meta&logoColor=white"></a>
-  <a href="https://github.com/facebookresearch/momentum"><img alt="Meta MHR" src="https://img.shields.io/badge/Meta_AI-MHR_(Momentum_Human_Rig)-0467DF?style=for-the-badge&logo=meta&logoColor=white"></a>
-  <a href="https://ollama.com/library/llama3.2"><img alt="Meta Llama 3.2" src="https://img.shields.io/badge/Meta_AI-Llama_3.2-0467DF?style=for-the-badge&logo=meta&logoColor=white"></a>
+  <a href="https://dev.meta.ai/docs/quickstart"><img alt="Meta Muse Spark 1.3" src="https://img.shields.io/badge/Meta_AI-Muse_Spark_1.3-2B44E8?style=for-the-badge&logo=meta&logoColor=white"></a>
+  <a href="https://ai.meta.com/sam2/"><img alt="Meta SAM 3D Body" src="https://img.shields.io/badge/Meta_AI-sam--3d--body-2B44E8?style=for-the-badge&logo=meta&logoColor=white"></a>
+  <a href="https://github.com/facebookresearch/momentum"><img alt="Meta MHR" src="https://img.shields.io/badge/Meta_AI-MHR_(Momentum_Human_Rig)-4F67FF?style=for-the-badge&logo=meta&logoColor=white"></a>
+  <a href="https://ollama.com/library/llama3.2"><img alt="Meta Llama 3.2" src="https://img.shields.io/badge/Meta_AI-Llama_3.2-172554?style=for-the-badge&logo=meta&logoColor=white"></a>
 </p>
 <p align="center">
-  <a href="https://www.meta.com/ai-glasses/"><img alt="Meta Ray-Ban Glasses" src="https://img.shields.io/badge/Wearable-Meta_Ray--Ban_Glasses-1E293B?style=flat-square&logo=meta&logoColor=white"></a>
-  <a href="https://github.com/MiroPsota/OmniEgoCap"><img alt="3D Motion Pipeline" src="https://img.shields.io/badge/3D_Motion-OmniEgoCap_%2B_HaWoR_%2B_DROID--SLAM-E04F26?style=flat-square"></a>
-  <a href="https://reccobeats.com/"><img alt="Spotify + ReccoBeats" src="https://img.shields.io/badge/Music_Sync-Spotify_%2B_ReccoBeats-1DB954?style=flat-square&logo=spotify&logoColor=white"></a>
-  <a href="https://vite.dev/"><img alt="Vite 6" src="https://img.shields.io/badge/Studio_App-Vite_6_%C2%B7_Vanilla_JS-646CFF?style=flat-square&logo=vite&logoColor=white"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT_Open_Source-10B981?style=flat-square"></a>
+  <a href="https://www.meta.com/ai-glasses/"><img alt="Meta Ray-Ban Glasses" src="https://img.shields.io/badge/Wearable-Meta_Ray--Ban_Glasses-1E2230?style=flat-square&logo=meta&logoColor=white"></a>
+  <a href="https://github.com/MiroPsota/OmniEgoCap"><img alt="3D Motion Pipeline" src="https://img.shields.io/badge/3D_Motion-OmniEgoCap_%2B_HaWoR_%2B_DROID--SLAM-E04826?style=flat-square"></a>
+  <a href="https://reccobeats.com/"><img alt="Spotify + ReccoBeats" src="https://img.shields.io/badge/Music_Sync-Spotify_%2B_ReccoBeats-2B44E8?style=flat-square&logo=spotify&logoColor=white"></a>
+  <a href="https://vite.dev/"><img alt="Vite 6" src="https://img.shields.io/badge/Studio_App-Vite_6_%C2%B7_Vanilla_JS-4F67FF?style=flat-square&logo=vite&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT_Open_Source-1E2230?style=flat-square"></a>
 </p>
 
 <p align="center">
