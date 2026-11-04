@@ -13,7 +13,6 @@ const LIVE_URL = 'ws://127.0.0.1:8765';
 const LIVE_RETRY_MS = 5000;
 const LIVE_STARTING_RETRY_MS = 400; // after Play: the director waits only 5 s for the page
 const LIVE_START_TIMEOUT_MS = 20000;
-const MAX_CUES = 100;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 const ENERGY_ORDER = ['low', 'medium', 'high'];
 const ACTION_LABELS = { flash_light: 'Flash light', dim: 'Dim', change_color: 'Change color' };
@@ -32,9 +31,7 @@ const els = {
   error: $('error'), playBtn: $('play-btn'), playLabel: $('play-label'), restartBtn: $('restart-btn'),
   progressLabel: $('progress-label'), progressFill: $('progress-fill'), tabs: $('tabs'),
   tabBtns: [...document.querySelectorAll('[role="tab"]')], views: [...document.querySelectorAll('[role="tabpanel"]')],
-  activityView: $('view-activity'), energyChip: $('energy-chip'), energyValue: $('energy-value'),
-  energySegs: [...document.querySelectorAll('#energy-meter .seg')], energyNote: $('energy-note'),
-  timeline: $('timeline'), timelineCount: $('timeline-count'), ambient: $('ambient'), bulbs: $('bulbs'),
+  ambient: $('ambient'), bulbs: $('bulbs'),
   lightsAction: $('lights-action'), lightsEnergy: $('lights-energy'), lightsMood: $('lights-mood'),
   lightsSwatch: $('lights-swatch'), lightsColor: $('lights-color'), lightsReason: $('lights-reason'),
   musicPanel: $('music-panel'), musicState: $('music-state'), beats: [...document.querySelectorAll('.beat')],
@@ -96,13 +93,6 @@ function onTabKeydown(e) {
 // ---------- Director messages: energy, cues, light color, tempo and mood ----------
 
 function renderMessage(msg) {
-  const level = ENERGY_ORDER.indexOf(msg.energy) + 1;
-  els.energyValue.textContent = capitalize(msg.energy);
-  els.energySegs.forEach((seg, i) => seg.classList.toggle('is-on', i < level));
-  const posture = word(msg.posture_label) === 'unknown' ? '' : word(msg.posture_label);
-  const speed = Number.isFinite(msg.speed) ? ` at ${msg.speed.toFixed(2)} m/s` : '';
-  els.energyNote.textContent = `${msg.time ?? ''} · ${capitalize(posture || 'moving')}${speed} · ${ACTION_LABELS[msg.action]}`;
-
   if (Number.isFinite(msg.intensity)) state.master = Math.min(1, Math.max(0, msg.intensity));
   if (typeof msg.color === 'string' && HEX_COLOR.test(msg.color)) state.color = msg.color;
   if (msg.action === 'flash_light') {
@@ -132,35 +122,6 @@ function renderMessage(msg) {
   els.lightsMood.textContent = mood ? capitalize(mood) : '-';
   for (const beat of els.beats) beat.style.setProperty('--beat', `${(60 / msg.music_tempo).toFixed(3)}s`);
   state.last = msg;
-}
-
-function addCue(msg) {
-  const last = state.cues[state.cues.length - 1];
-  if (last && last.action === msg.action && last.energy === msg.energy && last.music_tempo === msg.music_tempo) {
-    state.cues[state.cues.length - 1] = msg; // ~3 messages a second repeat the same cue: they update the last row
-    els.timeline.lastElementChild.querySelector('time').textContent = msg.time ?? '';
-  } else {
-    state.cues.push(msg);
-    const li = document.createElement('li');
-    li.className = 'tl-item';
-    li.innerHTML = `<span class="tl-dot" aria-hidden="true"></span><div><div class="tl-row"><span class="tl-action"></span>
-      <time></time></div><div class="tl-meta"><span class="energy energy-${msg.energy}"></span><span></span></div></div>`;
-    li.querySelector('.tl-action').textContent = ACTION_LABELS[msg.action];
-    li.querySelector('time').textContent = msg.time ?? '';
-    li.querySelector('.energy').textContent = `${capitalize(msg.energy)} energy`;
-    li.querySelector('.tl-meta span:last-child').textContent = state.modelMood ? `${msg.music_tempo} BPM` : 'Tempo pending';
-    els.timeline.appendChild(li);
-  }
-  if (state.cues.length > MAX_CUES) {
-    state.cues.shift();
-    els.timeline.firstElementChild.remove();
-  }
-  [...els.timeline.children].forEach((li, i, all) => li.classList.toggle('is-current', i === all.length - 1));
-  els.timelineCount.textContent = `${state.cues.length} cue${state.cues.length === 1 ? '' : 's'}`;
-  if (!els.activityView.hidden) {
-    const cur = els.timeline.lastElementChild;
-    els.timeline.scrollTo({ top: Math.max(cur.offsetTop - els.timeline.clientHeight / 2, 0), behavior: 'smooth' });
-  }
 }
 
 function colorName(hex) {
@@ -233,7 +194,7 @@ function renderFeatures(f, t) {
     ['Rhythm', f.rhythm?.strength > 0.3 ? `${Math.round(f.rhythm.bpm)}/min · ${Math.round(f.rhythm.strength * 100)}%` : 'none'],
     ['Arm swing', `${Math.round(f.arm)}°`], ['Upright', `${Math.round(f.upright * 100)}%`],
     ['Still', `${Math.round(f.still * 100)}%`], ['Energy', t.energy.toFixed(2)], ['Dance', t.danceability.toFixed(2)],
-    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? `${t.tempo} BPM · ${t.tempoFrom}` : '-'],
+    ['Valence', t.valence.toFixed(2)], ['Acoustic', t.acousticness.toFixed(2)], ['Tempo', t.tempo ? (t.tempoFrom === 'body rhythm' ? `${t.tempo}/min · body rhythm` : `${t.tempo} BPM · ${t.tempoFrom}`) : '-'],
   ];
   els.features.replaceChildren(...rows.map(([k, v], i) => {
     const row = Object.assign(document.createElement('div'), { className: i < 5 ? 'feat feat-in' : 'feat feat-out' });
@@ -318,10 +279,13 @@ function preSection(t) {
 
 async function loadPreSongs() {
   Object.assign(songs, { pre: null, preAt: -1 });
+  Object.assign(session, { active: true, activity: '' });
   const base = session.rec?.base;
   if (!base) return;
   const data = await fetch(`/${base}/songs.json`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!data || session.rec?.base !== base) return;
+  Object.assign(session, { active: data.active !== false, activity: data.activity || '' });
+  emit('activity', { active: session.active, activity: session.activity });
   const pre = (data.sections ?? []).filter((s) => s.songs?.length);
   for (const sec of pre) for (const s of sec.songs) s.why = `${sec.style} (${sec.mood}): ${sec.why}`;
   songs.pre = pre.length ? pre : null;
@@ -370,7 +334,7 @@ async function askSongs(t) {
     s.tempo = x ? Math.round(x.tempo) : null;
     s.fit = x ? Math.abs(x.tempo - t.tempo) / 60 + Math.abs(x.energy - t.energy) + Math.abs(x.valence - t.valence) : 9;
     s.why = t.search ? `${t.from ?? 'Muse Spark'}: ${t.search}, ${Math.round(t.tempo)} BPM, energy ${t.energy.toFixed(2)}.`
-      : `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo} BPM, ${t.mood} mood.`;
+      : `Picked at ${clock(t.at)} for energy ${t.energy.toFixed(2)}, ${t.tempo}${t.tempoFrom === 'body rhythm' ? '/min body rhythm' : ' BPM'}, ${t.mood} mood.`;
   }
   list.sort((a, b) => a.fit - b.fit);
   return { seed: `"${seed.name}"`, songs: list.slice(0, 5) };
@@ -383,7 +347,7 @@ function drawQueue() {
     const head = Object.assign(document.createElement('div'), { className: 'queue-head' });
     head.append(Object.assign(document.createElement('span'), { className: 'queue-time', textContent: `${clock(sec.start_s)}-${clock(sec.end_s)}` }),
       Object.assign(document.createElement('strong'), { textContent: sec.style }),
-      Object.assign(document.createElement('span'), { className: 'queue-mood', textContent: sec.mood }));
+      Object.assign(document.createElement('span'), { className: 'queue-mood', textContent: sec.source === 'Gymify' ? `${sec.mood} · Gymify` : sec.mood }));
     const ol = Object.assign(document.createElement('ol'), { className: 'queue-songs' });
     ol.append(...sec.songs.map((song) => songRow(song)));
     li.append(head, ol);
@@ -523,7 +487,7 @@ function renderControls() {
   els.playLabel.textContent = state.starting ? 'Starting…' : live ? 'Pause' : state.phase === 'paused' ? 'Resume' : 'Play';
   for (const btn of els.tabBtns) btn.classList.toggle('is-live', live && btn.dataset.tab !== 'day');
   const status = live ? 'Live' : state.phase === 'paused' ? 'Paused' : state.phase === 'ended' ? 'Ended' : 'Waiting';
-  for (const chip of [els.energyChip, els.musicState, els.chainState]) {
+  for (const chip of [els.musicState, els.chainState]) {
     chip.textContent = status;
     chip.classList.toggle('is-active', live);
   }
@@ -543,11 +507,6 @@ function showNotice(text) {
 function reset() {
   Object.assign(state, { phase: 'idle', cues: [], liveCount: 0, last: null, master: 1, modelMood: false });
   resetStage();
-  els.timeline.replaceChildren();
-  els.timelineCount.textContent = '0 cues';
-  els.energyValue.textContent = '-';
-  els.energySegs.forEach((s) => s.classList.remove('is-on'));
-  els.energyNote.textContent = 'Press Play.';
   els.lightsAction.textContent = 'Waiting';
   els.lightsAction.classList.remove('is-active');
   els.lightsReason.hidden = true;
@@ -642,7 +601,6 @@ function connectLive() {
       if (!isValidMessage(msg) || !session.rec) return;
       emit('message', { msg, live: true });
       renderMessage(msg);
-      addCue(msg);
       state.liveCount += 1;
       renderControls();
     } catch (err) {
@@ -678,6 +636,7 @@ document.addEventListener('lifelens:play-song', (e) => {
 });
 export { askSongs };
 
+document.addEventListener('lifelens:songs-changed', () => loadPreSongs());   // Gymify put its music in the queue
 document.addEventListener('lifelens:music-profile', async (e) => {
   const m = e.detail;
   songs.profile = m;

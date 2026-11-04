@@ -8,7 +8,9 @@ them live (src/session.js bodyFeatures): pace, time still, arm swing, how uprigh
 (src/session.js rhythmBpm). They give the song targets with the Music tab's formulas (src/main.js musicTargets). Meta
 Muse Spark reads every section's numbers and its captions in one call and names a music style and mood per section;
 ReccoBeats' top match for that style is the seed, and its recommendations near the targets are sorted by how close their
-measured tempo, energy and mood are. The key is read from director/.env, never printed.
+measured tempo, energy and mood are. The same call names the activity and whether it is active (exercise, sport,
+dance) or an everyday task; the app shows Stage and Gym only for active recordings. The key is read from
+director/.env, never printed.
 """
 
 import argparse
@@ -30,8 +32,10 @@ PROMPT = """You pick music for a recording of a person, filmed by a camera on th
 for each section below you get its numbers and what Meta Muse Spark saw in the video. For every section, name a music
 style that fits what they are doing and how they move (2-4 words a song search would match, e.g. "upbeat indie pop",
 "calm acoustic", "driving workout hip hop") and a mood from: calm, curious, joyful, tense, powerful.
-Answer with one JSON object: {{"sections": [{{"style": "...", "mood": "...", "why": "one short reason"}}, ...]}}, one per
-section, in order.
+Also say what the person is doing over the whole recording, and whether it is active: true if they exercise, play a
+sport, dance or perform; false for everyday tasks such as eating, desk work, chores or resting.
+Answer with one JSON object: {{"activity": "1-4 words", "active": true or false, "sections": [{{"style": "...",
+"mood": "...", "why": "one short reason"}}, ...]}}, one section entry per section, in order.
 
 {sections}"""
 
@@ -138,13 +142,17 @@ def main(a):
         lines.append(f"{i + 1}. {s0:.0f}-{s1:.0f} s: pace {f['pace']:.2f} m/s, still {round(100 * f['still'])}%, arm swing "
                      f"{f['arm']:.0f} deg, upright {round(100 * f['upright'])}%, {rh}. Muse saw: {said or 'no caption'}")
         sections.append({'start_s': round(s0, 1), 'end_s': round(s1, 1), 'features': f})
-    picks = ask(muse_key(), PROMPT.format(sections='\n'.join(lines)), []).get('sections', [])
+    answer = ask(muse_key(), PROMPT.format(sections='\n'.join(lines)), [], feature='songs')
+    picks = answer.get('sections', [])
     for sec, pick in zip(sections, picks + [{}] * len(sections)):
         mood = pick.get('mood', '') if pick.get('mood') in MOOD_VALENCE else ''
         sec.update(style=pick.get('style', ''), mood=mood, why=pick.get('why', ''), targets=targets(sec['features'], mood))
         sec['songs'] = songs_for(sec['style'], sec['targets']) if sec['style'] else []
-    out = {'sections': sections, 'model': os.getenv('MUSE_MODEL', 'muse-spark-1.3'), 'runtime_s': round(time.time() - t0, 1)}
+    # activity / active: Muse's read of the whole recording; the app shows Stage and Gym only for active ones
+    out = {'activity': str(answer.get('activity', '')), 'active': answer.get('active') is not False, 'sections': sections,
+           'model': os.getenv('MUSE_MODEL', 'muse-spark-1.3'), 'runtime_s': round(time.time() - t0, 1)}
     json.dump(out, open(f'{run}/songs.json', 'w', encoding='utf-8'), indent=1)
+    print(f"activity: {out['activity']} (active: {out['active']})", flush=True)
     for sec in sections:
         print(f"{sec['start_s']}-{sec['end_s']} s: {sec['style']} ({sec['mood']}): "
               f"{', '.join(s['name'] for s in sec['songs'][:3]) or 'no songs'}", flush=True)

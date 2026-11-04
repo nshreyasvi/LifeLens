@@ -411,6 +411,8 @@
         </div>
         <div class="media-stage">
           <canvas class="gym-view" id="gym-view" hidden aria-label="Gymify viewer: the 3D body with the head camera and the rep count"></canvas>
+          <!-- Stage and Gym on a recording Muse Spark found inactive (songs.json "active": false): a note instead -->
+          <div class="rest-note" id="rest-note" hidden><strong id="rest-title"></strong><p id="rest-text"></p></div>
           <div class="media-pane media-base" data-pane="pov">
             <video muted playsinline loop preload="auto" aria-label="Head-camera video"></video>
             <div class="live-overlay" id="live-overlay" aria-live="polite" hidden>
@@ -456,27 +458,18 @@
           <video muted playsinline loop preload="auto" aria-label="3D body, reconstructed from the head camera"></video>
         </div>
         <section class="view view-activity" id="view-activity" data-view="activity" role="tabpanel" aria-labelledby="tab-btn-activity">
-          <section class="panel panel-energy" aria-labelledby="energy-title">
+          <!-- What Meta Muse Spark saw at the playhead (day.js): the two frames it labelled, its posture and its caption -->
+          <section class="panel panel-now" aria-labelledby="now-title">
             <div class="panel-head">
-              <h2 id="energy-title">Live activity</h2>
-              <span class="chip" id="energy-chip">Waiting</span>
+              <h2 id="now-title">What Muse Spark sees now</h2>
+              <span class="chip" id="now-window">-</span>
             </div>
-            <div class="energy-value" id="energy-value" aria-live="polite">-</div>
-            <div>
-              <div class="energy-meter" id="energy-meter" aria-hidden="true">
-                <span class="seg"></span><span class="seg"></span><span class="seg"></span>
-              </div>
-              <div class="energy-scale" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span></div>
+            <div class="now-frames">
+              <figure><img id="now-body" alt="The 3D body frame Muse Spark looked at" hidden><figcaption>3D body</figcaption></figure>
+              <figure><img id="now-pov" alt="The head-camera frame Muse Spark looked at" hidden><figcaption>Head camera</figcaption></figure>
             </div>
-            <p class="energy-note" id="energy-note">Press Play to stream activity cues.</p>
-          </section>
-
-          <section class="panel panel-timeline" aria-labelledby="timeline-title">
-            <div class="panel-head">
-              <h2 id="timeline-title">Activity stream</h2>
-              <span class="chip" id="timeline-count">0 cues</span>
-            </div>
-            <ol class="timeline" id="timeline"></ol>
+            <p class="now-posture">Posture <strong id="now-posture">-</strong></p>
+            <p class="now-caption" id="now-caption">Open a recording and press Play.</p>
           </section>
         </section>
 

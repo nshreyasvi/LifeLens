@@ -102,44 +102,51 @@ function render(g) {
   const r = g.review;
   if (r) {
     parts.push(el('p', 'gym-summary', r.summary));
-    const list = el('ol', 'gym-changes');
-    list.append(...(r.improvements ?? []).map((c) => {
-      const li = el('li');
-      li.append(el('strong', '', c.change), el('span', 'gym-why', c.why ?? ''), el('span', 'gym-how', c.how ?? ''));
+    const list = el('ol', 'gym-cards');
+    list.append(...(r.improvements ?? []).map((c, k) => {
+      const li = el('li', 'gym-card');
+      const head = el('div', 'gym-card-head');
+      head.append(el('span', 'gym-card-n', String(k + 1)), el('strong', '', c.change));
+      const rep = repOf(`${c.change} ${c.why} ${c.how}`, g.reps.length);   // the rep the change rests on, if it names one
+      if (rep) {
+        const go = el('button', 'gym-rep-link', `Rep ${rep}`);
+        go.type = 'button';
+        go.setAttribute('aria-label', `Play rep ${rep}`);
+        go.addEventListener('click', () => { media.seek(g.reps[rep - 1].bottom_s); media.play(); });
+        head.appendChild(go);
+      }
+      const rows = el('dl', 'gym-card-rows');
+      rows.append(el('dt', '', 'Why'), el('dd', '', c.why ?? ''), el('dt', '', 'How'), el('dd', '', c.how ?? ''));
+      li.append(head, rows);
       return li;
     }));
     parts.push(list);
     if (r.went_well?.length) {
-      const good = el('ul', 'gym-good');
-      good.append(...r.went_well.map((t) => el('li', '', t)));
+      const good = el('div', 'gym-card gym-card-good');
+      const ul = el('ul', 'gym-good');
+      ul.append(...r.went_well.map((t) => el('li', '', t)));
+      good.append(el('strong', '', 'Went well'), ul);
       parts.push(good);
     }
     const more = el('details', 'gym-more');
     more.append(el('summary', '', `What Muse saw in the frames (${(r.form ?? []).length})`), ...(r.form ?? []).map((t) => el('p', '', t)),
       ...(r.caveats ?? []).map((t) => el('p', 'gym-caveat', t)));
     parts.push(more);
-    if (r.music) {
-      const m = r.music;
-      const music = el('div', 'gym-music');
-      const chips = el('div', 'gym-chips');
-      chips.append(...[[m.search, 'style'], [`${Math.round(m.tempo)} BPM`, 'tempo'], [`${Math.round(100 * m.energy)}%`, 'energy'],
-        [`${Math.round(100 * m.valence)}%`, 'mood'], [`${Math.round(100 * (m.instrumentalness ?? 0))}%`, 'instrumental']].map(([v, k]) => {
-        const c = el('span', 'gym-chip');
-        c.append(el('strong', '', v), ` ${k}`);
-        return c;
-      }));
-      const play = el('button', 'btn btn-small-text btn-primary', 'Play gym music');
-      play.type = 'button';
-      play.addEventListener('click', () => document.dispatchEvent(new CustomEvent('lifelens:music-profile', { detail: m })));
-      music.append(el('span', 'gym-label', 'Music to train to (Muse Spark)'), chips, el('p', 'gym-why', m.reason ?? ''), play);
-      parts.push(music);
-    }
+    if (r.music) parts.push(el('p', 'gym-note', `Music for the reps: "${r.music.search}" is in the Music queue for `
+      + `${clock(g.reps[0].start_s)}-${clock(g.reps[g.reps.length - 1].end_s)} (Muse Spark's pick for this exercise).`));
   }
   const feedback = el('div', 'gym-col gym-feedback');
-  feedback.append(el('h3', 'gym-col-title', 'Form feedback from Meta Muse Spark'), ...parts);
+  feedback.append(el('h3', 'gym-col-title', 'Muse Spark feedback'), ...parts);
   const cols = el('div', 'gym-cols');
   cols.append(numbers, feedback);
   box.replaceChildren(head, cols);
+}
+
+// "rep 4" / "reps 3-4" / "in rep 6" in Muse's text: the first rep it names (1-based), or 0.
+function repOf(text, n) {
+  const m = /\breps?\s+(\d+)/i.exec(text ?? '');
+  const k = m ? Number(m[1]) : 0;
+  return k >= 1 && k <= n ? k : 0;
 }
 
 // One row per rep: depth as a bar against the deepest rep, seconds down and up, and the left-right difference.
@@ -195,6 +202,7 @@ async function gymify() {
     const rec = (await fetchRecordings()).processed.find((r) => r.base === session.rec.base);
     if (rec) session.rec.files = rec.files;          // gym.json is listed now
     load();
+    document.dispatchEvent(new CustomEvent('lifelens:songs-changed'));   // the queue has the exercise's music now
   }, 2000);
 }
 

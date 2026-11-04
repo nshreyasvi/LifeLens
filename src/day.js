@@ -247,6 +247,7 @@ function update() {
   strip.setAttribute('aria-valuetext', describe(s));
   $('routine-clock').textContent = `${clock(s)} / ${clock(view.labels.length)}`;
   $('routine-caption').textContent = describe(s);
+  showNow(s);
   const i = view.entries.findIndex((e) => s >= e.start && s < e.end);
   if (i === view.current) return;
   view.items[view.current]?.classList.remove('is-current');
@@ -258,7 +259,27 @@ function update() {
   if (!log.closest('[hidden]')) log.scrollTo({ left: item.offsetLeft - log.clientWidth / 2 + item.offsetWidth / 2, behavior: 'smooth' });
 }
 
+// What Muse Spark saw in the 5 s window under the playhead: the 3D body and head-camera frames it labelled
+// (frames/body_<start>.jpg, pov_<start>.jpg), the posture it named and its caption.
+function showNow(s) {
+  const start = Math.floor(s / 5) * 5;
+  if (start === view.nowAt) return;
+  view.nowAt = start;
+  const base = session.rec?.base;
+  const cap = view.captions.find((c) => s >= c.start_s && s < c.end_s);
+  $('now-window').textContent = `${clock(start)}-${clock(Math.min(start + 5, view.labels.length))}`;
+  $('now-posture').textContent = view.labels[s] && view.labels[s] !== 'unknown' ? capitalize(view.labels[s]) : 'No label';
+  $('now-caption').textContent = cap && !cap.text.startsWith('[') ? tidy(cap.text) : 'No caption for this moment.';
+  for (const [id, name] of [['now-body', 'body'], ['now-pov', 'pov']]) {
+    const img = $(id);
+    img.onerror = () => { img.hidden = true; };
+    img.onload = () => { img.hidden = false; };
+    img.src = base ? `/${base}/frames/${name}_${String(start).padStart(4, '0')}.jpg` : '';
+  }
+}
+
 function redraw() {
+  view.nowAt = -1;
   view.labels = view.rows.map((r) => r.label);      // Meta Muse Spark's posture per second (pipeline/insights.py)
   drawStrip();
   drawLog();

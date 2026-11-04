@@ -41,7 +41,7 @@ function segmentFacts(t0, t1) {
   const f = bodyFeatures(t1, t1 - t0);
   const m = moments(Math.round(t0 * FPS), Math.round(t1 * FPS));
   return `${clock(t0)}-${clock(t1)}: pace ${f.pace.toFixed(2)} m/s, still ${Math.round(100 * f.still)}%, `
-    + `${f.rhythm?.strength > 0.3 ? `body rhythm ${Math.round(f.rhythm.bpm)} BPM` : 'no steady rhythm'}, `
+    + `${f.rhythm?.strength > 0.3 ? `body rhythm ${Math.round(f.rhythm.bpm)}/min` : 'no steady rhythm'}, `
     + `${m.hits} sudden arm moves, ${m.jumps} jumps, ${m.crouches} crouches, ${m.turns} fast turns, `
     + `hands up ${Math.round(100 * m.up)}%, arm spread ${m.spread.toFixed(2)} m.`;
 }

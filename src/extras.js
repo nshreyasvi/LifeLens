@@ -34,6 +34,7 @@ function openTab(next) {
   tab = next;
   mediaRoot.dataset.tab = tab;
   renderActions();
+  renderRest();
   mediaRoot.hidden = !TAB_PANES[tab];
   if (!TAB_PANES[tab]) return;
   media.show(chosen[tab] ?? TAB_PANES[tab]);
@@ -121,12 +122,25 @@ $('muse-log-close').addEventListener('click', () => toggleCalls(false));
 const ACTIONS = { stage: { btn: 'stagify-btn', status: 'stagify-status', done: () => Boolean(document.querySelector('#stagify-out a')) || Boolean(session.rec?.files?.['stage.json']), again: 'Stagify again' },
   gym: { btn: 'gym-btn', status: 'gym-status', done: () => Boolean(document.querySelector('#gym-result .gym-ex')), again: 'Run Gymify again' } };
 const firstLabel = {};
+// Stage and Gym on a recording Muse Spark found inactive: a light-hearted note in the main view, no viewer, no button.
+const REST = {
+  stage: (a) => ['The stage lights stay down', `Muse Spark watched this one and saw ${a}. A fine thing to do, just not a show. Bring some moves next time and the lights will follow.`],
+  gym: (a) => ['Zero reps, and that is fine', `Muse Spark checked every frame and saw ${a}, not a workout. Rest day logged.`],
+};
+function renderRest() {
+  const note = REST[tab] && session.active === false ? REST[tab](session.activity || 'an everyday moment') : null;
+  $('rest-note').hidden = !note;
+  $('stage-dock').hidden = tab !== 'stage' || Boolean(note);      // no rig without a show
+  if (note) [$('rest-title').textContent, $('rest-text').textContent] = note;
+}
+document.addEventListener('lifelens:activity', () => { renderRest(); renderActions(); });
+
 function renderActions() {
   for (const [name, a] of Object.entries(ACTIONS)) {
     const box = document.querySelector(`.media-action[data-tab="${name}"]`);
     const btn = $(a.btn);
     firstLabel[name] ??= btn.textContent;
-    box.hidden = tab !== name || !session.rec || session.live;
+    box.hidden = tab !== name || !session.rec || session.live || session.active === false;
     box.dataset.state = btn.disabled ? 'running' : a.done() ? 'done' : 'idle';
     btn.textContent = box.dataset.state === 'done' ? a.again : firstLabel[name];
     box.querySelector('.action-status').textContent = btn.disabled ? $(a.status)?.textContent ?? '' : '';

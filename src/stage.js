@@ -188,7 +188,7 @@ export function updateStage(f, ctx) {
   stage.spot = { x: n.x, y: n.y, level: master, spread: clamp01((n.spread - 0.5) / 0.9) };
   if (stage.open && now - (stage.hudAt ?? 0) > 400) {
     stage.hudAt = now;
-    $('show-tempo').textContent = `${ctx.songBpm ? `${ctx.songBpm} BPM · song` : bpm ? `${Math.round(bpm)} BPM · body rhythm` : 'No beat'}`
+    $('show-tempo').textContent = `${ctx.songBpm ? `${ctx.songBpm} BPM · song` : bpm ? `body rhythm ${Math.round(bpm)}/min` : 'No beat'}`
       + `${ctx.mood ? ` · ${ctx.mood}` : ''} · ${ctx.t ? clock(ctx.t) : ''}`;
   }
   if (ctx.live) {
@@ -218,7 +218,7 @@ function facts(f, ctx) {
   const count = (w) => recent.filter((c) => c.text.startsWith(w)).length;
   return [
     `Pace ${f.pace.toFixed(2)} m/s, still ${Math.round(f.still * 100)}% of the time, trunk lean ${Math.round(f.lean)} deg.`,
-    f.rhythm?.strength > 0.3 ? `Body rhythm ${Math.round(f.rhythm.bpm)} BPM (strength ${f.rhythm.strength.toFixed(2)}).` : 'No steady body rhythm.',
+    f.rhythm?.strength > 0.3 ? `Body rhythm ${Math.round(f.rhythm.bpm)}/min, how often the limbs' speed pattern repeats (strength ${f.rhythm.strength.toFixed(2)}).` : 'No steady body rhythm.',
     q ? `Hands above the shoulders ${Math.round(100 * avg(q.up, (v) => (v > 0.8 ? 1 : 0)))}% of the time; arm spread ${avg(q.spread).toFixed(2)} m on average.` : '',
     q ? `Turning ${Math.round(Math.abs(q.yaw[j1] - q.yaw[j0]) / 8)} deg/s on average.` : '',
     `In the last 30 s: ${count('Hit')} sudden arm moves, ${count('Jump')} jumps, ${count('Crouch')} crouches, ${count('Turn')} fast turns.`,
