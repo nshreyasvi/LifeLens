@@ -16,7 +16,7 @@ const DEFAULT_STAGES = [
   { id: 'ingest', label: 'Preparing video clip', state: 'active' },
   { id: 'hawor', label: 'Tracking hands & camera movement', state: 'pending' },
   { id: 'build_input', label: 'Setting floor & height scale', state: 'pending' },
-  { id: 'omniegocap', label: 'Building your 3D body (Meta SAM 3D · MHR)', state: 'pending' },
+  { id: 'omniegocap', label: 'Building your 3D body (OmniEgoCap · Meta MHR)', state: 'pending' },
   { id: 'render', label: 'Rendering 3D body & movement flow', state: 'pending' },
   { id: 'describe_muse', label: 'Meta Muse Spark describing each moment', state: 'pending' },
   { id: 'posture_muse', label: 'Meta Muse Spark reading your posture', state: 'pending' },
@@ -54,7 +54,7 @@ export function renderHardware(hw) {
   const shortCpu = (hw.cpu || 'Processor').replace(/\(R\)|\(TM\)|CPU|@.*$/gi, '').replace(/\s+/g, ' ').trim();
   const startText = $('start-hw-text');
   if (startText) {
-    startText.textContent = `${hw.gpu || shortCpu} · Meta Muse Spark · Meta SAM 3D · MHR`;
+    startText.textContent = `${hw.gpu || shortCpu} · Meta Muse Spark · OmniEgoCap · Meta MHR`;
   }
   const gpuName = $('hw-gpu-name');
   if (gpuName) gpuName.textContent = hw.gpu || 'Graphics Card';

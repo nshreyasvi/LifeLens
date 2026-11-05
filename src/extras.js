@@ -192,7 +192,7 @@ document.addEventListener('lifelens:session', () => {
   if (rec) {
     media.setSources({ pov: rec.pov, body: rec.body, graph: rec.graph });
     $('media-title').textContent = rec.name.replace(/[-_]+/g, ' ');
-    $('media-caption').textContent = 'Powered by Meta Muse Spark, Meta SAM 3D & MHR.';
+    $('media-caption').textContent = 'Powered by Meta Muse Spark, OmniEgoCap & Meta MHR.';
   } else if (session.live) {
     media.clear();
     $('media-title').textContent = 'Live session';

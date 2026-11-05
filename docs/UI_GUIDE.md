@@ -10,31 +10,14 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 
 ---
 
-## 1. Start Screen & Session Launcher
-
-<p align="center">
-  <a href="media/start-launcher.mp4">
-    <img alt="LifeLens Start Screen & Processing Video" src="media/start-launcher.gif" width="900">
-  </a>
-  <br/>
-  <sub>🎬 Click the animated preview above to open <a href="media/start-launcher.mp4"><b>media/start-launcher.mp4</b></a></sub>
-</p>
-
-- **Wearer Profile:** Enter your name, height, weight, and age so **Meta MHR** scales your 3D body accurately in world space and **Meta Muse Spark** tailors feedback to you.
-- **Open a Saved Session:** Launch any pre-processed 3D session (`eating`, `exercising`, `snowboard-strap-in`) immediately — no GPU required to explore existing sessions.
-- **Process a New Clip:** Select any raw recording in `recordings/`, choose your camera preset (**Meta Ray-Ban Glasses**, **Phone on head strap**, **GoPro Linear**, or **GoPro Wide**), and run the 8-stage 3D MHR pipeline with live stage-by-stage progress and hardware telemetry bubbles.
-- **Record Live:** Film directly from a connected camera while **Meta Muse Spark** captions your activity and posture every few seconds.
-
----
-
-## 2. Routine & Relaxed-Life Feedback System (`Routine` Tab)
+## 1. Routine & Relaxed-Life Feedback System (`Routine` Tab)
 
 <p align="center">
   <a href="media/routine-feedback.mp4">
-    <img alt="LifeLens Routine Feedback System Video" src="media/routine-feedback.gif" width="900">
+    <img alt="LifeLens Routine Feedback System Dashboard" src="media/routine-feedback.gif" width="900">
   </a>
   <br/>
-  <sub>🎬 Click the animated preview above to open <a href="media/routine-feedback.mp4"><b>media/routine-feedback.mp4</b></a></sub>
+  <sub>🎬 Click the scrolling dashboard preview above to open <a href="media/routine-feedback.mp4"><b>media/routine-feedback.mp4</b></a></sub>
 </p>
 
 - **Synchronized First-Person & 3D MHR View:** Watch your first-person camera POV alongside your reconstructed **3D Meta MHR body mesh** (`mesh_exo.mp4`) and the live movement flow below the 3D mesh.
@@ -44,7 +27,7 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 
 ---
 
-## 3. Gymify Training Feedback System (`Gym` Tab)
+## 2. Gymify Training Feedback System (`Gym` Tab)
 
 <p align="center">
   <a href="media/gym-feedback.mp4">
@@ -65,7 +48,7 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 
 ---
 
-## 4. Unified Video & Music Player + Day Vibe (`Music` Tab)
+## 3. Unified Video & Music Player + Day Vibe (`Music` Tab)
 
 <p align="center">
   <a href="media/music-dayvibe.mp4">
@@ -83,7 +66,7 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 
 ---
 
-## 5. Dance Choreography & Virtual Stage Performance (`Stage` Tab)
+## 4. Dance Choreography & Virtual Stage Performance (`Stage` Tab)
 
 <p align="center">
   <a href="media/stage-choreography.mp4">

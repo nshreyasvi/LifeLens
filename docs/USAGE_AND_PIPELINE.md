@@ -72,7 +72,7 @@ Open **`http://localhost:8000`** in your browser.
 To reconstruct 3D MHR bodies from brand-new recordings, use Linux or Windows WSL2 with an NVIDIA GPU (8 GB+ VRAM, CUDA 12.6):
 
 ```bash
-bash archive/scripts/setup.sh
+bash scripts/setup.sh
 ```
 
 ### Recording Best Practices
