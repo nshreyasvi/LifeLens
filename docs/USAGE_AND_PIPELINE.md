@@ -6,7 +6,7 @@ Back to [Main README](../README.md) · See also: [UI & Features Guide](UI_GUIDE.
 
 ## 1. Quick Start (Explore Included 3D Sessions — No GPU Needed)
 
-The repository includes pre-processed first-person sessions (`eating`, `exercising`, `snowboard-strap-in`, `activities`) in [`examples/`](../examples) recorded on our head-mounted GoPro and processed into **3D Meta MHR body meshes**, joint kinematics, synced [ReccoBeats](https://reccobeats.com/) soundtracks, and **Meta Muse Spark** insights.
+The repository includes pre-processed first-person sessions (`eating`, `exercising`, `snowboard-strap-in`) in [`examples/`](../examples) recorded on our head-mounted GoPro (to replicate Meta Ray-Ban Smart Glasses) and processed into **3D Meta MHR body meshes**, joint kinematics, synced [ReccoBeats](https://reccobeats.com/) soundtracks, and **Meta Muse Spark** feedback.
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) 18+
@@ -63,7 +63,7 @@ Open **`http://localhost:8000`** in your browser.
 3. **Floor Plane & Metric Scale ([`pipeline/build_input.py`](../pipeline/build_input.py)):** Fits a gravity-aligned floor plane to the SLAM point cloud and scales the world using your height or [Metric3D v2](https://github.com/YvanYin/Metric3D) monocular depth.
 4. **Full-Body 3D MHR Reconstruction ([`pipeline/run_omniegocap.py`](../pipeline/run_omniegocap.py)):** Combines **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** and [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) to reconstruct the full 22-joint 3D body and articulated 3D hands from first-person head and wrist trajectories.
 5. **3D Mesh & Kinematics Stream Rendering ([`pipeline/render.py`](../pipeline/render.py)):** Produces the third-person **3D MHR body video** (`mesh_exo.mp4`), scrolling joint kinematics plot (`pose_graph.mp4`), side-by-side comparison (`side_by_side.mp4`), and per-frame joint CSV (`pose_timeseries.csv`).
-6. **Multimodal Reasoning & Coaching:** **Meta Muse Spark 1.3** processes the POV frames, 3D MHR renders, and joint kinematics to generate 5 s scene narrations, posture classifications, Routine habit coaching, Gymify rep analysis, and 20 s movement-synced [ReccoBeats](https://reccobeats.com/) soundtracks.
+6. **Multimodal Reasoning & Feedback Systems:** **Meta Muse Spark 1.3** processes the POV frames, 3D MHR renders, and joint kinematics to generate 5 s scene narrations, posture classifications, Routine & relaxed-life feedback, Gymify training feedback, and 20 s movement-synced [ReccoBeats](https://reccobeats.com/) soundtracks.
 
 ---
 

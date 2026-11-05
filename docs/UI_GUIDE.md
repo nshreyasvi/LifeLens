@@ -1,54 +1,66 @@
-# LifeLens UI & Features Guide
+# LifeLens UI & Feedback Systems Guide
 
-Back to [Main README](../README.md) · See also: [Usage & 3D Pipeline](USAGE_AND_PIPELINE.md) · [Meta AI Models & Ecosystem](MODELS_AND_ECOSYSTEM.md) · [Technical Deep Dive](DEEP_DIVE.md)
+Back to [Main README](../README.md) · See also: [Usage & 3D Pipeline](USAGE_AND_PIPELINE.md) · [Meta AI & Open-Source Models](MODELS_AND_ECOSYSTEM.md) · [Technical Deep Dive](DEEP_DIVE.md)
 
 ---
 
 ## Overview
 
-LifeLens turns a single first-person camera video into an interactive studio experience powered by **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)**, **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)**, **[Meta Llama 3.2](https://ollama.com/library/llama3.2)**, and open-source **[ReccoBeats](https://reccobeats.com/)**. Tested on head-mounted GoPro recordings and built for Meta Ray-Ban Smart Glasses and phone head-mounts, the interface is organized into a clean launcher and four focused workspace tabs — **Routine**, **Gym**, **Music**, and **Stage** — designed with friendly, non-technical language and visual cards.
+LifeLens turns a single first-person camera video into an interactive studio experience powered by **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)**, **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)**, **[Meta Llama 3.2](https://ollama.com/library/llama3.2)**, open-source **[OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)**, and open-source **[ReccoBeats](https://reccobeats.com/)**. Tested on head-mounted GoPro recordings to replicate the first-person perspective of **Meta Ray-Ban Smart Glasses**, the interface is organized into a clean launcher and four focused workspace tabs — **Routine**, **Gym**, **Music**, and **Stage** — designed with friendly, non-technical language and visual feedback cards.
 
 ---
 
 ## 1. Start Screen & Session Launcher
 
 <p align="center">
-  <img alt="LifeLens Start Screen" src="screenshots/ui-start.png" width="900">
+  <a href="media/start-launcher.mp4">
+    <img alt="LifeLens Start Screen & Processing Video" src="media/start-launcher.gif" width="900">
+  </a>
+  <br/>
+  <sub>🎬 Click the animated preview above to open <a href="media/start-launcher.mp4"><b>media/start-launcher.mp4</b></a></sub>
 </p>
 
-- **Wearer Profile:** Enter your name, height, weight, and age so **Meta MHR** scales your 3D body accurately in world space and **Meta Muse Spark** tailors coaching to you.
-- **Open a Saved Session:** Launch any pre-processed 3D session (`eating`, `exercising`, `snowboard-strap-in`, `activities`) immediately — no GPU required to explore existing sessions.
+- **Wearer Profile:** Enter your name, height, weight, and age so **Meta MHR** scales your 3D body accurately in world space and **Meta Muse Spark** tailors feedback to you.
+- **Open a Saved Session:** Launch any pre-processed 3D session (`eating`, `exercising`, `snowboard-strap-in`) immediately — no GPU required to explore existing sessions.
 - **Process a New Clip:** Select any raw recording in `recordings/`, choose your camera preset (**Meta Ray-Ban Glasses**, **Phone on head strap**, **GoPro Linear**, or **GoPro Wide**), and run the 8-stage 3D MHR pipeline with live stage-by-stage progress and hardware telemetry bubbles.
 - **Record Live:** Film directly from a connected camera while **Meta Muse Spark** captions your activity and posture every few seconds.
 
 ---
 
-## 2. Routine & Habit Coach (`Routine` Tab)
+## 2. Routine & Relaxed-Life Feedback System (`Routine` Tab)
 
 <p align="center">
-  <img alt="LifeLens Routine & Habit Coach" src="screenshots/ui-routine.png" width="900">
+  <a href="media/routine-feedback.mp4">
+    <img alt="LifeLens Routine Feedback System Video" src="media/routine-feedback.gif" width="900">
+  </a>
+  <br/>
+  <sub>🎬 Click the animated preview above to open <a href="media/routine-feedback.mp4"><b>media/routine-feedback.mp4</b></a></sub>
 </p>
 
-- **Synchronized 3-Pane View:** Watch your first-person camera POV alongside your reconstructed **3D Meta MHR body mesh** (`mesh_exo.mp4`) and the live **Joint Kinematics & Movement Flow** stream (`pose_graph.mp4`) positioned directly below the 3D mesh.
-- **Current Moment Inspection:** Displays the exact first-person frame and 3D MHR body render that **Meta Muse Spark** inspected for the current 5-second window, paired with concise posture and scene pills.
+- **Synchronized First-Person & 3D MHR View:** Watch your first-person camera POV alongside your reconstructed **3D Meta MHR body mesh** (`mesh_exo.mp4`) and the live movement flow below the 3D mesh.
+- **Current Moment Inspection:** Displays the exact first-person activity image and 3D MHR body render that **Meta Muse Spark** inspected for the current 5-second window, evaluating what activity you were doing, how effective it was, and how you feel.
 - **Posture Breakdown & Clickable Photo Timeline:** Visualizes your session split across `walking`, `standing`, `sitting`, `crouching`, `bending`, and `arms raised`. Click any 5-second photo card on the timeline to jump the video and 3D MHR mesh to that exact moment.
-- **Coaching & Habit Tips:** Friendly, visual cards generated by **Meta Muse Spark** highlighting what went well, timestamped posture adjustments, and comparisons across your **Past Sessions**.
+- **Relaxed-Life & Habit Feedback Cards:** Friendly, visual cards generated by **Meta Muse Spark** highlighting what went well, timestamped posture adjustments for a calmer and more relaxed life, and comparisons across your **Past Sessions**.
 
 ---
 
-## 3. Gymify Visual Workout Coach (`Gym` Tab)
+## 3. Gymify Training Feedback System (`Gym` Tab)
 
 <p align="center">
-  <img alt="LifeLens Gymify Workout Coach" src="screenshots/ui-gym.png" width="900">
+  <a href="media/gym-feedback.mp4">
+    <img alt="LifeLens Gymify Training Feedback System Video" src="media/gym-feedback.gif" width="900">
+  </a>
+  <br/>
+  <sub>🎬 Click the animated preview above to open <a href="media/gym-feedback.mp4"><b>media/gym-feedback.mp4</b></a></sub>
 </p>
 
-- **Automatic Exercise Recognition:** **Meta Muse Spark** inspects 3D MHR body frames and POV frames over the most active window using MHR joint trajectories to identify the exercise and confidence level.
+- **Automatic Exercise & Effectiveness Recognition:** **Meta Muse Spark** inspects 3D MHR body frames and POV frames over the most active window using MHR joint trajectories to identify the exercise and evaluate movement effectiveness.
 - **3D MHR Biomechanical Rep Counting:** Measures every rep directly on the 3D MHR joints (knee flexion, hip hinge, elbow angle, or wrist elevation), computing:
   - **Reps & Sets**
   - **Peak Depth & Range of Motion** (e.g., `136°` squat knee flexion)
   - **Eccentric / Concentric Tempo** (seconds down vs. seconds up)
   - **Left–Right Symmetry** at the bottom of each rep
-- **Visual Per-Rep Form Cards:** Each rep has a clickable card with visual depth gauges, symmetry bars, and concise coaching cues from **Meta Muse Spark**.
+- **Visual Per-Rep Form Feedback Cards:** Each rep has a clickable card with visual depth gauges, symmetry bars, and concise form feedback from **Meta Muse Spark**.
 - **Cozy Rest-Day Notice:** When viewing a non-workout clip (such as seated `eating`), Gymify displays a friendly illustrated rest-day card instead of forcing a rep count.
 
 ---
@@ -56,7 +68,11 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 ## 4. Unified Video & Music Player + Day Vibe (`Music` Tab)
 
 <p align="center">
-  <img alt="LifeLens Music & Day Vibe Tab" src="screenshots/ui-music.png" width="900">
+  <a href="media/music-dayvibe.mp4">
+    <img alt="LifeLens Music & Day Vibe Tab Video" src="media/music-dayvibe.gif" width="900">
+  </a>
+  <br/>
+  <sub>🎬 Click the animated preview above to open <a href="media/music-dayvibe.mp4"><b>media/music-dayvibe.mp4</b></a></sub>
 </p>
 
 - **Unified Video + Music Playback (Powered by Open-Source [ReccoBeats](https://reccobeats.com/)):** Pressing **Play** or scrubbing the video timeline locks the music player to the active movement section so video and soundtrack stay in sync:
@@ -67,12 +83,16 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 
 ---
 
-## 5. Virtual Dance Studio & Stage Show (`Stage` Tab)
+## 5. Dance Choreography & Virtual Stage Performance (`Stage` Tab)
 
 <p align="center">
-  <img alt="LifeLens Virtual Stage Show" src="screenshots/ui-stage.png" width="900">
+  <a href="media/stage-choreography.mp4">
+    <img alt="LifeLens Dance Choreography & Stage Performance Video" src="media/stage-choreography.gif" width="900">
+  </a>
+  <br/>
+  <sub>🎬 Click the animated preview above to open <a href="media/stage-choreography.mp4"><b>media/stage-choreography.mp4</b></a></sub>
 </p>
 
-- **Center-Stage 3D MHR Performer:** Your 3D MHR body mesh is keyed onto a dark virtual stage with a persistent first-person POV inset so you can always see both perspectives smoothly at 60 fps.
+- **Center-Stage 3D MHR Performer:** Your 3D MHR body mesh is keyed onto a dark virtual stage with a persistent first-person POV inset so dancers and performers can rehearse choreography smoothly at 60 fps.
 - **6 Reactive Lighting Fixtures:** Six virtual stage lights map directly to your 3D MHR body parts (**Left Arm**, **Right Arm**, **Left Leg**, **Right Leg**, **Torso**, and **Pace**), reacting every frame to limb speed, arm spread, jumps, crouches, and turns.
 - **Stagify Show Planner & Hardware DMX/Hue Export:** Click **Create full stage show** to let **Meta Muse Spark** design a multi-scene lighting arc (`stage.json`, `stage_cues.csv`) that can drive real-world [Art-Net DMX](https://art-net.org.uk/) fixtures or a [Philips Hue](https://developers.meethue.com/) bridge.

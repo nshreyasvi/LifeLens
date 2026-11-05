@@ -2,47 +2,52 @@
   <img alt="LifeLens Banner" src="docs/brand/hero-banner.jpg" width="100%">
 </p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-wordmark-on-dark.svg">
-    <img alt="LifeLens Logo" src="docs/brand/logo-wordmark.svg" width="340">
-  </picture>
-</p>
-
 <h3 align="center">
-  One Head Camera. Your Whole Body in 3D.<br/>
-  <sub>Powered by <b>Meta Muse Spark 1.3</b>, <b>Meta MHR (Momentum Human Rig)</b>, <b>Meta Llama 3.2</b> &amp; <b>ReccoBeats</b></sub>
+  See What Your Glasses Can't — Your Whole Body in 3D, Turned into an Everyday Feedback System for Routine, Training, Music &amp; Stage.
 </h3>
 
 <p align="center">
   <a href="https://dev.meta.ai/docs/quickstart"><img alt="Meta Muse Spark 1.3" src="https://img.shields.io/badge/Meta_AI-Muse_Spark_1.3-2B44E8?style=for-the-badge&logo=meta&logoColor=white"></a>
   <a href="https://github.com/facebookresearch/momentum"><img alt="Meta MHR" src="https://img.shields.io/badge/Meta_AI-MHR_(Momentum_Human_Rig)-4F67FF?style=for-the-badge&logo=meta&logoColor=white"></a>
   <a href="https://ollama.com/library/llama3.2"><img alt="Meta Llama 3.2" src="https://img.shields.io/badge/Meta_AI-Llama_3.2-172554?style=for-the-badge&logo=meta&logoColor=white"></a>
-  <a href="https://www.meta.com/ai-glasses/"><img alt="Meta Ray-Ban & Head Cameras" src="https://img.shields.io/badge/Wearable-Meta_Ray--Ban_%26_GoPro-1E2230?style=for-the-badge&logo=meta&logoColor=white"></a>
-  <a href="https://github.com/MiroPsota/OmniEgoCap"><img alt="3D Motion Pipeline" src="https://img.shields.io/badge/3D_Motion-OmniEgoCap_%2B_HaWoR_%2B_DROID--SLAM-E04826?style=for-the-badge"></a>
-  <a href="https://reccobeats.com/"><img alt="ReccoBeats Open Source" src="https://img.shields.io/badge/Music_AI-ReccoBeats_Open_Source-2B44E8?style=for-the-badge"></a>
-  <a href="https://vite.dev/"><img alt="Vite 6" src="https://img.shields.io/badge/Studio_App-Vite_6_%C2%B7_Vanilla_JS-4F67FF?style=for-the-badge&logo=vite&logoColor=white"></a>
+  <a href="https://github.com/MiroPsota/OmniEgoCap"><img alt="OmniEgoCap Open Source" src="https://img.shields.io/badge/Open_Source-OmniEgoCap_3D_Body-E04826?style=for-the-badge"></a>
+  <a href="https://github.com/ThunderVVV/HaWoR"><img alt="HaWoR + DROID-SLAM + Metric3D" src="https://img.shields.io/badge/Open_Source-HaWoR_%2B_DROID--SLAM_%2B_Metric3D-1E2230?style=for-the-badge"></a>
+  <a href="https://reccobeats.com/"><img alt="ReccoBeats Open Source" src="https://img.shields.io/badge/Open_Source-ReccoBeats_Music_AI-2B44E8?style=for-the-badge"></a>
+  <a href="https://www.meta.com/ai-glasses/"><img alt="Tested with GoPro Head-Mount for Meta Ray-Ban" src="https://img.shields.io/badge/Wearable_POV-GoPro_Head--Mount_%E2%86%92_Meta_Ray--Ban-4F67FF?style=for-the-badge&logo=meta&logoColor=white"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT_Open_Source-1E2230?style=for-the-badge"></a>
 </p>
 
 <p align="center">
-  <a href="#why-lifelens">Overview</a> ·
+  <a href="#why-lifelens">Why LifeLens</a> ·
   <a href="#video-demo">Video Demo</a> ·
-  <a href="#use-cases-powered-by-meta-mhr--meta-muse-spark">Use Cases</a> ·
-  <a href="#ui-tour">UI Screenshots</a> ·
-  <a href="#3d-pipeline-architecture">Architecture</a> ·
+  <a href="#everyday-use-cases--feedback-systems">Use Cases</a> ·
+  <a href="#interactive-ui--feedback-system-tour">UI Video Tour</a> ·
+  <a href="#full-end-to-end-pipeline-architecture">Full Pipeline</a> ·
+  <a href="#3d-mhr-sessions">3D Sessions</a> ·
   <a href="#installation--quick-start">Quick Start</a> ·
-  <a href="#documentation-hub">Docs Hub</a> ·
-  <a href="#open-source-license">License</a>
+  <a href="#documentation-hub">Docs Hub</a>
 </p>
 
 ---
 
 ## Why LifeLens
 
-Head-mounted cameras and smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** only see what is **in front** of you — they never see your own body.
+Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** and head-mounted cameras look *outward* at the world — they see your coffee cup, your desk, or the mountain ahead, **but they never see your own body**.
 
-**LifeLens reconstructs how your whole body moves from a single first-person camera.** Tested on head-mounted GoPro recordings and designed for Meta Ray-Ban Smart Glasses and phone head-mounts, LifeLens uses **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** together with [HaWoR](https://github.com/ThunderVVV/HaWoR), [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM), [Metric3D v2](https://github.com/YvanYin/Metric3D), and [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) to recover your **22-joint 3D body and 30-joint articulated hands** in world space. Then **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)** (with **[Meta Llama 3.2](https://ollama.com/library/llama3.2)** for offline local mode) and open-source **[ReccoBeats](https://reccobeats.com/)** turn your 3D motion into daily habit coaching, visual workout rep analysis, movement-synced music with **Day Vibe** picks, and a 6-light virtual stage show.
+**LifeLens makes your unseen body visible and turns your daily motion into gentle, actionable feedback.**
+
+- **Tested with a Head-Mounted GoPro to Replicate Meta Ray-Ban Smart Glasses:** We tested LifeLens on real first-person recordings captured with a **head-mounted GoPro** configured to match the field of view and head motion of **Meta Ray-Ban Smart Glasses** (and it also supports phone head-mounts and wearable action cameras).
+- **100% Open-Source 3D Body Reconstruction (`OmniEgoCap` + `Meta MHR`):** Using open-source **[OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)**, **[HaWoR](https://github.com/ThunderVVV/HaWoR)**, **[DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM)**, and **[Metric3D v2](https://github.com/YvanYin/Metric3D)** paired with **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)**, LifeLens reconstructs your **full 22-joint 3D body and 30-joint hands** in world space from a single head-mounted camera.
+- **Activity, Effectiveness & Mood Understanding (`Meta Muse Spark 1.3`):** **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)** (with **[Meta Llama 3.2](https://ollama.com/library/llama3.2)** for offline local mode) inspects **both your first-person activity images and your 3D MHR body renders** to understand **what activity you were doing**, **how effective your movement was**, and **how you feel** — powering **better daily routines and a more relaxed life**, **better training**, **mood-matched music via open-source [ReccoBeats](https://reccobeats.com/)**, and **dance choreography & stage performance**.
+
+<!--
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-wordmark-on-dark.svg">
+    <img alt="LifeLens Logo" src="docs/brand/logo-wordmark.svg" width="300">
+  </picture>
+</p>
+-->
 
 ---
 
@@ -50,61 +55,68 @@ Head-mounted cameras and smart glasses like **[Meta Ray-Ban Glasses](https://www
 
 <p align="center">
   <a href="docs/lifelens-demo.mp4">
-    <img alt="Watch the full LifeLens Demo Video (with voiceover)" src="docs/lifelens-demo.gif" width="900">
+    <img alt="Watch the full LifeLens Demo Video (with voiceover)" src="docs/lifelens-demo.gif" width="920">
   </a>
   <br/>
-  <sub>🎬 Click the preview above to watch <a href="docs/lifelens-demo.mp4"><b>docs/lifelens-demo.mp4</b></a> (full HD walkthrough with voiceover).</sub>
+  <sub>🎬 Click the animated preview above to watch <a href="docs/lifelens-demo.mp4"><b>docs/lifelens-demo.mp4</b></a> (full 3-minute HD walkthrough with voiceover).</sub>
 </p>
 
 ---
 
-## Use Cases Powered by Meta MHR & Meta Muse Spark
+## Everyday Use Cases & Feedback Systems
 
-| Experience | How Meta MHR + Meta Muse Spark + ReccoBeats Work Together |
+| Everyday Use Case | How Meta Muse Spark + Meta MHR + Open-Source Models Help You |
 |---|---|
-| 🧭 **Routine & Habit Coach** | Reconstructs your full **3D Meta MHR body** (`mesh_exo.mp4`) and live joint kinematics (`pose_graph.mp4`) from everyday clips (meals, desk work, walks, outdoor sports) while **Meta Muse Spark** inspects both POV and 3D MHR frames to label posture every 5 seconds and give friendly habit coaching. |
-| 🏋️ **Gymify Workout Coach** | Tracks knee flexion, hip hinge, elbow angles, and left–right balance directly on the **3D MHR joints** while **Meta Muse Spark** identifies the exercise from 3D MHR renders, counts reps & sets, and provides visual per-rep depth gauges and form cues. |
-| 🎵 **Synced Music + Day Vibe** | Uses open-source **[ReccoBeats](https://reccobeats.com/)** audio feature matching to lock your video and music player in sync (1 track for 20–30 s clips, or 1 track per ~20 s movement window for longer clips) and curates **Your Day Vibe in a Song** plus tracks to **Play Next Time You're Doing Similar Tasks**. |
-| 💡 **Virtual Dance Studio Stage** | Places your **3D MHR body** center stage under 6 reactive lighting fixtures mapped to your left/right arms, legs, torso, and pace, with full-show choreography (**Stagify**) and real-world [Art-Net DMX](https://art-net.org.uk/) & [Philips Hue](https://developers.meethue.com/) export. |
+| 🌿 **Routine Feedback System & A More Relaxed Life** | **Meta Muse Spark** looks at your first-person activity images and your **3D Meta MHR body** every 5 seconds to recognize what you are doing, measure posture balance (`Sitting`, `Standing`, `Crouching`, `Reaching`), and advise you based on how you feel — helping you spot tension, take mindful breaks, and live a calmer, more relaxed life. |
+| 🏋️ **Better Training (`Gymify` Feedback System)** | Evaluates **what exercise you are performing and how effective each rep is** directly from your 3D MHR joints and images — tracking `136°` squat knee flexion, hip hinge, rep tempo, and left–right symmetry with visual per-rep feedback cards. |
+| 🎵 **Mood-Matched Music & Day Vibe (`ReccoBeats`)** | Uses open-source **[ReccoBeats](https://reccobeats.com/)** audio feature matching to lock your video and music player in sync across movement windows and curates **Your Day Vibe in a Song** plus tracks to **Play Next Time You're Doing Similar Tasks**. |
+| 💃 **Dance Choreography & Stage Performance (`Stagify`)** | Places your **3D MHR body** on a 6-light virtual stage where each spotlight reacts to your left/right arms, legs, torso, and pace — letting dancers and performers rehearse choreography and export live cues to [Art-Net DMX](https://art-net.org.uk/) & [Philips Hue](https://developers.meethue.com/). |
 
 ---
 
-## UI Tour
+## Interactive UI & Feedback System Tour
 
-> Full walkthrough of every view and control: **[`docs/UI_GUIDE.md`](docs/UI_GUIDE.md)**
+> Click any animated preview below to open its high-resolution `.mp4` video. Full guide: **[`docs/UI_GUIDE.md`](docs/UI_GUIDE.md)**
 
-<p align="center">
-  <img alt="LifeLens Routine & Habit Coach View" src="docs/screenshots/ui-routine.png" width="920">
-  <br/>
-  <sub><b>Routine &amp; Habit Coach:</b> Synchronized first-person POV, 3D Meta MHR body mesh, live joint kinematics stream below the mesh, clickable 5s photo timeline, and friendly habit tips.</sub>
-</p>
-
-| Start Screen & Session Launcher | Gymify Visual Workout Coach |
+| 🧭 Routine & Relaxed-Life Feedback System | 🏋️ Gymify Training Feedback System |
 |---|---|
-| <img alt="Start Screen" src="docs/screenshots/ui-start.png" width="450"> | <img alt="Gymify Coach" src="docs/screenshots/ui-gym.png" width="450"> |
-| Pick a pre-processed 3D session (`eating`, `exercising`, `snowboard-strap-in`, `activities`), process a new recording, or film live with hardware telemetry. | Automatic exercise recognition, 3D MHR squat depth & symmetry bars, and clickable per-rep coaching cards. |
+| <a href="docs/media/routine-feedback.mp4"><img alt="Routine Feedback System Video" src="docs/media/routine-feedback.gif" width="450"></a> | <a href="docs/media/gym-feedback.mp4"><img alt="Gymify Training Feedback System Video" src="docs/media/gym-feedback.gif" width="450"></a> |
+| 🎬 **[Watch `routine-feedback.mp4`](docs/media/routine-feedback.mp4)** — Synchronized POV & 3D Meta MHR mesh, clickable 5s posture timeline, effectiveness breakdown, and relaxed-life habit advice. | 🎬 **[Watch `gym-feedback.mp4`](docs/media/gym-feedback.mp4)** — Automatic exercise recognition, `136°` 3D MHR squat depth & balance bars, and clickable per-rep feedback cards. |
 
-| Unified Music Player & Day Vibe | 6-Fixture Virtual Stage Show |
+| 🎵 Open-Source ReccoBeats Music & Day Vibe | 💃 Dance Choreography & 6-Light Stage Performance |
 |---|---|
-| <img alt="Music & Day Vibe" src="docs/screenshots/ui-music.png" width="450"> | <img alt="Virtual Stage Show" src="docs/screenshots/ui-stage.png" width="450"> |
-| Video and open-source ReccoBeats music player locked in sync across ~20 s movement windows, plus **Day Vibe** and **Play Next Time** recommendations. | 6 virtual stage lights driven by your 3D MHR limb velocities with persistent POV inset and DMX / Hue output. |
+| <a href="docs/media/music-dayvibe.mp4"><img alt="ReccoBeats Music & Day Vibe Video" src="docs/media/music-dayvibe.gif" width="450"></a> | <a href="docs/media/stage-choreography.mp4"><img alt="Dance Choreography & Stage Performance Video" src="docs/media/stage-choreography.gif" width="450"></a> |
+| 🎬 **[Watch `music-dayvibe.mp4`](docs/media/music-dayvibe.mp4)** — Bidirectional video-to-song timeline sync powered by open-source **ReccoBeats**, plus **Day Vibe** and **Play Next Time** picks. | 🎬 **[Watch `stage-choreography.mp4`](docs/media/stage-choreography.mp4)** — 6 virtual stage lights driven by your 3D MHR limb velocities for dance choreography and DMX / Hue stage shows. |
 
 ---
 
-## 3D Pipeline Architecture
+## Full End-to-End Pipeline Architecture
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-pipeline-dark.svg">
-    <img alt="LifeLens Architecture Pipeline" src="docs/architecture-pipeline.svg" width="920">
+    <img alt="LifeLens Full End-to-End Pipeline Architecture" src="docs/architecture-pipeline.svg" width="960">
   </picture>
+  <br/>
+  <sub>Mermaid source: <a href="figures/lifelens-full-pipeline.mmd"><code>figures/lifelens-full-pipeline.mmd</code></a> · High-res PNG: <a href="figures/lifelens-full-pipeline.png"><code>figures/lifelens-full-pipeline.png</code></a></sub>
 </p>
+
+---
+
+## 3D MHR Sessions (`examples/` & `runs/`)
+
+Click any animated preview below to open the full side-by-side 3D Meta MHR reconstruction video:
+
+| 🍽️ `eating` — Cozy Meal & Rest Routine (27 s) | 🏋️ `exercising` — Full-Body Squats (35 s) | 🏂 `snowboard-strap-in` — Ground Strap-In (35 s) |
+|---|---|---|
+| <a href="examples/eating/side_by_side.mp4"><img alt="Eating 3D MHR Session" src="docs/media/eating-3d.gif" width="300"></a> | <a href="examples/exercising/side_by_side.mp4"><img alt="Exercising 3D MHR Session" src="docs/media/exercising-3d.gif" width="300"></a> | <a href="examples/snowboard-strap-in/side_by_side.mp4"><img alt="Snowboard Strap-In 3D MHR Session" src="docs/media/snowboard-3d.gif" width="300"></a> |
+| **[Watch `side_by_side.mp4`](examples/eating/side_by_side.mp4)** · High-visibility 3D hand & wrist reconstruction (`HaWoR` + `Meta MHR`) and relaxed seated posture feedback. | **[Watch `side_by_side.mp4`](examples/exercising/side_by_side.mp4)** · **Gymify** automatic squat detection, `136°` peak knee flexion, and per-rep effectiveness feedback. | **[Watch `side_by_side.mp4`](examples/snowboard-strap-in/side_by_side.mp4)** · Ground-level crouch & forward reach reconstruction (`OmniEgoCap` + `Meta MHR`). |
 
 ---
 
 ## Installation & Quick Start
 
-You can explore all included 3D MHR sessions (`eating`, `exercising`, `snowboard-strap-in`, `activities`) **immediately on any laptop — no GPU required**.
+You can explore all three 3D MHR sessions (`eating`, `exercising`, `snowboard-strap-in`) **immediately on any laptop — no GPU required**.
 
 ### 1. Clone & Install
 
@@ -140,18 +152,7 @@ npm run dev
 
 Open **`http://localhost:8000`** in your browser.
 
-> **Want to run the 3D GPU pipeline on your own videos?** See **[`docs/USAGE_AND_PIPELINE.md`](docs/USAGE_AND_PIPELINE.md)** for one-command WSL2 / Linux CUDA setup (`bash archive/scripts/setup.sh`) and camera presets (`glasses`, `phone`, `gopro-linear`, `gopro-wide`).
-
----
-
-## Included 3D Sessions (`examples/` & `runs/`)
-
-| Session | Activity | Duration | Highlights |
-|---|---|---|---|
-| **`eating`** | Seated Meal & Hand Gestures | 27 s | High-visibility 3D hand & wrist reconstruction (`HaWoR` + `Meta MHR`), seated posture coaching, cozy rest-day cards |
-| **`exercising`** | Full-Body Bodyweight Squats | 35 s | **Gymify** automatic squat detection, `136°` peak knee flexion tracking, per-rep depth & balance coaching |
-| **`snowboard-strap-in`** | Ground-Level Snowboard Binding Strap-In | 35 s | Deep ground crouch & forward reach reconstruction (`Meta MHR` + `OmniEgoCap`), outdoor mountain kinematics |
-| **`activities`** | Multi-Activity Daily Routine | 48 s | Continuous transition across everyday postures, ~20 s window ReccoBeats music transitions, and **Day Vibe** picks |
+> **Want to run the 3D GPU pipeline on your own GoPro or Meta Ray-Ban videos?** See **[`docs/USAGE_AND_PIPELINE.md`](docs/USAGE_AND_PIPELINE.md)** for one-command WSL2 / Linux CUDA setup (`bash archive/scripts/setup.sh`) and camera presets (`glasses`, `gopro-linear`, `gopro-wide`, `phone`).
 
 ---
 
@@ -161,9 +162,9 @@ Detailed guides and technical references live in [`docs/`](docs):
 
 | Guide | What It Covers |
 |---|---|
-| 🖥️ **[UI & Features Guide (`docs/UI_GUIDE.md`)](docs/UI_GUIDE.md)** | Visual walkthrough of the **Start Screen**, **Routine & Habit Coach**, **Gymify Workout Coach**, **Unified Music Player + Day Vibe**, and **Virtual Stage Show**. |
-| ⚙️ **[Usage & 3D Pipeline Guide (`docs/USAGE_AND_PIPELINE.md`)](docs/USAGE_AND_PIPELINE.md)** | Step-by-step installation, camera calibration presets (**Meta Ray-Ban Glasses**, GoPro, Phone), running `pipeline/run.py`, and hardware DMX / Hue lighting. |
-| 🧠 **[Meta AI Models & Ecosystem (`docs/MODELS_AND_ECOSYSTEM.md`)](docs/MODELS_AND_ECOSYSTEM.md)** | How **Meta MHR**, **Meta Muse Spark 1.3** (all 9 stages), **Meta Llama 3.2**, and open-source **ReccoBeats** work together, plus 3D MPJPE accuracy benchmarks (`102.6 mm`) and full ecosystem links. |
+| 🖥️ **[UI & Feedback Systems Guide (`docs/UI_GUIDE.md`)](docs/UI_GUIDE.md)** | Animated video walkthrough of the **Start Screen**, **Routine Feedback System**, **Gymify Training Feedback System**, **ReccoBeats Music + Day Vibe**, and **Dance Choreography & Stage Show**. |
+| ⚙️ **[Usage & 3D Pipeline Guide (`docs/USAGE_AND_PIPELINE.md`)](docs/USAGE_AND_PIPELINE.md)** | Step-by-step installation, camera calibration presets (**Head-Mounted GoPro** & **Meta Ray-Ban Glasses**), running `pipeline/run.py`, and hardware DMX / Hue lighting. |
+| 🧠 **[Meta AI & Open-Source Models (`docs/MODELS_AND_ECOSYSTEM.md`)](docs/MODELS_AND_ECOSYSTEM.md)** | How **Meta MHR**, **Meta Muse Spark 1.3** (all 9 stages), **Meta Llama 3.2**, open-source **OmniEgoCap**, and open-source **ReccoBeats** work together, plus 3D MPJPE accuracy benchmarks (`102.6 mm`). |
 | 🔬 **[Technical Deep Dive (`docs/DEEP_DIVE.md`)](docs/DEEP_DIVE.md)** | Calibration math, joint kinematics formulas, body-rhythm autocorrelation, and every output file schema. |
 
 ---
@@ -174,10 +175,10 @@ Built for the **Meta Global AI Developer Hackathon 2026**.
 
 | Member | Role |
 |---|---|
-| **Shrey** ([@nshreyasvi](https://github.com/nshreyasvi)) | Lead · 3D pipeline (Meta MHR, HaWoR, OmniEgoCap) · Meta Muse Spark integrations · Studio UI & design |
+| **Shrey** ([@nshreyasvi](https://github.com/nshreyasvi)) | Lead · 3D pipeline (Meta MHR, OmniEgoCap, HaWoR) · Meta Muse Spark integrations · Studio UI & design |
 | **Dhruv** ([@Dhruv-Patil-1720](https://github.com/Dhruv-Patil-1720)) | Agentic Director: fast & slow loops, freeze detection, reactive flash, Muse Spark reasoning tuning |
-| **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end architecture: Vite app, live director sync, stage lights & music (ReccoBeats), routine view |
-| **Yash** | Research, testing on real recordings, demo & submission support |
+| **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end architecture: Vite app, live director sync, stage lights & music (ReccoBeats), routine feedback view |
+| **Yash** | Research, testing on real head-mounted GoPro recordings, demo & submission support |
 
 ---
 
