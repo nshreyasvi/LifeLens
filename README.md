@@ -1,11 +1,11 @@
 <p align="center">
-  <img alt="LifeLens Banner" src="docs/brand/lifelens-banner.jpg" width="100%">
+  <img alt="LifeLens Banner" src="docs/brand/banner.jpg" width="100%">
 </p>
 
 <h1 align="center">LifeLens</h1>
 
 <p align="center">
-  <b>Your whole body in 3D from a head camera — feedback for routine, training, music &amp; stage.</b>
+  <b>Your camera sees the world; LifeLens sees you — turning first-person vision into 3D body intelligence.</b>
 </p>
 
 <p align="center">
@@ -42,13 +42,6 @@ Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** 
 - **100% Open-Source 3D Body Reconstruction (`OmniEgoCap` + `Meta MHR`):** Uses open-source **[OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap)**, **[HaWoR](https://github.com/ThunderVVV/HaWoR)**, **[DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM)**, and **[Metric3D v2](https://github.com/YvanYin/Metric3D)** paired with **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** to reconstruct your **full 22-joint 3D body and 30-joint hands** in world space from a single head-mounted camera.
 - **Activity, Effectiveness & Mood Understanding (`Meta Muse Spark 1.3`):** **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)** (with **[Meta Llama 3.2](https://ollama.com/library/llama3.2)** for offline local mode) inspects **both your first-person activity images and your 3D MHR body renders** to understand **what activity you were doing**, **how effective your movement was**, and **how you feel** — powering **better daily routines and a more relaxed life**, **better training**, **mood-matched music via open-source [ReccoBeats](https://reccobeats.com/)**, and **dance choreography & stage performance**.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-wordmark-on-dark.svg">
-    <img alt="LifeLens Logo" src="docs/brand/logo-wordmark.svg" width="240">
-  </picture>
-</p>
-
 ---
 
 ## Video Demo
@@ -65,17 +58,50 @@ Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** 
 
 ## Dashboard & Feedback Systems Overview
 
-> Click any scrolling dashboard preview below to watch its `.mp4` video. Full walkthrough: **[`docs/UI_GUIDE.md`](docs/UI_GUIDE.md)**
+> Interactive dashboard previews showing what you can click and open across all four workspace tabs. Full walkthrough: **[`docs/UI_GUIDE.md`](docs/UI_GUIDE.md)**
 
-| 🧭 Routine Feedback System Dashboard | 🏋️ Gymify Training Feedback System UI |
-|---|---|
-| <a href="docs/media/routine-feedback.mp4"><img alt="Routine Feedback System Dashboard" src="docs/media/routine-feedback.gif" width="460"></a> | <a href="docs/media/gym-feedback.mp4"><img alt="Gymify Training Feedback System Dashboard" src="docs/media/gym-feedback.gif" width="460"></a> |
-| **[Watch `routine-feedback.mp4`](docs/media/routine-feedback.mp4)** — Synchronized camera view, 3D Meta MHR body, posture breakdown, clickable 5s photo timeline, and relaxed-life habit feedback. | **[Watch `gym-feedback.mp4`](docs/media/gym-feedback.mp4)** — Automatic exercise recognition, `136°` 3D MHR squat depth & symmetry bars, and clickable per-rep feedback cards. |
-
-| 🎵 Open-Source ReccoBeats Music & Day Vibe Dashboard | 💃 Dance Choreography & 6-Light Stage Dashboard |
-|---|---|
-| <a href="docs/media/music-dayvibe.mp4"><img alt="ReccoBeats Music & Day Vibe Dashboard" src="docs/media/music-dayvibe.gif" width="460"></a> | <a href="docs/media/stage-choreography.mp4"><img alt="Dance Choreography & Stage Dashboard" src="docs/media/stage-choreography.gif" width="460"></a> |
-| **[Watch `music-dayvibe.mp4`](docs/media/music-dayvibe.mp4)** — Video-synced song windows powered by open-source **ReccoBeats**, plus **Day Vibe in a Song** and **Play Next Time** picks. | **[Watch `stage-choreography.mp4`](docs/media/stage-choreography.mp4)** — 6 virtual stage lights driven by your 3D MHR limb velocities for dance choreography and DMX / Hue stage shows. |
+<table width="100%">
+  <tr>
+    <th width="50%" align="left">🧭 Routine Feedback System Dashboard</th>
+    <th width="50%" align="left">🏋️ Gymify Training Feedback System UI</th>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/UI_GUIDE.md#1-routine--relaxed-life-feedback-system-routine-tab">
+        <img alt="Routine Feedback System Dashboard" src="docs/media/routine-feedback.gif" width="100%">
+      </a>
+      <br/>
+      <sub>Open a session, press <b>Play</b> to sync your POV and 3D Meta MHR body, click any 5s snapshot on the <b>Activity Timeline</b> to jump the video, and inspect <b>Past Sessions</b> &amp; <b>Meta Muse Spark</b> tips.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/UI_GUIDE.md#2-gymify-training-feedback-system-gym-tab">
+        <img alt="Gymify Training Feedback System Dashboard" src="docs/media/gym-feedback.gif" width="100%">
+      </a>
+      <br/>
+      <sub>Switch to the <b>Gym</b> tab to inspect live 3D MHR joint angles and rep counts, then click individual <b>Rep 1 / Rep 2 / Rep 3</b> cards to review <code>136°</code> squat depth, tempo, and left–right symmetry.</sub>
+    </td>
+  </tr>
+  <tr>
+    <th width="50%" align="left">🎵 ReccoBeats Music &amp; Day Vibe Dashboard</th>
+    <th width="50%" align="left">💃 Dance Choreography &amp; 6-Light Stage Dashboard</th>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/UI_GUIDE.md#3-unified-video--music-player--day-vibe-music-tab">
+        <img alt="ReccoBeats Music & Day Vibe Dashboard" src="docs/media/music-dayvibe.gif" width="100%">
+      </a>
+      <br/>
+      <sub>Switch to the <b>Music</b> tab, press <b>Play</b>, and click across clip window segments to jump the video and switch matched open-source <b>ReccoBeats</b> tracks + <b>Your Day Vibe in a Song</b>.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/UI_GUIDE.md#4-dance-choreography--virtual-stage-performance-stage-tab">
+        <img alt="Dance Choreography & Stage Dashboard" src="docs/media/stage-choreography.gif" width="100%">
+      </a>
+      <br/>
+      <sub>Switch to the <b>Stage</b> tab to watch your 3D MHR performer drive <b>6 reactive stage lights</b> mapped to your arms, legs, torso, and pace, with <b>Stagify</b> multi-scene DMX / Hue show cues.</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -84,7 +110,7 @@ Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** 
 | Everyday Use Case | How Meta Muse Spark + Meta MHR + Open-Source Models Help You |
 |---|---|
 | 🌿 **Routine Feedback System & A More Relaxed Life** | **Meta Muse Spark** looks at your first-person activity images and your **3D Meta MHR body** every 5 seconds to recognize what you are doing, measure posture balance (`Sitting`, `Standing`, `Crouching`, `Reaching`), and advise you based on how you feel — helping you spot tension, take mindful breaks, and live a calmer, more relaxed life. |
-| 🏋️ **Better Training (`Gymify` Feedback System)** | Evaluates **what exercise you are performing and how effective each rep is** directly from your 3D MHR joints and images — tracking `136°` squat knee flexion, hip hinge, rep tempo, and left–right symmetry with visual per-rep feedback cards. |
+| 🏋️ **Better Training (`Gymify` Feedback System)** | Evaluates **what exercise you are performing and how effective each rep is** directly from your 3D MHR joints and images — tracking `136°` squat knee flexion, hip hinge, rep tempo, and left–right symmetry with clickable per-rep feedback cards. |
 | 🎵 **Mood-Matched Music & Day Vibe (`ReccoBeats`)** | Uses open-source **[ReccoBeats](https://reccobeats.com/)** audio feature matching to lock your video and music player in sync across movement windows and curates **Your Day Vibe in a Song** plus tracks to **Play Next Time You're Doing Similar Tasks**. |
 | 💃 **Dance Choreography & Stage Performance (`Stagify`)** | Places your **3D MHR body** on a 6-light virtual stage where each spotlight reacts to your left/right arms, legs, torso, and pace — letting dancers and performers rehearse choreography and export live cues to [Art-Net DMX](https://art-net.org.uk/) & [Philips Hue](https://developers.meethue.com/). |
 
@@ -107,9 +133,9 @@ Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** 
 
 | Session | Activity | Duration | Highlights |
 |---|---|---|---|
-| **`eating`** | Seated Meal & Hand Gestures | 27 s | **[Watch `side_by_side.mp4`](examples/eating/side_by_side.mp4)** · High-visibility 3D hand & wrist reconstruction (`HaWoR` + `Meta MHR`) and relaxed seated posture feedback |
-| **`exercising`** | Full-Body Bodyweight Squats | 35 s | **[Watch `side_by_side.mp4`](examples/exercising/side_by_side.mp4)** · **Gymify** automatic squat detection, `136°` peak knee flexion, and per-rep effectiveness feedback |
-| **`snowboard-strap-in`** | Mountain Snowboard Binding Strap-In | 35 s | **[Watch `side_by_side.mp4`](examples/snowboard-strap-in/side_by_side.mp4)** · Ground-level crouch & forward reach reconstruction (`OmniEgoCap` + `Meta MHR`) |
+| **`eating`** | Seated Meal & Hand Gestures | 27 s | High-visibility 3D hand & wrist reconstruction (`HaWoR` + `Meta MHR`) and relaxed seated posture feedback |
+| **`exercising`** | Full-Body Bodyweight Squats | 35 s | **Gymify** automatic squat detection, `136°` peak knee flexion, and per-rep effectiveness feedback |
+| **`snowboard-strap-in`** | Mountain Snowboard Binding Strap-In | 35 s | Ground-level crouch & forward reach reconstruction (`OmniEgoCap` + `Meta MHR`) |
 
 ---
 
@@ -124,7 +150,7 @@ LifeLens/
 ├── scripts/              # One-command GPU environment setup (scripts/setup.sh)
 ├── examples/             # Pre-processed 3D MHR sessions (eating, exercising, snowboard-strap-in)
 ├── figures/              # Full-pipeline Mermaid diagrams (.mmd, .md, .png)
-├── docs/                 # Documentation hub, brand assets, and scrolling dashboard previews
+├── docs/                 # Documentation hub, brand assets, and interactive dashboard GIFs
 ├── bench/                # Real-time FPS & latency benchmarks
 ├── index.html            # Studio entry point
 └── vite.config.js        # Vite server & local API routes
@@ -178,7 +204,7 @@ Open **`http://localhost:8000`** in your browser.
 
 | Guide | What It Covers |
 |---|---|
-| 🖥️ **[UI & Feedback Systems Guide (`docs/UI_GUIDE.md`)](docs/UI_GUIDE.md)** | Scrolling dashboard walkthrough of the **Routine Feedback System**, **Gymify Training Feedback System**, **ReccoBeats Music + Day Vibe**, and **Dance Choreography & Stage Show**. |
+| 🖥️ **[UI & Feedback Systems Guide (`docs/UI_GUIDE.md`)](docs/UI_GUIDE.md)** | Interactive dashboard walkthrough of the **Routine Feedback System**, **Gymify Training Feedback System**, **ReccoBeats Music + Day Vibe**, and **Dance Choreography & Stage Show**. |
 | ⚙️ **[Usage & 3D Pipeline Guide (`docs/USAGE_AND_PIPELINE.md`)](docs/USAGE_AND_PIPELINE.md)** | Step-by-step installation (`bash scripts/setup.sh`), camera calibration presets (**Head-Mounted GoPro** & **Meta Ray-Ban Glasses**), running `pipeline/run.py`, and hardware DMX / Hue lighting. |
 | 🧠 **[Meta AI & Open-Source Models (`docs/MODELS_AND_ECOSYSTEM.md`)](docs/MODELS_AND_ECOSYSTEM.md)** | How **Meta MHR**, **Meta Muse Spark 1.3** (all 9 stages), **Meta Llama 3.2**, open-source **OmniEgoCap**, and open-source **ReccoBeats** work together, plus 3D MPJPE accuracy benchmarks (`102.6 mm`). |
 | 🔬 **[Technical Deep Dive (`docs/DEEP_DIVE.md`)](docs/DEEP_DIVE.md)** | Calibration math, joint kinematics formulas, body-rhythm autocorrelation, and every output file schema. |
@@ -189,12 +215,10 @@ Open **`http://localhost:8000`** in your browser.
 
 Built for the **Meta Global AI Developer Hackathon 2026**.
 
-| Member | Role |
-|---|---|
-| **Shrey** ([@nshreyasvi](https://github.com/nshreyasvi)) | Lead · 3D pipeline (Meta MHR, OmniEgoCap, HaWoR) · Meta Muse Spark integrations · Studio UI & design |
-| **Dhruv** ([@Dhruv-Patil-1720](https://github.com/Dhruv-Patil-1720)) | Agentic Director: fast & slow loops, freeze detection, reactive flash, Muse Spark reasoning tuning |
-| **Avi** ([@avinashmantripragada](https://github.com/avinashmantripragada)) | Front-end architecture: Vite app, live director sync, stage lights & music (ReccoBeats), routine feedback view |
-| **Yash** | Research, testing on real head-mounted GoPro recordings, demo & submission support |
+- **Shreyasvi Natraj**
+- **Avinash Mantripragada**
+- **Dhruv Patil**
+- **Yash Ingle**
 
 ---
 
