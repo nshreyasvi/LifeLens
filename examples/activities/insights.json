@@ -1,0 +1,133 @@
+{
+  "clips": {
+    "activities": {
+      "duration_min": 0.8,
+      "minutes": {
+        "walking": 0.08,
+        "standing": 0.0,
+        "sitting": 0.17,
+        "crouching": 0.08,
+        "bending": 0.13,
+        "arms raised": 0.33,
+        "unknown": 0.0
+      },
+      "share": {
+        "walking": 0.104,
+        "standing": 0.0,
+        "sitting": 0.208,
+        "crouching": 0.104,
+        "bending": 0.167,
+        "arms raised": 0.417,
+        "unknown": 0.0
+      },
+      "sit_stand_transitions": 2,
+      "longest_sitting_min": 0.17,
+      "walking_distance_m": 12.4,
+      "bent_over_min": 0.13
+    }
+  },
+  "total": {
+    "duration_min": 0.8,
+    "minutes": {
+      "walking": 0.08,
+      "standing": 0.0,
+      "sitting": 0.17,
+      "crouching": 0.08,
+      "bending": 0.13,
+      "arms raised": 0.33,
+      "unknown": 0.0
+    },
+    "share": {
+      "walking": 0.104,
+      "standing": 0.0,
+      "sitting": 0.208,
+      "crouching": 0.104,
+      "bending": 0.167,
+      "arms raised": 0.417,
+      "unknown": 0.0
+    },
+    "sit_stand_transitions": 2,
+    "longest_sitting_min": 0.17,
+    "walking_distance_m": 12.4,
+    "bent_over_min": 0.13
+  },
+  "posture_from": "Meta Muse Spark",
+  "log": "Total 0.8 min: walking 0.08 min, sitting 0.17 min, crouching 0.08 min, bending 0.13 min, arms raised 0.33 min\n2 times sat or crouched down, longest sitting 0.17 min, walked 12.4 m, bent over 0.13 min.\nClip activities:\n  sitting 10 s. The camera wearer sits and raises both arms. The camera wearer stands up.\n  walking 5 s. The camera wearer walks forward.\n  bending 5 s. The camera wearer walks outdoors.\n  crouching 5 s. The camera wearer walks while extending their left arm.\n  arms raised 20 s. The camera wearer walks forward. The camera wearer stretches both arms. The camera wearer stretches both arms forward. The camera wearer extends both arms forward.\n  bending 3 s. Extends both arms forward with clenched fists.",
+  "runtime_s": 0.2,
+  "report": {
+    "summary": "This 0.8 min recording shows a short floor-to-standing sequence that ends with a longer arm stretch. The wearer starts sitting on the ground with arms up, gets up and moves a short distance, then spends 20 s with arms raised stretching forward.",
+    "what_they_did": [
+      "0:00-0:10: sits and raises both arms then stands up (sitting)",
+      "0:10-0:15: walks forward (walking)",
+      "0:15-0:20: walks outdoors (bending)",
+      "0:20-0:25: walks while extending left arm (crouching)",
+      "0:25-0:45: walks forward and stretches both arms then extends both arms forward (arms raised)",
+      "0:45-0:48: extends both arms forward with clenched fists (bending)"
+    ],
+    "posture_and_movement": [
+      "Most time was arms raised at 0.33 min out of 0.8 min, from the 20 s block at 0:25-0:45 when captions say stretches both arms and extends both arms forward.",
+      "Very little upright walking was logged at 0.08 min for 12.4 m, covering the 0:10-0:15 walk forward and the moving parts at 0:15-0:25.",
+      "Sitting was brief at 0.17 min with longest sit 0.17 min and 2 sit-downs, matching the 0:00 sit with raised arms and the 0:05 stand up; the 3D bodies at 0:00-0:20 show lying on back and front on the floor rather than chair sitting.",
+      "Bending totaled 0.13 min and crouching 0.08 min, from the 5 s bending at 0:15-0:20, the 5 s crouching at 0:20-0:25, and the 3 s bending at 0:45-0:48 with arms forward and fists clenched."
+    ],
+    "compared_with_history": [
+      "Compared with eating, this recording moved more and sat less: 12.4 m walked and 0.17 min sitting with longest sit 0.17 min here versus 3.3 m walked and 0.32 min sitting with longest sit 0.32 min for eating.",
+      "Compared with exercising, this recording walked less but held arms up longer: 0.08 min walking and 12.4 m here versus 0.42 min walking and 27.6 m for exercising, and 0.33 min arms raised here versus 0.1 min for exercising.",
+      "Compared with snowboard-strap-in, sitting was shorter though get-ups were the same count: longest sit 0.17 min and 0.17 min sitting here versus longest sit 0.33 min and 0.42 min sitting there, with 2 sit-downs in both and 12.4 m walked here versus 9.9 m there."
+    ],
+    "improvements": [
+      {
+        "change": "Get up in two steps from the floor",
+        "why": "2 sit-downs with a short 0.17 min sit and a stand up at 0:05, and 3D bodies show lying on back then front",
+        "how": "At 0:00-0:10 after raising both arms, roll to side, push to hands and knees, then step one foot forward before standing before the 0:10 walk forward"
+      },
+      {
+        "change": "Keep arms lower during the short walks",
+        "why": "0:20-0:25 crouching while walking while extending left arm, and bending label at 0:15-0:20 while walking outdoors",
+        "how": "During 0:10-0:25 walks forward and outdoors, let arms hang or swing small and only lift the left arm after stopping"
+      },
+      {
+        "change": "Spread the long arm hold into shorter reaches",
+        "why": "0.33 min arms raised in one 20 s block at 0:25-0:45 of stretching both arms forward",
+        "how": "During the 0:25-0:45 stretch, reach forward for a few seconds, lower arms to rest, then reach again for the next stretch cue"
+      },
+      {
+        "change": "Bend knees when reaching forward at the end",
+        "why": "final 3 s bending at 0:45-0:48 extends both arms forward with clenched fists after 0.13 min bent over",
+        "how": "During 0:40-0:48 extends both arms forward, keep feet still from the 12.4 m walk and soften knees instead of leaning from the waist"
+      },
+      {
+        "change": "Pause between standing and stretching",
+        "why": "only 0.08 min walking for 12.4 m straight into 20 s arms raised",
+        "how": "After the 0:25 walks forward, stop feet, settle balance, then start the 0:30 stretches both arms sequence"
+      }
+    ],
+    "went_well": [
+      "Kept moving through sit, walk, and stretch without a long sit, with longest sit only 0.17 min in 0.8 min.",
+      "Finished with a sustained 20 s arms-raised stretch sequence at 0:25-0:45 with both arms reaching forward."
+    ],
+    "caveats": [
+      "Posture names can be wrong: 0:15 is called bending while the caption says walks outdoors, and 0:20 is called crouching while the caption says walks while extending left arm.",
+      "Legs are a 3D estimate the head camera never sees, so floor positions at 0:00-0:20 shown as lying on back and front may not match the true legs."
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "history": [
+      "eating",
+      "exercising",
+      "snowboard-strap-in"
+    ],
+    "prompt": "You give movement feedback on one recording of a person's day. It was filmed by a camera on their head.\nLifeLens turned it into a 3D body estimate. Meta Muse Spark described frames of the video every 5 s and named a posture\nfor each 5 s (walking, standing, sitting, crouching, bending, arms raised) from a 3D body frame and a head-camera frame;\nit can be wrong. The walking distance comes from the 3D body. Other recordings follow; they may be of other people, so compare routines,\nnot the person.\n\nWrite a detailed, specific review as one JSON object with exactly these keys:\n- \"summary\": 2-3 sentences on what this recording shows.\n- \"what_they_did\": 5-8 strings in time order, each \"m:ss-m:ss: what they did (posture)\".\n- \"posture_and_movement\": 3-5 observations, each with the numbers it rests on (minutes per posture, longest sit,\n  distance, sit-downs, bending).\n- \"compared_with_history\": 2-4 observations naming the earlier recordings they compare with.\n- \"improvements\": 4-6 objects {\"change\": short instruction starting with a verb, \"why\": the moment or number in this\n  recording that calls for it, \"how\": a concrete way to do it during these exact activities}.\n- \"went_well\": 2-3 strings.\n- \"caveats\": 1-2 strings on what the data cannot tell (model mistakes, a 3D estimate of legs that the camera never sees).\nRules: use only numbers and moments that appear below; no medical diagnosis or treatment; plain words; answer with the\nJSON object only.\n\nTHIS RECORDING (activities, 0.8 min)\nRecorded 0.8 min: walking 0.08 min, sitting 0.17 min, crouching 0.08 min, bending 0.13 min, arms raised 0.33 min. Walked 12.4 m, 2 sit-downs, longest sit 0.17 min, bent over 0.13 min.\nPosture bouts and what Muse saw:\nTotal 0.8 min: walking 0.08 min, sitting 0.17 min, crouching 0.08 min, bending 0.13 min, arms raised 0.33 min\n2 times sat or crouched down, longest sitting 0.17 min, walked 12.4 m, bent over 0.13 min.\nClip activities:\n  sitting 10 s. The camera wearer sits and raises both arms. The camera wearer stands up.\n  walking 5 s. The camera wearer walks forward.\n  bending 5 s. The camera wearer walks outdoors.\n  crouching 5 s. The camera wearer walks while extending their left arm.\n  arms raised 20 s. The camera wearer walks forward. The camera wearer stretches both arms. The camera wearer stretches both arms forward. The camera wearer extends both arms forward.\n  bending 3 s. Extends both arms forward with clenched fists.\nMuse's captions every 5 s:\n0:00 The camera wearer sits and raises both arms.\n0:05 The camera wearer stands up.\n0:10 The camera wearer walks forward.\n0:15 The camera wearer walks outdoors.\n0:20 The camera wearer walks while extending their left arm.\n0:25 The camera wearer walks forward.\n0:30 The camera wearer stretches both arms.\n0:35 The camera wearer stretches both arms forward.\n0:40 The camera wearer extends both arms forward.\n0:45 Extends both arms forward with clenched fists.\nThe images are this recording's 3D body (legs estimated) at 0:00, 0:05, 0:10, 0:15, 0:20, 0:25, 0:30, 0:35, in order: use them for posture and movement.\n\nOTHER RECORDINGS\n- eating: Recorded 0.4 min: sitting 0.32 min, bending 0.08 min. Walked 3.3 m, 1 sit-downs, longest sit 0.32 min, bent over 0.08 min. What they did: 0:00 The camera wearer sits down.; 0:05 The camera wearer stirs noodles in a bowl with a spoon.; 0:10 The camera wearer eats food from a bowl.; 0:15 The camera wearer stirs noodles in a bowl.; 0:20 Stirs noodles in a bowl with a spoon.\n- exercising: Recorded 0.93 min: walking 0.42 min, standing 0.25 min, bending 0.17 min, arms raised 0.1 min. Walked 27.6 m, 0 sit-downs, longest sit 0.0 min, bent over 0.17 min. What they did: 0:00 The camera wearer walks forward.; 0:05 The camera wearer is walking forward.; 0:20 The camera wearer walks then squats down.; 0:25 The camera wearer stands and clasps hands together.; 0:30 The camera wearer unclasps their hands.; 0:35 The camera wearer stands up.; 0:40 The camera wearer spins in place.; 0:45 The camera wearer bends to touch their shoes.\n- snowboard-strap-in: Recorded 0.58 min: standing 0.08 min, sitting 0.42 min, bending 0.08 min. Walked 9.9 m, 2 sit-downs, longest sit 0.33 min, bent over 0.08 min. What they did: 0:00 The camera wearer sits on the snow and adjusts their snowboard boot.; 0:05 The camera wearer straps into a snowboard.; 0:15 The camera wearer puts on a snowboard.; 0:20 The camera wearer straps boots onto a snowboard.; 0:25 The camera wearer fastens their snowboard binding."
+  },
+  "suggestions": {
+    "lines": [
+      "Get up in two steps from the floor",
+      "Keep arms lower during the short walks",
+      "Spread the long arm hold into shorter reaches"
+    ],
+    "provider": "Meta Muse Spark",
+    "model": "muse-spark-1.3",
+    "earlier_days": 3,
+    "sample_days": 0
+  }
+}

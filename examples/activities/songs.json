@@ -1,0 +1,119 @@
+{
+ "activity": "stretching and walking",
+ "active": true,
+ "too_short": false,
+ "duration_s": 48.0,
+ "sections": [
+  {
+   "start_s": 0.0,
+   "end_s": 24.0,
+   "features": {
+    "pace": 0.2560940277777778,
+    "still": 0.08888888888888889,
+    "arm": 35.01611377589378,
+    "upright": 0.0,
+    "rhythm": {
+     "bpm": 138.46153846153845,
+     "strength": 0.12292775428951581
+    }
+   },
+   "what_happens": "Rises from sitting to walk outside",
+   "style": "light acoustic stroll",
+   "mood": "curious",
+   "why": "Gentle acoustic tempo matches the slow stand-up and easy outdoor walk.",
+   "targets": {
+    "energy": 0.5673764293981481,
+    "danceability": 0.30000000000000004,
+    "valence": 0.3,
+    "acousticness": 0.2122222222222222,
+    "instrumentalness": 0.15333333333333335,
+    "loudness": -13.865883101851852,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "286f8c06-d78d-4e57-84d4-0dcd614561af",
+     "name": "Here Comes The Sun",
+     "spotifyId": "7L3AkxTIVosuV9q251kjfC",
+     "artist": "TEEMID",
+     "tempo": 124,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "1c33a687-a6c3-4e0c-aa3c-a9c8d98c7a7f",
+     "name": "Three Little Birds",
+     "spotifyId": "7vggqxNKwd6xdRoYS0pQtM",
+     "artist": "Bob Marley & The Wailers",
+     "tempo": 74,
+     "fit": 0.01
+    },
+    {
+     "id": "9ae757d6-3427-45df-a28d-b950609042d8",
+     "name": "Banana Pancakes",
+     "spotifyId": "0BgbobvykXxEvxo2HhCuvM",
+     "artist": "Jack Johnson",
+     "tempo": 115,
+     "fit": 0.126
+    }
+   ]
+  },
+  {
+   "start_s": 24.0,
+   "end_s": 48.0,
+   "features": {
+    "pace": 0.26050819444444445,
+    "still": 0.26944444444444443,
+    "arm": 17.31762552778855,
+    "upright": 0.24001538194444438,
+    "rhythm": null
+   },
+   "what_happens": "Stretches both arms while walking forward",
+   "style": "calm yoga ambient",
+   "mood": "calm",
+   "why": "Slow soft ballads support the sustained low-energy forward arm stretch.",
+   "targets": {
+    "energy": 0.52245803585667,
+    "danceability": 0.28658812763894276,
+    "valence": 0.358006921875,
+    "acousticness": 0.3386111111111111,
+    "instrumentalness": 0.26166666666666666,
+    "loudness": -13.82909837962963,
+    "tempo": null,
+    "tempo_from": ""
+   },
+   "songs": [
+    {
+     "id": "087bc1b4-5103-4d78-a8ed-cb964244850f",
+     "name": "Stay With Me",
+     "spotifyId": "5Nm9ERjJZ5oyfXZTECKmRt",
+     "artist": "Sam Smith",
+     "tempo": 84,
+     "fit": 0.01
+    }
+   ],
+   "fallbacks": [
+    {
+     "id": "3ac67a92-5477-42a8-9bb4-8262bb4f8bb5",
+     "name": "Let It Be",
+     "spotifyId": "5FUqfbY84XmvhOR71Ls1bW",
+     "artist": "Feestteam, Het Feestteam",
+     "tempo": 75,
+     "fit": 0.062
+    },
+    {
+     "id": "f02541c8-dc48-454a-8b08-fce62606f28d",
+     "name": "Skinny Love",
+     "spotifyId": "3B3eOgLJSqPEA0RfboIQVM",
+     "artist": "Bon Iver",
+     "tempo": 76,
+     "fit": 0.108
+    }
+   ]
+  }
+ ],
+ "model": "muse-spark-1.3",
+ "runtime_s": 45.1
+}
