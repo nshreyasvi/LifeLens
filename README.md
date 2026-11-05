@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="LifeLens Banner" src="docs/brand/banner.jpg" width="100%">
+  <img alt="LifeLens Banner" src="docs/brand/lifelens-hero.jpg" width="100%">
 </p>
 
 <h1 align="center">LifeLens</h1>
@@ -48,10 +48,10 @@ Smart glasses like **[Meta Ray-Ban Glasses](https://www.meta.com/ai-glasses/)** 
 
 <p align="center">
   <a href="docs/lifelens-demo.mp4">
-    <img alt="Watch the full LifeLens Demo Video (with voiceover)" src="docs/lifelens-demo.gif" width="920">
+    <img alt="Watch the full LifeLens Demo Video (with voiceover)" src="docs/lifelens-demo.gif?v=2" width="100%">
   </a>
   <br/>
-  <sub>🎬 Click the animated preview above to watch <a href="docs/lifelens-demo.mp4"><b>docs/lifelens-demo.mp4</b></a> (full 3-minute HD walkthrough with voiceover).</sub>
+  <sub>🎬 Click the animated preview above to watch <a href="docs/lifelens-demo.mp4"><b>docs/lifelens-demo.mp4</b></a> (full 2:08 HD walkthrough with voiceover — 3D MHR body reconstruction, render-to-reason with Meta Muse Spark, and live UI tour across Routine, Music, Stage &amp; Gymify).</sub>
 </p>
 
 ---
