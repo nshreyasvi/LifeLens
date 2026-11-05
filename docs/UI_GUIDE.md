@@ -6,7 +6,7 @@ Back to [Main README](../README.md) · See also: [Usage & 3D Pipeline](USAGE_AND
 
 ## Overview
 
-LifeLens turns a single first-person camera video into an interactive studio experience powered by **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)**, **[Meta SAM 3D Body (`sam-3d-body`)](https://ai.meta.com/sam2/)**, and **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)**. The interface is organized into a clean launcher and four focused workspace tabs — **Routine**, **Gym**, **Music**, and **Stage** — designed with friendly, non-technical language and visual cards.
+LifeLens turns a single first-person camera video into an interactive studio experience powered by **[Meta Muse Spark 1.3](https://dev.meta.ai/docs/quickstart)**, **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)**, **[Meta Llama 3.2](https://ollama.com/library/llama3.2)**, and open-source **[ReccoBeats](https://reccobeats.com/)**. Tested on head-mounted GoPro recordings and built for Meta Ray-Ban Smart Glasses and phone head-mounts, the interface is organized into a clean launcher and four focused workspace tabs — **Routine**, **Gym**, **Music**, and **Stage** — designed with friendly, non-technical language and visual cards.
 
 ---
 
@@ -42,7 +42,7 @@ LifeLens turns a single first-person camera video into an interactive studio exp
   <img alt="LifeLens Gymify Workout Coach" src="screenshots/ui-gym.png" width="900">
 </p>
 
-- **Automatic Exercise Recognition:** **Meta Muse Spark** inspects 3D MHR body frames and POV frames over the most active window using `sam-3d-body` + MHR joint trajectories to identify the exercise and confidence level.
+- **Automatic Exercise Recognition:** **Meta Muse Spark** inspects 3D MHR body frames and POV frames over the most active window using MHR joint trajectories to identify the exercise and confidence level.
 - **3D MHR Biomechanical Rep Counting:** Measures every rep directly on the 3D MHR joints (knee flexion, hip hinge, elbow angle, or wrist elevation), computing:
   - **Reps & Sets**
   - **Peak Depth & Range of Motion** (e.g., `136°` squat knee flexion)
@@ -59,11 +59,11 @@ LifeLens turns a single first-person camera video into an interactive studio exp
   <img alt="LifeLens Music & Day Vibe Tab" src="screenshots/ui-music.png" width="900">
 </p>
 
-- **Unified Video + Music Playback:** Pressing **Play** or scrubbing the video timeline locks the [Spotify](https://developer.spotify.com/documentation/embeds) player to the active movement section so video and music stay in sync:
-  - **20–30 s clips:** Plays **1 best-fitting track** matched to the whole clip's pace and energy.
+- **Unified Video + Music Playback (Powered by Open-Source [ReccoBeats](https://reccobeats.com/)):** Pressing **Play** or scrubbing the video timeline locks the music player to the active movement section so video and soundtrack stay in sync:
+  - **20–30 s clips:** Plays **1 best-fitting track** matched via ReccoBeats to the whole clip's pace and energy.
   - **Longer clips:** Automatically transitions tracks across **~20-second movement windows** as your pace, rhythm, and mood shift.
   - **Short clips (< 10 s):** Displays a playful AI DJ warm-up card explaining that a few more seconds of movement help lock in the best track.
-- **Your Day Vibe in a Song & Next-Time Picks:** Curates a signature **Day Vibe** track for your session plus recommendations to **Play Next Time You're Doing Similar Tasks**, powered by **Meta Muse Spark** and [ReccoBeats](https://reccobeats.com/).
+- **Your Day Vibe in a Song & Next-Time Picks:** Curates a signature **Day Vibe** track for your session plus recommendations to **Play Next Time You're Doing Similar Tasks**, powered by **Meta Muse Spark** and open-source [ReccoBeats](https://reccobeats.com/).
 
 ---
 
@@ -76,4 +76,3 @@ LifeLens turns a single first-person camera video into an interactive studio exp
 - **Center-Stage 3D MHR Performer:** Your 3D MHR body mesh is keyed onto a dark virtual stage with a persistent first-person POV inset so you can always see both perspectives smoothly at 60 fps.
 - **6 Reactive Lighting Fixtures:** Six virtual stage lights map directly to your 3D MHR body parts (**Left Arm**, **Right Arm**, **Left Leg**, **Right Leg**, **Torso**, and **Pace**), reacting every frame to limb speed, arm spread, jumps, crouches, and turns.
 - **Stagify Show Planner & Hardware DMX/Hue Export:** Click **Create full stage show** to let **Meta Muse Spark** design a multi-scene lighting arc (`stage.json`, `stage_cues.csv`) that can drive real-world [Art-Net DMX](https://art-net.org.uk/) fixtures or a [Philips Hue](https://developers.meethue.com/) bridge.
-

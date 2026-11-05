@@ -71,7 +71,7 @@ world is instead scaled so the camera sits at your height minus 7 cm (a head-str
 bash archive/scripts/setup.sh     # conda envs omniegocap, hawor, mhr, vlm; upstream code; weights; HaWoR patch
 ```
 
-The 3D human body and hand representation uses **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** and **[Meta SAM 3D Body (`sam-3d-body`)](https://ai.meta.com/sam2/)** alongside [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) and [HaWoR](https://github.com/ThunderVVV/HaWoR).
+The 3D human body and hand representation uses **[Meta MHR (Momentum Human Rig)](https://github.com/facebookresearch/momentum)** alongside [OmniEgoCap](https://github.com/MiroPsota/OmniEgoCap) and [HaWoR](https://github.com/ThunderVVV/HaWoR).
 
 The dev server finds the conda envs in `CONDA_ROOT` (default `~/anaconda3`).
 
@@ -109,7 +109,7 @@ The pipeline never borrows another recording's body: if the 3D body fails, the r
 
 | From | You get | Made by |
 |---|---|---|
-| The head-camera video | Your 3D MHR body (with 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → `sam-3d-body` + Meta MHR + OmniEgoCap (body) |
+| The head-camera video | Your 3D MHR body (with 30 finger joints, 30 fps) and its joint angles | HaWoR (hands, camera path) → Meta MHR + OmniEgoCap (body) |
 | The video, every 5 s | A caption of what you are doing | Meta Muse Spark, from 3 frames |
 | The 3D body and the head camera, every 5 s | A posture label | Meta Muse Spark, from the two frames |
 | Muse's labels, every second | Posture: walking, standing, sitting, crouching, bending, arms raised, and the time split | [`insights.py`](../pipeline/insights.py) from Muse's 5 s labels |
